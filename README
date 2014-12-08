@@ -1,0 +1,27 @@
+
+CLIQuery is a command-line search consolidator using Bing and WolframAlpha.
+
+A query may return immediate results such as calculations or facts, or a page of search results.
+CLIQuery is the wrapper for bing.py and wolfram.py, controls flow of search results
+Arguments passed to CLIQuery are interpreted in bing.py and wolfram.py which communicate results back for further branching or execution.
+
+A current list of arguments:
+        -s      Specifies a page of search results to be returned
+        -f      'Feeling Lucky', opens the top search result in browser
+
+Steps towards setup:
+    1. There is no config file currently, so it is your responsibility to both sign up for a WolframAlpha API key (https://developer.wolframalpha.com/portal/apisignup.html) and add it to the api_key variable at the top of wolfram.py
+        i. API Key allows 2000 WolframAlpha searches monthly
+    2. Resolve the following dependencies:
+        i. scrapy (pip install scrapy)
+            Used for parsing XPath's, will be ported to lxml library in future
+        ii. iceweasel (apt-get install iceweasel)
+            If you are not on Debian you must use another browser that allows
+            pages to be opened using cmd-line args, then replace it in CLI_QUERY
+    3. Make the script executable for all users
+        chmod a+x CLI_QUERY
+    4. Alias CLI_QUERY for ease of use
+        In .bashrc or .bash_aliases add:
+            alias ?='/pathname/CLI_QUERY'
+
+
