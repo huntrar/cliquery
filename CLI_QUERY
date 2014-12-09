@@ -17,7 +17,7 @@ if echo $BING | grep -q "BingReturnVal" ; then
     if [[ $BING = 'q' ]] ; then
         exit 0
     else
-        $BROWSER $BING
+        $BROWSER $BING &
     fi
 elif echo $BING | grep -q "CalcReturnVal" ; then
     BING=${BING%$'CalcReturnVal'}
@@ -32,7 +32,7 @@ else
             if [[ $BING = 'q' ]] ; then
                 exit 0
             else
-                $BROWSER $BING
+                $BROWSER $BING &
             fi
         fi
     else
