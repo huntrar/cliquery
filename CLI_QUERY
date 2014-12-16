@@ -12,7 +12,10 @@ KWARGS="$@"
 BROWSER="iceweasel"
 DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 BING=$(python $DIR/bing.py $KWARGS)
-if echo $BING | grep -q "BingReturnVal" ; then
+if echo $BING | grep -q "BingFirstVal" ; then
+    BING=${BING%$'BingFirstVal'}
+    $BROWSER $BING &
+elif echo $BING | grep -q "BingReturnVal" ; then
     BING=${BING%$'BingReturnVal'}
     if [[ $BING = 'q' ]] ; then
         exit 0

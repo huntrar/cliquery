@@ -11,6 +11,7 @@ from scrapy.selector import Selector
 from scrapy.http import HtmlResponse
 
 search_flag = False
+feelinglucky_flag = False
 
 argument_list = list(sys.argv) # Get cmd-line args
 argument_list.pop(0) # Pop script name from list
@@ -18,6 +19,9 @@ if argument_list:
     if argument_list[0] == "-s":
         argument_list[0] = argument_list[0].replace("-s", "")
         search_flag = True 
+    elif argument_list[0] == "-f":
+        argument_list[0] = argument_list[0].replace("-f", "")
+        feelinglucky_flag = True
     if len(argument_list) > 1:
         if " " in argument_list[1]:
             argument_list = argument_list[1].split(" ")
@@ -43,7 +47,13 @@ response = HtmlResponse(url=url, body=html)
 
 sel = Selector(response)
 
-if search_flag:
+if feelinglucky_flag:
+    first_link = sel.xpath('//h2/a/@href').extract()[0]
+    if "http://" in first_link:
+        print first_link + 'BingFirstVal'
+        sys.exit(0)
+
+elif search_flag or feelinglucky_flag:
     unprocessed_links = sel.xpath('//h2/a/@href').extract()
     links = []
     link_descs = []
