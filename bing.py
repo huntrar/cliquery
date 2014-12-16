@@ -53,7 +53,7 @@ if feelinglucky_flag:
         print first_link + 'BingFirstVal'
         sys.exit(0)
 
-elif search_flag or feelinglucky_flag:
+elif search_flag:
     unprocessed_links = sel.xpath('//h2/a/@href').extract()
     links = []
     link_descs = []
