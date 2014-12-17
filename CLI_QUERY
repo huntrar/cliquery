@@ -3,16 +3,15 @@
 # AUTHOR: Hunter Hammond
 # VERSION: 1.7
 # Wrapper for bing.py and wolfram.py
-# First checks for bing calculation or date/time result as this will be fastest return
-# Then checks for wolframalpha result, if none then returns bing search pages
-# Argument list: -s forces Bing search
-#                -f forces 'feeling lucky' Bing search
 
 KWARGS="$@"
 BROWSER="iceweasel"
 DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 BING=$(python $DIR/bing.py $KWARGS)
-if echo $BING | grep -q "BingFirstVal" ; then
+if echo $BING | grep -q "BingOpenUrl" ; then
+    BING=${BING%$'BingOpenUrl'}
+    $BROWSER $BING &
+elif echo $BING | grep -q "BingFirstVal" ; then
     BING=${BING%$'BingFirstVal'}
     $BROWSER $BING &
 elif echo $BING | grep -q "BingReturnVal" ; then

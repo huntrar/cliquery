@@ -8,6 +8,7 @@ Arguments passed to CLIQuery are interpreted in bing.py and wolfram.py which com
 A current list of arguments:
         -s      Specifies a page of search results to be returned
         -f      'Feeling Lucky', opens the top search result in browser
+        -o      Opens a link directly through argument list
 
 Steps towards setup:
     1. There is no config file currently, so it is your responsibility to both sign up for a WolframAlpha API key (https://developer.wolframalpha.com/portal/apisignup.html) and add it to the api_key variable at the top of wolfram.py

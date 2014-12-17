@@ -5,15 +5,14 @@ VERSION: 1.7
 DEPENDENCIES: lxml
 '''
 
-import StringIO
 import sys
 import urllib2
 
 import lxml.html as lh
 
-
 search_flag = False
 feelinglucky_flag = False
+open_flag = False
 
 argument_list = list(sys.argv) # Get cmd-line args
 argument_list.pop(0) # Pop script name from list
@@ -24,7 +23,13 @@ if argument_list:
     if argument_list[0] == "-f":
         argument_list[0] = argument_list[0].replace("-f", "")
         feelinglucky_flag = True
+    if argument_list[0] == "-o":
+        argument_list[0] = argument_list[0].replace("-o", "")
+        open_flag = True 
     if len(argument_list) > 1:
+        if open_flag:
+            print argument_list[1] + 'BingOpenUrl'
+            sys.exit(0)
         if " " in argument_list[1]:
             argument_list = argument_list[1].split(" ")
 
@@ -48,7 +53,8 @@ html = lh.parse(urllib2.urlopen(request)) # Get HTML page
 
 if feelinglucky_flag:
     first_link = html.xpath('//h2/a/@href')[0]
-    if "http://" in first_link:
+    sys.stderr.write('first_link: ' + first_link)
+    if "http://" in first_link or "https://" in first_link:
         print first_link + 'BingFirstVal'
     elif '/images/' in first_link:
         first_link = 'http://www.bing.com' + first_link
@@ -60,7 +66,7 @@ elif search_flag:
     links = []
     link_descs = []
     for link in unprocessed_links:
-        if "http://" in link: 
+        if "http://" in link or "https://" in link: 
             links.append(link)
             ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
             link_desc = html.xpath(ld_xpath)

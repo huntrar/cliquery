@@ -4,14 +4,12 @@ VERSION: 1.7
 DEPENDENCIES: lxml
 '''
 
-import StringIO
 import sys
 import urllib2
 import itertools
 from collections import OrderedDict
 
 import lxml.html as lh
-
 
 api_key = '' # Enter WolframAlpha API key here
 
