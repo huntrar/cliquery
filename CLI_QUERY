@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # AUTHOR: Hunter Hammond
-# VERSION: 1.6
+# VERSION: 1.7
 # Wrapper for bing.py and wolfram.py
 # First checks for bing calculation or date/time result as this will be fastest return
 # Then checks for wolframalpha result, if none then returns bing search pages

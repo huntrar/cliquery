@@ -1,16 +1,17 @@
 ''' Python 2.7.3
 AUTHOR: Hunter Hammond
-VERSION: 1.6
-DEPENDENCIES: pip install scrapy
+VERSION: 1.7
+DEPENDENCIES: lxml
 '''
 
+import StringIO
 import sys
 import urllib2
 import itertools
 from collections import OrderedDict
 
-from scrapy.selector import Selector
-from scrapy.http import XmlResponse
+import lxml.html as lh
+
 
 api_key = '' # Enter WolframAlpha API key here
 
@@ -31,17 +32,14 @@ base_url = 'http://api.wolframalpha.com/v2/query?input='
 url = base_url + url_args + '&appid=' + api_key
 
 request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
-html = urllib2.urlopen(request).read() # Get HTML page
-response = XmlResponse(url=url, body=html)
+html = lh.parse(urllib2.urlopen(request)) # Get HTML page
 
-sel = Selector(response)
-
-titles = list(OrderedDict.fromkeys(sel.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation']/@title").extract()))
+titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation']/@title")))
 entries = []
 if titles:
     for title in titles:
         entry_xpath = "//pod[@title='" + title + "']/subpod/plaintext/text()"
-        entry = sel.xpath(entry_xpath).extract()
+        entry = html.xpath(entry_xpath)
         if entry:
             entries.append(entry[0])
 

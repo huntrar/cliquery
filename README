@@ -13,8 +13,7 @@ Steps towards setup:
     1. There is no config file currently, so it is your responsibility to both sign up for a WolframAlpha API key (https://developer.wolframalpha.com/portal/apisignup.html) and add it to the api_key variable at the top of wolfram.py
         i. API Key allows 2000 WolframAlpha searches monthly
     2. Resolve dependencies:
-        i. scrapy (pip install scrapy)
-            Used for parsing XPath's, will be ported to lxml library in future
+        i. lxml (pip install lxml)
         ii. iceweasel (apt-get install iceweasel)
             If you are not on Debian you must use another browser that allows
             pages to be opened using cmd-line args, then replace it in CLI_QUERY

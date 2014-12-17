@@ -1,14 +1,16 @@
+#coding=utf-8
 ''' Python 2.7.3
 AUTHOR: Hunter Hammond
-VERSION: 1.6
-DEPENDENCIES: pip install scrapy
+VERSION: 1.7
+DEPENDENCIES: lxml
 '''
 
+import StringIO
 import sys
 import urllib2
 
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
+import lxml.html as lh
+
 
 search_flag = False
 feelinglucky_flag = False
@@ -42,13 +44,10 @@ base_url = 'http://www.bing.com/search?q='
 url = base_url + argument_list
 
 request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
-html = urllib2.urlopen(request).read() # Get HTML page
-response = HtmlResponse(url=url, body=html)
-
-sel = Selector(response)
+html = lh.parse(urllib2.urlopen(request)) # Get HTML page
 
 if feelinglucky_flag:
-    first_link = sel.xpath('//h2/a/@href').extract()[0]
+    first_link = html.xpath('//h2/a/@href')[0]
     if "http://" in first_link:
         print first_link + 'BingFirstVal'
     elif '/images/' in first_link:
@@ -57,21 +56,21 @@ if feelinglucky_flag:
     sys.exit(0)
 
 elif search_flag:
-    unprocessed_links = sel.xpath('//h2/a/@href').extract()
+    unprocessed_links = html.xpath('//h2/a/@href')
     links = []
     link_descs = []
     for link in unprocessed_links:
         if "http://" in link: 
             links.append(link)
             ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
-            link_desc = sel.xpath(ld_xpath).extract()
+            link_desc = html.xpath(ld_xpath)
             if type(link_desc) == list:
                 link_desc = ''.join(link_desc)
             link_descs.append(link_desc)
         elif '/images/' in link:
             links.append('http://www.bing.com' + link)
             ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
-            link_desc = sel.xpath(ld_xpath).extract()
+            link_desc = html.xpath(ld_xpath)
             if type(link_desc) == list:
                 link_desc = ''.join(link_desc)
             link_descs.append(link_desc)
@@ -94,8 +93,8 @@ elif search_flag:
             print 'qBingReturnVal'
             sys.exit(0)
 
-calc_result = sel.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value').extract() # Check if calculation result is present or age/date
-define_result = sel.xpath('//ol[@class="b_dList b_indent"]/li/div/text()').extract() # Check if calculation result is a definition
+calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value') # Check if calculation result is present or age/date
+define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()') # Check if calculation result is a definition
 try:
     if calc_result:
         if len(calc_result) == 1:
