@@ -1,4 +1,3 @@
-#coding=utf-8
 ''' Python 2.7.3
 AUTHOR: Hunter Hammond
 VERSION: 1.7
