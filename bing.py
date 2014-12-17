@@ -27,7 +27,7 @@ if argument_list:
         open_flag = True 
     if len(argument_list) > 1:
         if open_flag:
-            print argument_list[1] + 'BingOpenUrl'
+            print ' '.join(argument_list[1:]) + 'BingOpenUrl'
             sys.exit(0)
         if " " in argument_list[1]:
             argument_list = argument_list[1].split(" ")
@@ -51,8 +51,12 @@ request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
 html = lh.parse(urllib2.urlopen(request)) # Get HTML page
 
 if feelinglucky_flag:
-    first_link = html.xpath('//h2/a/@href')[0]
-    sys.stderr.write('first_link: ' + first_link)
+    try:
+        first_link = html.xpath('//h2/a/@href')[0]
+    except IndexError:
+        print 'BingFail'
+        sys.stderr.write('Failed to retrieve webpage.\n')
+        sys.exit(0)
     if "http://" in first_link or "https://" in first_link:
         print first_link + 'BingFirstVal'
     elif '/images/' in first_link:
@@ -62,6 +66,10 @@ if feelinglucky_flag:
 
 elif search_flag:
     unprocessed_links = html.xpath('//h2/a/@href')
+    if not unprocessed_links:
+        print 'BingFail'
+        sys.stderr.write('Failed to retrieve webpage.\n')
+        sys.exit(0)
     links = []
     link_descs = []
     for link in unprocessed_links:

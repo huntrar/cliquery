@@ -8,7 +8,9 @@ KWARGS="$@"
 BROWSER="iceweasel"
 DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 BING=$(python $DIR/bing.py $KWARGS)
-if echo $BING | grep -q "BingOpenUrl" ; then
+if echo $BING | grep -q "BingFail" ; then
+    exit 0
+elif echo $BING | grep -q "BingOpenUrl" ; then
     BING=${BING%$'BingOpenUrl'}
     $BROWSER $BING &
 elif echo $BING | grep -q "BingFirstVal" ; then
