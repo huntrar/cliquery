@@ -19,7 +19,7 @@ if argument_list:
     if argument_list[0] == "-s":
         argument_list[0] = argument_list[0].replace("-s", "")
         search_flag = True 
-    elif argument_list[0] == "-f":
+    if argument_list[0] == "-f":
         argument_list[0] = argument_list[0].replace("-f", "")
         feelinglucky_flag = True
     if len(argument_list) > 1:
@@ -51,7 +51,10 @@ if feelinglucky_flag:
     first_link = sel.xpath('//h2/a/@href').extract()[0]
     if "http://" in first_link:
         print first_link + 'BingFirstVal'
-        sys.exit(0)
+    elif '/images/' in first_link:
+        first_link = 'http://www.bing.com' + first_link
+        print first_link + 'BingFirstVal'
+    sys.exit(0)
 
 elif search_flag:
     unprocessed_links = sel.xpath('//h2/a/@href').extract()
@@ -60,6 +63,13 @@ elif search_flag:
     for link in unprocessed_links:
         if "http://" in link: 
             links.append(link)
+            ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
+            link_desc = sel.xpath(ld_xpath).extract()
+            if type(link_desc) == list:
+                link_desc = ''.join(link_desc)
+            link_descs.append(link_desc)
+        elif '/images/' in link:
+            links.append('http://www.bing.com' + link)
             ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
             link_desc = sel.xpath(ld_xpath).extract()
             if type(link_desc) == list:
