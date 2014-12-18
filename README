@@ -2,17 +2,18 @@
 CLIQuery is a search engine consolidator for the command-line using Bing and WolframAlpha.
 
 A query may return immediate results such as calculations or facts, or a page of search results.
-CLIQuery is the wrapper for bing.py and wolfram.py, controls flow of search results
-Arguments passed to CLIQuery are interpreted in bing.py and wolfram.py which communicate results back for further branching or execution.
 
-A current list of arguments:
-        -s      Returns a page of search results from Bing
+Pages of search results may be followed by entering their corresponding link number.
+
+Flag arguments:
+        -s      Returns a page of links from Bing search results
         -f      'Feeling Lucky', opens the top search result in browser
-        -o      Opens a link directly through argument list
-        -w      Returns results from WolframAlpha
+        -o      Open a link directly, must pass url as argument
+        -w      Returns data from WolframAlpha
 
 Steps towards setup:
-    1. Sign up for a WolframAlpha API key (https://developer.wolframalpha.com/portal/apisignup.html), then create config.txt and paste the key within
+    1. Sign up for a WolframAlpha API key (https://developer.wolframalpha.com/portal/apisignup.html)
+    2. Paste the API key in config.txt
         i. API Key allows 2000 WolframAlpha searches monthly
     2. Resolve dependencies:
         i. lxml (pip install lxml)
