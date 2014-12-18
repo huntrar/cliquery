@@ -1,6 +1,6 @@
 ''' Python 2.7.3
 AUTHOR: Hunter Hammond
-VERSION: 1.7
+VERSION: 1.8
 DEPENDENCIES: lxml
 '''
 
@@ -9,30 +9,35 @@ import urllib2
 
 import lxml.html as lh
 
-search_flag = False
-feelinglucky_flag = False
-open_flag = False
+flags = { 's' : False,
+          'f' : False,
+          'o' : False,
+          'w' : False,
+}
 
 argument_list = list(sys.argv) # Get cmd-line args
-argument_list.pop(0) # Pop script name from list
+argument_list.pop(0) # Pop script name from arg list
 if argument_list:
-    if argument_list[0] == "-s":
-        argument_list[0] = argument_list[0].replace("-s", "")
-        search_flag = True 
-    if argument_list[0] == "-f":
-        argument_list[0] = argument_list[0].replace("-f", "")
-        feelinglucky_flag = True
-    if argument_list[0] == "-o":
-        argument_list[0] = argument_list[0].replace("-o", "")
-        open_flag = True 
+    if "-" in argument_list[0]:
+        try:
+            arg_flag = argument_list[0][1]
+            flags[arg_flag] = True
+        except IndexError:
+            pass
+    else:
+        arg_flag = ''
     if len(argument_list) > 1:
-        if open_flag:
+        if flags['o']:
             print ' '.join(argument_list[1:]) + 'BingOpenUrl'
             sys.exit(0)
         if " " in argument_list[1]:
             argument_list = argument_list[1].split(" ")
 
 if not argument_list: # argument_list state might change in "if argument_list"
+    sys.exit(0)
+
+if flags['w']:
+    print 'WolfForce'
     sys.exit(0)
 
 url_args = []
@@ -47,10 +52,15 @@ else:
 base_url = 'http://www.bing.com/search?q='
 url = base_url + argument_list
 
-request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
-html = lh.parse(urllib2.urlopen(request)) # Get HTML page
+try:
+    request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
+    html = lh.parse(urllib2.urlopen(request)) # Get HTML page
+except urllib2.URLError:
+    print 'BingFail'
+    sys.stderr.write('Failed to retrieve webpage.\n')
+    sys.exit(0)
 
-if feelinglucky_flag:
+if flags['f']:
     try:
         first_link = html.xpath('//h2/a/@href')[0]
     except IndexError:
@@ -64,7 +74,7 @@ if feelinglucky_flag:
         print first_link + 'BingFirstVal'
     sys.exit(0)
 
-elif search_flag:
+elif flags['s']:
     unprocessed_links = html.xpath('//h2/a/@href')
     if not unprocessed_links:
         print 'BingFail'

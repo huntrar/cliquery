@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # AUTHOR: Hunter Hammond
-# VERSION: 1.7
+# VERSION: 1.8
 # Wrapper for bing.py and wolfram.py
 
 KWARGS="$@"
@@ -10,6 +10,15 @@ DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 BING=$(python $DIR/bing.py $KWARGS)
 if echo $BING | grep -q "BingFail" ; then
     exit 0
+elif echo $BING | grep -q "WolfForce" ; then
+    WOLF=$(python $DIR/wolfram.py $KWARGS)
+    if echo $WOLF | grep -q "WolfFail" ; then
+        exit 0
+    elif echo $WOLF | grep -q "WolfNoMatch" ; then
+        exit 0
+    else
+        echo $WOLF
+    fi
 elif echo $BING | grep -q "BingOpenUrl" ; then
     BING=${BING%$'BingOpenUrl'}
     $BROWSER $BING &
@@ -28,7 +37,9 @@ elif echo $BING | grep -q "CalcReturnVal" ; then
     echo $BING
 else
     WOLF=$(python $DIR/wolfram.py $KWARGS)
-    if echo $WOLF | grep -q "WolfNoMatch" ; then
+    if echo $WOLF | grep -q "WolfFail" ; then
+        exit 0
+    elif echo $WOLF | grep -q "WolfNoMatch" ; then
         KWARGS="-s "$KWARGS
         BING=$(python $DIR/bing.py $KWARGS)
         if echo $BING | grep -q "BingReturnVal" ; then
