@@ -28,21 +28,21 @@ if argument_list:
         arg_flag = ''
     if len(argument_list) > 1:
         if flags['o']:
-            print ' '.join(argument_list[1:]) + 'BingOpenUrl'
+            print ' '.join(argument_list[1:]) + 'BingOpen'
             sys.exit(0)
         if " " in argument_list[1]:
             argument_list = argument_list[1].split(" ")
-
-if not argument_list: # argument_list state might change in "if argument_list"
+else:
     sys.exit(0)
 
 if flags['w']:
-    print 'WolfForce'
+    print 'WolfFlag'
     sys.exit(0)
 
 url_args = []
 for arg in argument_list:
-    url_arg = arg.replace('+', '%2B') # Bing interprets addition + as %2B
+    if "+" in url_arg:
+        url_arg = arg.replace('+', '%2B') # Bing interprets addition + as %2B
     url_args.append(url_arg)
 if len(url_args) > 1:
     argument_list = '+'.join(url_args)
@@ -68,10 +68,10 @@ if flags['f']:
         sys.stderr.write('Failed to retrieve webpage.\n')
         sys.exit(0)
     if "http://" in first_link or "https://" in first_link:
-        print first_link + 'BingFirstVal'
+        print first_link + 'BingFL'
     elif '/images/' in first_link:
         first_link = 'http://www.bing.com' + first_link
-        print first_link + 'BingFirstVal'
+        print first_link + 'BingFL'
     sys.exit(0)
 
 elif flags['s']:
@@ -101,35 +101,33 @@ elif flags['s']:
     if links and link_descs:
         for i in xrange(len(links)):
             print_desc = (str(i) + ". " + link_descs[i] + "\n").encode('ascii', 'ignore')
-            sys.stderr.write(print_desc) # DO NOT REMOVE!! Prints link choices
+            sys.stderr.write(print_desc) # Prints link choices
 
         try:
-            sys.stderr.write(": ") # DO NOT REMOVE!! Colon for input entry
+            sys.stderr.write(": ")
             link_num = raw_input("")
             if(link_num):
-                if link_num == 'q':
-                    print 'qBingReturnVal'
-                    sys.exit(0)
-                print(links[int(link_num)]) + 'BingReturnVal'
+                print(links[int(link_num)]) + 'BingPage'
                 sys.exit(0)
         except (ValueError, IndexError):
-            print 'qBingReturnVal'
+            print 'qBingPage'
             sys.exit(0)
 
+# Check for Bing calculation/definition result
 calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value') # Check if calculation result is present or age/date
 define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()') # Check if calculation result is a definition
 try:
     if calc_result:
         if len(calc_result) == 1:
-            print (calc_result[0] + 'CalcReturnVal').encode('ascii', 'ignore')
+            print (calc_result[0] + 'BingCalc').encode('ascii', 'ignore')
         else:
-            print ('\n'.join(calc_result) + 'CalcReturnVal').encode('ascii', 'ignore')
+            print ('\n'.join(calc_result) + 'BingCalc').encode('ascii', 'ignore')
         sys.exit(0)
     elif define_result:
         if len(define_result) == 1:
-            print (define_result[0] + 'CalcReturnVal').encode('ascii', 'ignore')
+            print (define_result[0] + 'BingCalc').encode('ascii', 'ignore')
         else:
-            print ('\n'.join(define_result) + 'CalcReturnVal').encode('ascii', 'ignore')
+            print ('\n'.join(define_result) + 'BingCalc').encode('ascii', 'ignore')
         sys.exit(0)
     else:
         print 'BingNoMatch'

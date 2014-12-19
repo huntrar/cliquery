@@ -10,7 +10,7 @@ DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 BING=$(python $DIR/bing.py $KWARGS)
 if echo $BING | grep -q "BingFail" ; then
     exit 0
-elif echo $BING | grep -q "WolfForce" ; then
+elif echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
     WOLF=$(python $DIR/wolfram.py $KWARGS)
     if echo $WOLF | grep -q "WolfFail" ; then
         exit 0
@@ -19,31 +19,31 @@ elif echo $BING | grep -q "WolfForce" ; then
     else
         echo $WOLF
     fi
-elif echo $BING | grep -q "BingOpenUrl" ; then
-    BING=${BING%$'BingOpenUrl'}
+elif echo $BING | grep -q "BingOpen" ; then # Check for -o flag
+    BING=${BING%$'BingOpen'}
     $BROWSER $BING &
-elif echo $BING | grep -q "BingFirstVal" ; then
-    BING=${BING%$'BingFirstVal'}
+elif echo $BING | grep -q "BingFL" ; then # Check for -f flag
+    BING=${BING%$'BingFL'}
     $BROWSER $BING &
-elif echo $BING | grep -q "BingReturnVal" ; then
-    BING=${BING%$'BingReturnVal'}
+elif echo $BING | grep -q "BingPage" ; then # Return Bing page results
+    BING=${BING%$'BingPage'}
     if [[ $BING = 'q' ]] ; then
         exit 0
     else
         $BROWSER $BING &
     fi
-elif echo $BING | grep -q "CalcReturnVal" ; then
-    BING=${BING%$'CalcReturnVal'}
+elif echo $BING | grep -q "BingCalc" ; then # Return Bing calculation
+    BING=${BING%$'BingCalc'}
     echo $BING
-else
+else                                            # Return Wolf calculation
     WOLF=$(python $DIR/wolfram.py $KWARGS)
     if echo $WOLF | grep -q "WolfFail" ; then
         exit 0
-    elif echo $WOLF | grep -q "WolfNoMatch" ; then
+    elif echo $WOLF | grep -q "WolfNoMatch" ; then # If no result then force -s flag
         KWARGS="-s "$KWARGS
         BING=$(python $DIR/bing.py $KWARGS)
-        if echo $BING | grep -q "BingReturnVal" ; then
-            BING=${BING%$'BingReturnVal'}
+        if echo $BING | grep -q "BingPage" ; then
+            BING=${BING%$'BingPage'}
             if [[ $BING = 'q' ]] ; then
                 exit 0
             else
