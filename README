@@ -6,6 +6,8 @@ A query may return immediate results such as calculations or facts, or a page of
 Pages of search results may be followed by entering their corresponding link number.
 
 Flag arguments:
+    Only one of these arguments may be used at a time as they have conflicting
+    results. If more than one is entered, the first flag is always chosen.
         -s      Returns a page of links from Bing search results
         -f      'Feeling Lucky', opens the top search result in browser
         -o      Open a link directly, must pass url as argument
