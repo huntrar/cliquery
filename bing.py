@@ -40,7 +40,7 @@ if flags['w']:
     sys.exit(0)
 
 url_args = []
-for arg in argument_list:
+for url_arg in argument_list:
     if "+" in url_arg:
         url_arg = arg.replace('+', '%2B') # Bing interprets addition + as %2B
     url_args.append(url_arg)

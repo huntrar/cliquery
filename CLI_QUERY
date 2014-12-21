@@ -19,8 +19,8 @@ elif echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
     else
         echo $WOLF
     fi
-elif echo $BING | grep -q "BingOpen" ; then # Check for -o flag
-    BING=${BING%$'BingOpen'}
+elif echo $BING | grep -q "OpenUrl" ; then # Check for -o flag
+    BING=${BING%$'OpenUrl'}
     $BROWSER $BING &
 elif echo $BING | grep -q "BingFL" ; then # Check for -f flag
     BING=${BING%$'BingFL'}
