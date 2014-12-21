@@ -9,57 +9,78 @@ import urllib2
 
 import lxml.html as lh
 
-flags = { 's' : False,
+# Only one flag may be found
+flags = { 'found' : False,
+          's' : False,
           'f' : False,
           'o' : False,
           'w' : False,
 }
 
-argument_list = list(sys.argv) # Get cmd-line args
-argument_list.pop(0) # Pop script name from arg list
-if argument_list:
-    if "-" in argument_list[0]:
+# Clean arguments
+arg_list = list(sys.argv)
+arg_list.pop(0) # Pop script name from list
+clean_args = []
+if arg_list:
+    for arg in arg_list:
         try:
-            arg_flag = argument_list[0][1]
-            flags[arg_flag] = True
+            if arg[0] == "-" and not flags['found']:
+                try:
+                    arg_flag = arg[1]
+                    flags[arg_flag] = True
+                    flags['found'] = True
+                except IndexError:
+                    pass
+            else:
+                if " " in arg:
+                    clean_args = arg.split(" ")
+                else:
+                    clean_args.append(arg)
         except IndexError:
-            pass
-    else:
-        arg_flag = ''
-    if len(argument_list) > 1:
-        if flags['o']:
-            print ' '.join(argument_list[1:]) + 'BingOpen'
+            print 'BingFail'
+            sys.stderr.write('No search terms entered.\n')
             sys.exit(0)
-        if " " in argument_list[1]:
-            argument_list = argument_list[1].split(" ")
+    if flags['o']:
+        print ' '.join(clean_args) + 'BingOpen'
+        sys.exit(0)
 else:
+    print 'BingFail'
+    sys.stderr.write('No search terms entered.\n')
     sys.exit(0)
 
 if flags['w']:
     print 'WolfFlag'
     sys.exit(0)
 
+# Further cleaning of args before they are added to base_url
 url_args = []
-for url_arg in argument_list:
-    if "+" in url_arg:
-        url_arg = arg.replace('+', '%2B') # Bing interprets addition + as %2B
-    url_args.append(url_arg)
-if len(url_args) > 1:
-    argument_list = '+'.join(url_args)
-else:
-    argument_list = url_args[0]
+try:
+    for url_arg in clean_args:
+        if "+" in url_arg:
+            url_arg = arg.replace('+', '%2B')
+        url_args.append(url_arg)
+    if len(url_args) > 1:
+        url_args = '+'.join(url_args)
+    else:
+        url_args = url_args[0]
+except IndexError:
+    print 'BingFail'
+    sys.stderr.write('No search terms entered.\n')
+    sys.exit(0)
     
 base_url = 'http://www.bing.com/search?q='
-url = base_url + argument_list
+url = base_url + url_args
 
+# Retrieve webpage response
 try:
     request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
-    html = lh.parse(urllib2.urlopen(request)) # Get HTML page
+    html = lh.parse(urllib2.urlopen(request))
 except urllib2.URLError:
     print 'BingFail'
     sys.stderr.write('Failed to retrieve webpage.\n')
     sys.exit(0)
 
+# Parse webpage response
 if flags['f']:
     try:
         first_link = html.xpath('//h2/a/@href')[0]

@@ -4,6 +4,7 @@ VERSION: 1.8
 DEPENDENCIES: lxml
 '''
 
+import os
 import sys
 import urllib2
 import itertools
@@ -11,34 +12,45 @@ from collections import OrderedDict
 
 import lxml.html as lh
 
-f = open('config.txt', 'r')
-api_key = f.readline() # Get WolframAlpha API key
+# Get API key from config.txt
+cfg_path = os.path.dirname(os.path.abspath(__file__))
+f = open(cfg_path + '/config.txt', 'r')
+api_key = f.readline()
+f.close()
 
-argument_list = list(sys.argv) # Get cmd-line args
-argument_list.pop(0) # Pop script name from list
-if len(argument_list) > 0: # If given as one input string then split into list
-    if "-" in argument_list[0]:
-        argument_list.pop(0)
-    elif len(argument_list) > 1:
-        if " " in argument_list[1]:
-            argument_list = argument_list[1].split(" ")
+# Clean arguments
+arg_list = list(sys.argv)
+arg_list.pop(0) # Pop script name from list
+clean_args = []
+if arg_list:
+    for arg in arg_list:
+        try:
+            if arg[0] != "-":
+                if " " in arg:
+                    clean_args = arg.split(" ")
+                else:
+                    clean_args.append(arg)
+        except IndexError:
+            sys.exit(0)
 
-try:
-    url_args = '+'.join(argument_list)
-except AttributeError:
-    sys.stderr.write("Argument list error! Expected list, got " + type(argument_list) + "\n")
-    
+# Add clean_args and api_key to base_url
 base_url = 'http://api.wolframalpha.com/v2/query?input='
+try:
+    url_args = '+'.join(clean_args)
+except AttributeError:
+    sys.stderr.write("Argument list error! Expected list, got " + type(clean_args) + "\n")
 url = base_url + url_args + '&appid=' + api_key
 
+# Retrieve webpage response
 try:
     request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
-    html = lh.parse(urllib2.urlopen(request)) # Get HTML page
+    html = lh.parse(urllib2.urlopen(request))
 except urllib2.URLError:
     print 'WolfFail'
     sys.stderr.write('Failed to retrieve webpage.\n')
     sys.exit(0)
 
+# Parse webpage response
 titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation']/@title")))
 entries = []
 if titles:
