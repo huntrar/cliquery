@@ -2,17 +2,34 @@
 #AUTHOR: Hunter Hammond
 #VERSION: 1.8
 
-KWARGS="$@"
+KW="$@" # kwargs
 BROWSER="iceweasel"
-DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
-BING=$(python $DIR/bing.py $KWARGS)
-if echo $BING | grep -q "BingFail" ; then
-    exit 0
-elif echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
-    WOLF=$(python $DIR/wolfram.py $KWARGS)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+bing () {
+    BING=$(python $DIR/bing.py $KW)
+    if echo $BING | grep -q "BingFail" ; then
+        exit 0
+    fi
+}
+
+wolf () {
+    WOLF=$(python $DIR/wolfram.py $KW)
     if echo $WOLF | grep -q "WolfFail" ; then
         exit 0
-    elif echo $WOLF | grep -q "WolfNoMatch" ; then
+    fi
+}
+
+bing
+if echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
+    wolf
+    if echo $WOLF | grep -q "WolfNoMatch" ; then
         exit 0
     else
         echo $WOLF
@@ -33,13 +50,11 @@ elif echo $BING | grep -q "BingPage" ; then # Return Bing page results
 elif echo $BING | grep -q "BingCalc" ; then # Return Bing calculation
     BING=${BING%$'BingCalc'}
     echo $BING
-else                                            # Return Wolf calculation
-    WOLF=$(python $DIR/wolfram.py $KWARGS)
-    if echo $WOLF | grep -q "WolfFail" ; then
-        exit 0
-    elif echo $WOLF | grep -q "WolfNoMatch" ; then # If no result then force -s flag
-        KWARGS="-s "$KWARGS
-        BING=$(python $DIR/bing.py $KWARGS)
+else                                        # Return Wolf calculation
+    wolf
+    if echo $WOLF | grep -q "WolfNoMatch" ; then 
+        KW="-s "$KW # If no result then force -s flag
+        bing
         if echo $BING | grep -q "BingPage" ; then
             BING=${BING%$'BingPage'}
             if [[ $BING = 'q' ]] ; then
