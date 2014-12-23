@@ -39,14 +39,14 @@ if arg_list:
         except IndexError:
             print 'BingFail'
             sys.stderr.write('No search terms entered.\n')
-            sys.exit(0)
+            sys.exit(1)
     if flags['o']:
         print ' '.join(clean_args) + 'BingOpen'
         sys.exit(0)
 else:
     print 'BingFail'
     sys.stderr.write('No search terms entered.\n')
-    sys.exit(0)
+    sys.exit(1)
 
 if flags['w']:
     print 'WolfFlag'
@@ -66,7 +66,7 @@ try:
 except IndexError:
     print 'BingFail'
     sys.stderr.write('No search terms entered.\n')
-    sys.exit(0)
+    sys.exit(1)
     
 base_url = 'http://www.bing.com/search?q='
 url = base_url + url_args
@@ -87,7 +87,7 @@ if flags['f']:
     except IndexError:
         print 'BingFail'
         sys.stderr.write('Failed to retrieve webpage.\n')
-        sys.exit(0)
+        sys.exit(1)
     if "http://" in first_link or "https://" in first_link:
         print first_link + 'BingFL'
     elif '/images/' in first_link:
@@ -100,7 +100,7 @@ elif flags['s']:
     if not unprocessed_links:
         print 'BingFail'
         sys.stderr.write('Failed to retrieve webpage.\n')
-        sys.exit(0)
+        sys.exit(1)
     links = []
     link_descs = []
     for link in unprocessed_links:
@@ -132,7 +132,7 @@ elif flags['s']:
                 sys.exit(0)
         except (ValueError, IndexError):
             print 'qBingPage'
-            sys.exit(0)
+            sys.exit(1)
 
 # Check for Bing calculation/definition result
 calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value') # Check if calculation result is present or age/date

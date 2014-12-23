@@ -31,7 +31,7 @@ if arg_list:
                 else:
                     clean_args.append(arg)
         except IndexError:
-            sys.exit(0)
+            sys.exit(1)
 
 # Add clean_args and api_key to base_url
 base_url = 'http://api.wolframalpha.com/v2/query?input='
@@ -39,6 +39,7 @@ try:
     url_args = '+'.join(clean_args)
 except AttributeError:
     sys.stderr.write("Argument list error! Expected list, got " + type(clean_args) + "\n")
+    sys.exit(1)
 url = base_url + url_args + '&appid=' + api_key
 
 # Retrieve webpage response
@@ -48,7 +49,7 @@ try:
 except urllib2.URLError:
     print 'WolfFail'
     sys.stderr.write('Failed to retrieve webpage.\n')
-    sys.exit(0)
+    sys.exit(1)
 
 # Parse webpage response
 titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation']/@title")))
