@@ -6,6 +6,7 @@ DEPENDENCIES: lxml
 
 import sys
 import urllib2
+import re
 
 import lxml.html as lh
 
@@ -83,17 +84,20 @@ except urllib2.URLError:
 # Parse webpage response
 if flags['f']:
     try:
-        first_link = html.xpath('//h2/a/@href')[0]
+        unprocessed_links = html.xpath('//h2/a/@href')
+        for link in unprocessed_links:
+            if not re.search('(ad|Ad|AD)(?=\W)', link): # Ad check
+                if "http://" in link or "https://" in link:
+                    print link + 'BingFL'
+                    sys.exit(0) # Exit once first valid link printed
+                elif '/images/' in link:
+                    link = 'http://www.bing.com' + link
+                    print link + 'BingFL'
+                    sys.exit(0) # Exit once first valid link printed
     except IndexError:
         print 'BingFail'
         sys.stderr.write('Failed to retrieve webpage.\n')
         sys.exit(1)
-    if "http://" in first_link or "https://" in first_link:
-        print first_link + 'BingFL'
-    elif '/images/' in first_link:
-        first_link = 'http://www.bing.com' + first_link
-        print first_link + 'BingFL'
-    sys.exit(0)
 
 elif flags['s']:
     unprocessed_links = html.xpath('//h2/a/@href')
@@ -104,20 +108,21 @@ elif flags['s']:
     links = []
     link_descs = []
     for link in unprocessed_links:
-        if "http://" in link or "https://" in link: 
-            links.append(link)
-            ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
-            link_desc = html.xpath(ld_xpath)
-            if type(link_desc) == list:
-                link_desc = ''.join(link_desc)
-            link_descs.append(link_desc)
-        elif '/images/' in link:
-            links.append('http://www.bing.com' + link)
-            ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
-            link_desc = html.xpath(ld_xpath)
-            if type(link_desc) == list:
-                link_desc = ''.join(link_desc)
-            link_descs.append(link_desc)
+        if not re.search('(ad|Ad|AD)(?=\W)', link): # Check for advertisement
+            if "http://" in link or "https://" in link: 
+                links.append(link)
+                ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
+                link_desc = html.xpath(ld_xpath)
+                if type(link_desc) == list:
+                    link_desc = ''.join(link_desc)
+                link_descs.append(link_desc)
+            elif '/images/' in link:
+                links.append('http://www.bing.com' + link)
+                ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
+                link_desc = html.xpath(ld_xpath)
+                if type(link_desc) == list:
+                    link_desc = ''.join(link_desc)
+                link_descs.append(link_desc)
 
     if links and link_descs:
         for i in xrange(len(links)):
