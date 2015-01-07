@@ -1,6 +1,6 @@
 #!/bin/bash
 #AUTHOR: Hunter Hammond
-#VERSION: 1.8
+#VERSION: 1.9
 
 KW="$@" # kwargs
 BROWSER="iceweasel"
@@ -26,11 +26,24 @@ wolf () {
     fi
 }
 
+bingpage () {
+    BING=${BING%$'BingPage'}
+    if [[ $BING = 'q' ]] ; then
+        exit 0
+    else
+        $BROWSER $BING &
+    fi
+}
+
 bing
 if echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
     wolf
-    if echo $WOLF | grep -q "WolfNoMatch" ; then
-        exit 0
+    if echo $WOLF | grep -q "WolfNoMatch" ; then 
+        KW="-s "$KW # If no result then force -s flag
+        bing
+        if echo $BING | grep -q "BingPage" ; then
+            bingpage
+        fi
     else
         echo $WOLF
     fi
@@ -41,29 +54,10 @@ elif echo $BING | grep -q "BingFL" ; then # Check for -f flag
     BING=${BING%$'BingFL'}
     $BROWSER $BING &
 elif echo $BING | grep -q "BingPage" ; then # Return Bing page results
-    BING=${BING%$'BingPage'}
-    if [[ $BING = 'q' ]] ; then
-        exit 0
-    else
-        $BROWSER $BING &
-    fi
+    bingpage
 elif echo $BING | grep -q "BingCalc" ; then # Return Bing calculation
     BING=${BING%$'BingCalc'}
     echo $BING
 else                                        # Return Wolf calculation
-    wolf
-    if echo $WOLF | grep -q "WolfNoMatch" ; then 
-        KW="-s "$KW # If no result then force -s flag
-        bing
-        if echo $BING | grep -q "BingPage" ; then
-            BING=${BING%$'BingPage'}
-            if [[ $BING = 'q' ]] ; then
-                exit 0
-            else
-                $BROWSER $BING &
-            fi
-        fi
-    else
-        echo $WOLF
-    fi
+    exit 0
 fi
