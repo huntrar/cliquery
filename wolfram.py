@@ -20,14 +20,6 @@ class WolfSearch:
         self.api_key = self.GetApiKey()
         self.html = self.GetWolfHTML(self.url_args)
     
-    def GetApiKey(self):
-        # Get API key from config.txt
-        cfg_path = os.path.dirname(os.path.abspath(__file__))
-        f = open(cfg_path + '/config.txt', 'r')
-        api_key = f.readline()
-        f.close()
-        return api_key
-
     def ProcessArgs(self, url_args):
         clean_args = []
         if url_args:
@@ -41,6 +33,14 @@ class WolfSearch:
                     sys.exit()
         return clean_args
 
+    def GetApiKey(self):
+        # Get API key from config.txt
+        cfg_path = os.path.dirname(os.path.abspath(__file__))
+        f = open(cfg_path + '/config.txt', 'r')
+        api_key = f.readline()
+        f.close()
+        return api_key
+
     def GetWolfHTML(self, url_args):
         # Add clean_args and api_key to base_url
         base_url = 'http://api.wolframalpha.com/v2/query?input='
@@ -51,7 +51,7 @@ class WolfSearch:
             sys.exit()
         url = base_url + clean_args + '&appid=' + self.api_key
 
-        # Retrieve webpage response
+        # Get HTML response
         try:
             request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
             return lh.parse(urllib2.urlopen(request))
@@ -88,13 +88,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--search", help="get bing search results",
     action="store_true")
-    parser.add_argument("-f", "--flucky", help="feeling lucky result",
+    parser.add_argument("-f", "--first", help="opens first link result",
     action="store_true")
     parser.add_argument("-o", "--openurl", help="open link directly",
     action="store_true")
     parser.add_argument("-w", "--wolfram", help="get wolfram search result",
     action="store_true")
-    parser.add_argument("URL_ARGS", nargs='*', help="Search URL arguments")
+    parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()
     wolf_search = WolfSearch(args.URL_ARGS)
     wolf_search.Search()

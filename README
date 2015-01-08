@@ -1,25 +1,27 @@
 
-CLIQuery is a search engine consolidator for the command-line using Bing and WolframAlpha.
+CLIQuery is a search engine consolidator for command-line use, combining Bing
+and Wolfram|Alpha.
 
-A query may return immediate results such as calculations or facts, or a page of search results.
+A query may return immediate results such as calculations or facts, or instead a
+page of search results comprised of links to follow and short descriptions. 
 
-Pages of search results may be followed by entering their corresponding link number.
+Links in the search results may be opened by entering their corresponding link 
+number, such as 0 for the top result.
 
 Flag arguments:
-    Only one of these arguments may be used at a time as they have conflicting
-    results. If more than one is entered, the first flag is always chosen.
-        -s      Returns a page of links from Bing search results
-        -f      'Feeling Lucky', opens the top search result in browser
-        -o      Open a link directly, must pass url as argument
-        -w      Returns data from WolframAlpha
+        -s, --search Returns a page of links from Bing search results
+        -f, --first Opens the top (first) Bing search result
+        -o, --openurl Open a URL directly by passing it as an argument
+        -w, --wolfram Returns query response from Wolfram|Alpha
 
 Steps towards setup:
-    1. Sign up for a WolframAlpha API key (https://developer.wolframalpha.com/portal/apisignup.html)
+    1. Sign up for a Wolfram|Alpha API key (https://developer.wolframalpha.com/portal/apisignup.html)
     2. Paste the API key in config.txt
-        i. API Key allows 2000 WolframAlpha searches monthly
+        i. API Key allows 2000 Wolfram|Alpha searches/month
     2. Resolve dependencies:
         i. lxml (pip install lxml)
         ii. iceweasel (apt-get install iceweasel)
             If you are not on Debian you must use another browser that allows
-            pages to be opened using cmd-line args, then replace it in CLI_QUERY
+            pages to be opened using cmd-line args, then replace 'iceweasel'
+            with an equivalent command in the CLI_QUERY file under $BROWSER
 

@@ -13,9 +13,9 @@ import lxml.html as lh
 
 
 class BingSearch:
-    def __init__(self, url_args, search_flag, f_lucky_flag, open_flag, wolfram_flag):
+    def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag):
        self.search_flag = search_flag
-       self.f_lucky_flag = f_lucky_flag
+       self.first_flag = first_flag
        self.open_flag = open_flag
        self.wolfram_flag = wolfram_flag
        self.url_args = self.ProcessArgs(url_args)
@@ -68,14 +68,16 @@ class BingSearch:
             base_url = 'http://www.bing.com/search?q='
             url = base_url + url_args
             try:
+                # Get HTML response
                 request = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
                 return lh.parse(urllib2.urlopen(request))
             except urllib2.URLError:
                 print 'BingFail'
                 sys.stderr.write('Failed to retrieve webpage.\n')
                 sys.exit()
-
+    
     def BingSearchResults(self, html):
+        # Prints Bing search page links
         unprocessed_links = html.xpath('//h2/a/@href')
         if not unprocessed_links:
             print 'BingFail'
@@ -92,7 +94,8 @@ class BingSearch:
                     if type(link_desc) == list:
                         link_desc = ''.join(link_desc)
                     link_descs.append(link_desc)
-                elif '/images/' in link:
+                elif '/images/' in link and "www.bing.com" not in link:
+                    # Fix image links that are not prepended with www.bing.com
                     links.append('http://www.bing.com' + link)
                     ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
                     link_desc = html.xpath(ld_xpath)
@@ -115,7 +118,29 @@ class BingSearch:
                 print 'qBingPage'
                 sys.exit()
 
-    def FeelingLucky(self, html):
+    def BingCalculation(self, html):
+        calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value')
+        define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()')
+        try:
+            # Check if calculation result is present or age/date
+            if calc_result:
+                if len(calc_result) == 1:
+                    print (calc_result[0] + 'BingCalc').encode('ascii', 'ignore')
+                else:
+                    print ('\n'.join(calc_result) + 'BingCalc').encode('ascii', 'ignore')
+                sys.exit()
+            # Check if calculation result is a definition
+            elif define_result:
+                if len(define_result) == 1:
+                    print (define_result[0] + 'BingCalc').encode('ascii', 'ignore')
+                else:
+                    print ('\n'.join(define_result) + 'BingCalc').encode('ascii', 'ignore')
+                sys.exit()
+        except AttributeError:
+            pass
+        return False
+
+    def OpenFirstLink(self, html):
         try:
             unprocessed_links = html.xpath('//h2/a/@href')
             for link in unprocessed_links:
@@ -131,48 +156,26 @@ class BingSearch:
             sys.stderr.write('Failed to retrieve webpage.\n')
             sys.exit()
 
-    def Wolfram(self):
-        print 'WolfFlag'
+    def OpenUrl(self):
+        print ' '.join(self.url_args) + 'BingOpen'
         sys.exit()
 
-    def BingCalculation(self, html):
-        calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value') # Check if calculation result is present or age/date
-        define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()') # Check if calculation result is a definition
-        try:
-            if calc_result:
-                if len(calc_result) == 1:
-                    print (calc_result[0] + 'BingCalc').encode('ascii', 'ignore')
-                else:
-                    print ('\n'.join(calc_result) + 'BingCalc').encode('ascii', 'ignore')
-                sys.exit()
-            elif define_result:
-                if len(define_result) == 1:
-                    print (define_result[0] + 'BingCalc').encode('ascii', 'ignore')
-                else:
-                    print ('\n'.join(define_result) + 'BingCalc').encode('ascii', 'ignore')
-                sys.exit()
-            #else:
-                #print 'BingNoMatch'
-                #sys.exit()
-        except AttributeError:
-            pass
-            #print 'BingNoMatch'
-        return False
-
-    def Open(self):
-        print ' '.join(self.url_args) + 'BingOpen'
+    def CheckWolfram(self):
+        print 'WolfFlag'
         sys.exit()
 
     def Search(self):
         if self.open_flag:
-            self.Open()
+            self.OpenUrl()
         elif self.search_flag:
             self.BingSearchResults(self.html)
-        elif self.f_lucky_flag:
-            self.FeelingLucky(self.html)        
+        elif self.first_flag:
+            self.OpenFirstLink(self.html)        
         elif self.wolfram_flag:
-            self.Wolfram()
+            self.CheckWolfram()
         else:
+            # Defaults to BingCalculation, then Wolfram, which if fails will
+            # restart this program with search_flag set to True
             search_success = self.BingCalculation(self.html)
             if not search_success:
                 self.Wolfram()
@@ -183,19 +186,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--search", help="get bing search results",
     action="store_true")
-    parser.add_argument("-f", "--flucky", help="feeling lucky result",
+    parser.add_argument("-f", "--first", help="opens first link result",
     action="store_true")
     parser.add_argument("-o", "--openurl", help="open link directly",
     action="store_true")
     parser.add_argument("-w", "--wolfram", help="get wolfram search result",
     action="store_true")
-    parser.add_argument("URL_ARGS", nargs='*', help="Search URL arguments")
+    parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()
     search = bool(args.search)
-    flucky = bool(args.flucky)
+    first = bool(args.first)
     openurl = bool(args.openurl)
     wolfram = bool(args.wolfram)
-    bing_search = BingSearch(args.URL_ARGS, search, flucky, openurl, wolfram)
+    bing_search = BingSearch(args.URL_ARGS, search, first, openurl, wolfram)
     bing_search.Search()
 
 
