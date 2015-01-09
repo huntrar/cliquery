@@ -78,7 +78,7 @@ class WolfSearch:
                     output_list.append(title + ': ' + entry).encode('ascii', 'ignore')
                 except (AttributeError, UnicodeEncodeError):
                     pass
-            print '\n'.join(output_list).encode('ascii', 'ignore')
+            sys.stderr.write('\n'.join(output_list).encode('ascii', 'ignore'))
         else:
             print 'WolfNoMatch'
 
