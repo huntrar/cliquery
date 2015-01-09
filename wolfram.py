@@ -62,7 +62,7 @@ class WolfSearch:
     
     def Search(self):
         # Parse webpage response
-        titles = list(OrderedDict.fromkeys(self.html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation' and @title != 'Input interpretation' and @title != 'Image']/@title")))
+        titles = list(OrderedDict.fromkeys(self.html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation' and @title != 'Input interpretation' and @title != 'Image' and @title != 'Manipulatives illustration' and @title != 'Quotient and remainder']/@title")))
         entries = []
         if titles:
             for title in titles:
@@ -85,7 +85,10 @@ class WolfSearch:
                         output_list.append(title + ': ' + entry).encode('ascii', 'ignore')
                 except (AttributeError, UnicodeEncodeError):
                     pass
-            if len(output_list) > 2:
+            if not output_list:
+                print 'WolfNoMatch'
+                sys.exit()
+            elif len(output_list) > 2:
                 sys.stderr.write('\n'.join(output_list[:2]).encode('ascii', 'ignore'))
                 sys.stderr.write('\nSee more? (y/n): ')
                 see_more = raw_input("")
