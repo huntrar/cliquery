@@ -178,7 +178,7 @@ class BingSearch:
             # restart this program with search_flag set to True
             search_success = self.BingCalculation(self.html)
             if not search_success:
-                self.Wolfram()
+                self.CheckWolfram()
 
 
 if __name__ == "__main__":
