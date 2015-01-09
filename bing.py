@@ -119,7 +119,10 @@ class BingSearch:
                         print(links[int(link_num)]) + 'BingPage'
                     sys.exit()
             except (ValueError, IndexError):
-                print 'qBingPage'
+                if self.incog_flag:
+                    print 'qBingIncogPage'
+                else:
+                    print 'qBingPage'
                 sys.exit()
 
     def BingCalculation(self, html):

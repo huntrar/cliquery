@@ -38,7 +38,11 @@ bingpage () {
 
 bingincogpage() {
     BING=${BING%$'BingIncogPage'}
-    $BROWSER $INCOG $BING &
+    if [[ $BING = 'q' ]] ; then
+        exit 0
+    else
+        $BROWSER $INCOG $BING &
+    fi
 }
 
 bing
