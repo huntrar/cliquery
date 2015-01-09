@@ -62,7 +62,7 @@ class WolfSearch:
     
     def Search(self):
         # Parse webpage response
-        titles = list(OrderedDict.fromkeys(self.html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation']/@title")))
+        titles = list(OrderedDict.fromkeys(self.html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation' and @title != 'Input interpretation']/@title")))
         entries = []
         if titles:
             for title in titles:
@@ -70,12 +70,19 @@ class WolfSearch:
                 entry = self.html.xpath(entry_xpath)
                 if entry:
                     entries.append(entry[0])
-
             entries = list(OrderedDict.fromkeys(entries))
             output_list = []
+            if len(entries) == 1 and entries[0] == '{}':
+                print 'WolfNoMatch'
+                sys.exit()
             for title, entry in itertools.izip(titles, entries):
                 try:
-                    output_list.append(title + ': ' + entry).encode('ascii', 'ignore')
+                    if ' |' in entry:
+                        entry = '\n\t' + entry.replace(' |', ':').replace('\n', '\n\t')
+                    if title == 'Result':
+                        output_list.append(entry).encode('ascii', 'ignore')
+                    else:
+                        output_list.append(title + ': ' + entry).encode('ascii', 'ignore')
                 except (AttributeError, UnicodeEncodeError):
                     pass
             sys.stderr.write('\n'.join(output_list).encode('ascii', 'ignore'))
