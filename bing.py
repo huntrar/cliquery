@@ -1,6 +1,6 @@
 ''' Python 2.7.3
 AUTHOR: Hunter Hammond
-VERSION: 1.9
+VERSION: 2.0
 DEPENDENCIES: lxml
 '''
 
@@ -13,11 +13,12 @@ import lxml.html as lh
 
 
 class BingSearch:
-    def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag):
+    def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag, incog_flag):
        self.search_flag = search_flag
        self.first_flag = first_flag
        self.open_flag = open_flag
        self.wolfram_flag = wolfram_flag
+       self.incog_flag = incog_flag
        self.url_args = self.ProcessArgs(url_args)
        self.html = self.GetBingHTML(self.url_args)
 
@@ -112,7 +113,10 @@ class BingSearch:
                 sys.stderr.write(": ")
                 link_num = raw_input("")
                 if(link_num):
-                    print(links[int(link_num)]) + 'BingPage'
+                    if self.incog_flag:
+                        print(links[int(link_num)]) + 'BingIncogPage'
+                    else:
+                        print(links[int(link_num)]) + 'BingPage'
                     sys.exit()
             except (ValueError, IndexError):
                 print 'qBingPage'
@@ -146,18 +150,27 @@ class BingSearch:
             for link in unprocessed_links:
                 if not re.search('(ad|Ad|AD)(?=\W)', link): # Basic ad block
                     if "http://" in link or "https://" in link:
-                        print link + 'BingFL'
+                        if self.incog_flag:
+                            print link + 'BingIncogFL'
+                        else:
+                            print link + 'BingFL'
                         sys.exit() # Exit once first valid link printed
                     elif '/images/' in link:
                         link = 'http://www.bing.com' + link
-                        print link + 'BingFL'
+                        if self.incog_flag:
+                            print link + 'BingIncogFL'
+                        else:
+                            print link + 'BingFL'
                         sys.exit() # Exit once first valid link printed
         except IndexError:
             sys.stderr.write('Failed to retrieve webpage.\n')
             sys.exit()
 
     def OpenUrl(self):
-        print ' '.join(self.url_args) + 'BingOpen'
+        if self.incog_flag:
+            print ' '.join(self.url_args) + 'BingIncogOpen'
+        else:
+            print ' '.join(self.url_args) + 'BingOpen'
         sys.exit()
 
     def CheckWolfram(self):
@@ -192,13 +205,16 @@ if __name__ == "__main__":
     action="store_true")
     parser.add_argument("-w", "--wolfram", help="get wolfram search result",
     action="store_true")
+    parser.add_argument("-i", "--incognito", help="open browser in incognito",
+    action="store_true")
     parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()
     search = bool(args.search)
     first = bool(args.first)
     openurl = bool(args.openurl)
     wolfram = bool(args.wolfram)
-    bing_search = BingSearch(args.URL_ARGS, search, first, openurl, wolfram)
+    incognito = bool(args.incognito)
+    bing_search = BingSearch(args.URL_ARGS, search, first, openurl, wolfram, incognito)
     bing_search.Search()
 
 

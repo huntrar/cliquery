@@ -13,6 +13,7 @@ Flag arguments:
         -f, --first Opens the top (first) Bing search result
         -o, --openurl Open a URL directly by passing it as an argument
         -w, --wolfram Returns query response from Wolfram|Alpha
+        -i, --incognito Links will be opened in private browsing mode
 
 Steps towards setup:
     1. Sign up for a Wolfram|Alpha API key (https://developer.wolframalpha.com/portal/apisignup.html)
@@ -24,4 +25,6 @@ Steps towards setup:
             If you are not on Debian you must use another browser that allows
             pages to be opened using cmd-line args, then replace 'iceweasel'
             with an equivalent command in the CLI_QUERY file under $BROWSER
+            You are also responsible for changing the $INCOG variable to the
+            correct flag for private-browsing mode for your browser
 

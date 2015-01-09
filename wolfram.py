@@ -1,6 +1,6 @@
 ''' Python 2.7.3
 AUTHOR: Hunter Hammond
-VERSION: 1.9
+VERSION: 2.0
 DEPENDENCIES: lxml
 '''
 
@@ -93,6 +93,8 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--openurl", help="open link directly",
     action="store_true")
     parser.add_argument("-w", "--wolfram", help="get wolfram search result",
+    action="store_true")
+    parser.add_argument("-i", "--incognito", help="open browser in incognito",
     action="store_true")
     parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()

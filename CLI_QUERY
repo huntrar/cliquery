@@ -1,9 +1,10 @@
 #!/bin/bash
 #AUTHOR: Hunter Hammond
-#VERSION: 1.9
+#VERSION: 2.0
 
 KW="$@" # kwargs
 BROWSER="iceweasel"
+INCOG="-private-window"
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
     DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -35,6 +36,11 @@ bingpage () {
     fi
 }
 
+bingincogpage() {
+    BING=${BING%$'BingIncogPage'}
+    $BROWSER $INCOG $BING &
+}
+
 bing
 if echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
     wolf
@@ -43,6 +49,8 @@ if echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
         bing
         if echo $BING | grep -q "BingPage" ; then
             bingpage
+        elif echo $BING | grep -q "BingIncogPage" ; then
+            bingincogpage
         fi
     else
         echo $WOLF
@@ -50,11 +58,19 @@ if echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
 elif echo $BING | grep -q "BingOpen" ; then # Check for -o flag
     BING=${BING%$'BingOpen'}
     $BROWSER $BING &
+elif echo $BING | grep -q "BingIncogOpen" ; then
+    BING=${BING%$'BingIncogOpen'}
+    $BROWSER $INCOG $BING &
 elif echo $BING | grep -q "BingFL" ; then # Check for -f flag
     BING=${BING%$'BingFL'}
     $BROWSER $BING &
-elif echo $BING | grep -q "BingPage" ; then # Return Bing page results
+elif echo $BING | grep -q "BingIncogFL" ; then
+    BING=${BING%$'BingIncogFL'}
+    $BROWSER $INCOG $BING &
+elif echo $BING | grep -q "BingPage" ; then # Return Bing links to follow
     bingpage
+elif echo $BING | grep -q "BingIncogPage" ; then
+    bingincogpage
 elif echo $BING | grep -q "BingCalc" ; then # Return Bing calculation
     BING=${BING%$'BingCalc'}
     echo $BING
