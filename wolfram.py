@@ -85,7 +85,16 @@ class WolfSearch:
                         output_list.append(title + ': ' + entry).encode('ascii', 'ignore')
                 except (AttributeError, UnicodeEncodeError):
                     pass
-            sys.stderr.write('\n'.join(output_list).encode('ascii', 'ignore'))
+            if len(output_list) > 2:
+                sys.stderr.write('\n'.join(output_list[:2]).encode('ascii', 'ignore'))
+                sys.stderr.write('\nSee more? (y/n): ')
+                see_more = raw_input("")
+                if see_more == 'y' or see_more == 'Y':
+                    sys.stderr.write('\n'.join(output_list[2:]).encode('ascii', 'ignore'))
+                else:
+                    sys.exit()
+            else:
+                sys.stderr.write('\n'.join(output_list).encode('ascii', 'ignore'))
         else:
             print 'WolfNoMatch'
 
