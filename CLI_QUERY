@@ -32,7 +32,7 @@ bingpage () {
     if [[ $BING = 'q' ]] ; then
         exit 0
     else
-        $BROWSER $BING &
+        "$BROWSER" $BING &
     fi
 }
 
@@ -41,7 +41,7 @@ bingincogpage() {
     if [[ $BING = 'q' ]] ; then
         exit 0
     else
-        $BROWSER $INCOG $BING &
+        "$BROWSER" $INCOG $BING &
     fi
 }
 
@@ -61,16 +61,16 @@ if echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
     fi
 elif echo $BING | grep -q "BingOpen" ; then # Check for -o flag
     BING=${BING%$'BingOpen'}
-    $BROWSER $BING &
+    "$BROWSER" $BING &
 elif echo $BING | grep -q "BingIncogOpen" ; then
     BING=${BING%$'BingIncogOpen'}
-    $BROWSER $INCOG $BING &
+    "$BROWSER" $INCOG $BING &
 elif echo $BING | grep -q "BingFL" ; then # Check for -f flag
     BING=${BING%$'BingFL'}
-    $BROWSER $BING &
+    "$BROWSER" $BING &
 elif echo $BING | grep -q "BingIncogFL" ; then
     BING=${BING%$'BingIncogFL'}
-    $BROWSER $INCOG $BING &
+    "$BROWSER" $INCOG $BING &
 elif echo $BING | grep -q "BingPage" ; then # Return Bing links to follow
     bingpage
 elif echo $BING | grep -q "BingIncogPage" ; then
