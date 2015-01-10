@@ -15,9 +15,9 @@ import lxml.html as lh
 
 
 class WolfSearch:
-    def __init__(self, url_args):
+    def __init__(self, api_key, url_args):
         self.url_args = self.ProcessArgs(url_args)
-        self.api_key = self.GetApiKey()
+        self.api_key = api_key
         self.html = self.GetWolfHTML(self.url_args)
     
     def ProcessArgs(self, url_args):
@@ -32,14 +32,6 @@ class WolfSearch:
                 except IndexError:
                     sys.exit()
         return clean_args
-
-    def GetApiKey(self):
-        # Get API key from config.txt
-        cfg_path = os.path.dirname(os.path.abspath(__file__))
-        f = open(cfg_path + '/config.txt', 'r')
-        api_key = f.readline()
-        f.close()
-        return api_key
 
     def GetWolfHTML(self, url_args):
         # Add clean_args and api_key to base_url
@@ -96,9 +88,10 @@ if __name__ == "__main__":
     action="store_true")
     parser.add_argument("-i", "--incognito", help="open browser in incognito",
     action="store_true")
+    parser.add_argument("API_KEY", nargs='?', help="Wolfram|Alpha API key",
     parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()
-    wolf_search = WolfSearch(args.URL_ARGS)
+    wolf_search = WolfSearch(args.API_KEY, args.URL_ARGS)
     wolf_search.Search()
 
 

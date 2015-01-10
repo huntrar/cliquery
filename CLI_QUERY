@@ -3,8 +3,6 @@
 #VERSION: 2.0
 
 KW="$@" # kwargs
-BROWSER="iceweasel"
-INCOG="-private-window"
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
     DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -12,6 +10,10 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
     [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+CONFIG=$DIR'/config.txt'
+API_KEY=$(sed -n 1p $CONFIG)
+BROWSER=$(sed -n 2p $CONFIG)
+INCOG=$(sed -n 3p $CONFIG)
 
 bing () {
     BING=$(python $DIR/bing.py $KW)
@@ -21,7 +23,7 @@ bing () {
 }
 
 wolf () {
-    WOLF=$(python $DIR/wolfram.py $KW)
+    WOLF=$(python $DIR/wolfram.py $API_KEY $KW)
     if echo $WOLF | grep -q "WolfFail" ; then
         exit 0
     fi

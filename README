@@ -17,14 +17,26 @@ Flag arguments:
 
 Steps towards setup:
     1. Sign up for a Wolfram|Alpha API key (https://developer.wolframalpha.com/portal/apisignup.html)
-    2. Paste the API key in config.txt
         i. API Key allows 2000 Wolfram|Alpha searches/month
-    2. Resolve dependencies:
+    2. Enter fields in config.txt as follows
+        i. Line one: enter your Wolfram|Alpha API key
+        ii. Line two: enter your browser
+            a. Examples for Linux users: iceweasel, firefox, chrome
+            b. Example for Cygwin users: /cygdrive/c/Program Files (x86)/Mozilla
+                Firefox/firefox.exe, /cygdrive/c/Program\ Files\ \(x86\)/Google/
+                Chrome/Application/chrome.exe 
+        iii. Line three: enter your browser's cmd-line flag for private browsing
+            a. iceweasel/firefox: -private-window
+            b. chrome: -incognito
+        iv. Example config.txt:
+                AP1K3Y-EX5MPL3
+                iceweasel
+                -private-window
+    3. Resolve dependencies:
         i. lxml (pip install lxml)
-        ii. iceweasel (apt-get install iceweasel)
-            If you are not on Debian you must use another browser that allows
-            pages to be opened using cmd-line args, then replace 'iceweasel'
-            with an equivalent command in the CLI_QUERY file under $BROWSER
-            You are also responsible for changing the $INCOG variable to the
-            correct flag for private-browsing mode for your browser
+        ii. an internet browser
+            Any browser that accepts command-line arguments should work fine,
+            examples of working browsers include iceweasel, firefox, and chrome
+            Your choice of browser and other information should be entered in
+            config.txt for functionality.
 
