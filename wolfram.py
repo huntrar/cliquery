@@ -107,7 +107,7 @@ if __name__ == "__main__":
     action="store_true")
     parser.add_argument("-i", "--incognito", help="open browser in incognito",
     action="store_true")
-    parser.add_argument("API_KEY", nargs='?', help="Wolfram|Alpha API key",
+    parser.add_argument("API_KEY", nargs='?', help="Wolfram|Alpha API key"),
     parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()
     wolf_search = WolfSearch(args.API_KEY, args.URL_ARGS)
