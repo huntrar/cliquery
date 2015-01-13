@@ -23,7 +23,7 @@ bing () {
 }
 
 wolf () {
-    WOLF=$(python $DIR/wolfram.py $API_KEY $KW)
+    WOLF=$(python $DIR/wolfram.py $KW $API_KEY)
     if echo $WOLF | grep -q "WolfFail" ; then
         exit 0
     fi
