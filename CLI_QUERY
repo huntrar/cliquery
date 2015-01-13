@@ -53,9 +53,9 @@ if echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
     if echo $WOLF | grep -q "WolfNoMatch" ; then 
         KW="-s "$KW # If no result then force -s flag
         bing
-        if echo $BING | grep -q "BingPage" ; then
+        if echo $BING | grep -q "BingPage" ; then # -s flag
             bingpage
-        elif echo $BING | grep -q "BingIncogPage" ; then
+        elif echo $BING | grep -q "BingIncogPage" ; then # -is flag
             bingincogpage
         fi
     else
@@ -64,13 +64,13 @@ if echo $BING | grep -q "WolfFlag" ; then # Check for -w flag
 elif echo $BING | grep -q "BingOpen" ; then # Check for -o flag
     BING=${BING%$'BingOpen'}
     "$BROWSER" $BING &
-elif echo $BING | grep -q "BingIncogOpen" ; then
+elif echo $BING | grep -q "BingIncogOpen" ; then # Check for -io flag
     BING=${BING%$'BingIncogOpen'}
     "$BROWSER" $INCOG $BING &
 elif echo $BING | grep -q "BingFL" ; then # Check for -f flag
     BING=${BING%$'BingFL'}
     "$BROWSER" $BING &
-elif echo $BING | grep -q "BingIncogFL" ; then
+elif echo $BING | grep -q "BingIncogFL" ; then # Check for -if flag
     BING=${BING%$'BingIncogFL'}
     "$BROWSER" $INCOG $BING &
 elif echo $BING | grep -q "BingPage" ; then # Return Bing links to follow
@@ -80,6 +80,6 @@ elif echo $BING | grep -q "BingIncogPage" ; then
 elif echo $BING | grep -q "BingCalc" ; then # Return Bing calculation
     BING=${BING%$'BingCalc'}
     echo $BING
-else                                        # Return Wolf calculation
+else                                        
     exit 0
 fi
