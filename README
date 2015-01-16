@@ -1,42 +1,40 @@
+CLIQuery is a search engine consolidator for command-line use, combining the
+functionalities of Bing and Wolfram|Alpha.
 
-CLIQuery is a search engine consolidator for command-line use, combining Bing
-and Wolfram|Alpha.
+A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
 
-A query may return immediate results such as calculations or facts, or instead a
-page of search results comprised of links to follow and short descriptions. 
+Link results may be followed by entering the corresponding link number in the
+prompt, such as 0 for the top result.
 
-Links in the search results may be opened by entering their corresponding link 
-number, such as 0 for the top result.
 
-Flag arguments:
-        -s, --search Returns a page of links from Bing search results
-        -f, --first Opens the top (first) Bing search result
-        -o, --openurl Open a URL directly by passing it as an argument
-        -w, --wolfram Returns query response from Wolfram|Alpha
-        -i, --incognito Links will be opened in private browsing mode
+usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [URL_ARGS [URL_ARGS ...]]
+
+positional arguments:
+  URL_ARGS       Search keywords
+
+  optional arguments:
+    -h, --help     show this help message and exit
+    -s, --search   Get Bing search results
+    -f, --first    Open first link result
+    -o, --open     Open url directly
+    -w, --wolfram  Get Wolfram|Alpha search results
+
 
 Steps towards setup:
+
     1. Sign up for a Wolfram|Alpha API key (https://developer.wolframalpha.com/portal/apisignup.html)
         i. API Key allows 2000 Wolfram|Alpha searches/month
+
     2. Enter fields in config.txt as follows
         i. Line one: enter your Wolfram|Alpha API key
         ii. Line two: enter your browser
-            a. Examples for Linux users: iceweasel, firefox, chrome
-            b. Example for Cygwin users: /cygdrive/c/Program Files (x86)/Mozilla
-                Firefox/firefox.exe, /cygdrive/c/Program\ Files\ \(x86\)/Google/
-                Chrome/Application/chrome.exe 
-        iii. Line three: enter your browser's cmd-line flag for private browsing
-            a. iceweasel/firefox: -private-window
-            b. chrome: -incognito
-        iv. Example config.txt:
+            a. Example for Linux users: iceweasel, firefox
+            b. Example for Cygwin users: 
+                /cygdrive/c/Program\ Files\ \(x86\)/Mozilla\ Firefox/firefox.exe
+        iii. Example config.txt:
                 AP1K3Y-EX5MPL3
                 iceweasel
-                -private-window
+
     3. Resolve dependencies:
         i. lxml (pip install lxml)
-        ii. an internet browser
-            Any browser that accepts command-line arguments should work fine,
-            examples of working browsers include iceweasel, firefox, and chrome
-            Your choice of browser and other information should be entered in
-            config.txt for functionality.
 
