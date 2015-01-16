@@ -38,7 +38,8 @@ class CLIQuery:
             for arg in url_args:
                 try:
                     if " " in arg:
-                        clean_args = arg.split(" ")
+                        for split_arg in arg.split(" "):
+                            clean_args.append(split_arg)
                     else:
                         clean_args.append(arg)
                 except IndexError:
@@ -48,7 +49,7 @@ class CLIQuery:
             sys.stderr.write('No search terms entered.\n')
             sys.exit()
 
-        # Further cleaning of args before they are added to base_url
+        # Further processing of args before they are added to base_url
         new_url_args = []
         if not self.open_flag:
             try:
@@ -57,9 +58,9 @@ class CLIQuery:
                         url_arg = arg.replace('+', '%2B')
                     new_url_args.append(url_arg)
                 if len(new_url_args) > 1:
-                    new_url_args = '+'.join(url_args)
+                    new_url_args = '+'.join(new_url_args)
                 else:
-                    new_url_args = url_args[0]
+                    new_url_args = new_url_args[0]
             except IndexError:
                 sys.stderr.write('No search terms entered.\n')
                 sys.exit()
@@ -242,15 +243,15 @@ class CLIQuery:
             continue_search = True
 
         if continue_search:
-            # Defaults to BingCalculation, then Wolfram, which if fails will
-            # restart this program with search_flag set to True
+            # Defaults to BingCalculation, then WolframSearch, then BingSearch
             if self.wolfram_flag:
                 bing_html = self.GetBingHTML(self.url_args) 
                 wolf_html = self.html
             else:
                 bing_html = self.html
-                wolf_html = self.GetWolframHTML(self.url_args)
             if not self.BingCalculation(bing_html):
+                if not self.wolfram_flag:
+                    wolf_html = self.GetWolframHTML(self.url_args)
                 if not self.WolframSearch(wolf_html):
                     self.BingSearch(bing_html)
 
