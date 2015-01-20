@@ -27,10 +27,8 @@ class CLIQuery:
 
     def ReadConfig(self):
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        f = open(script_dir + '/config.txt', 'r')
-        cfg = f.readline().strip(), f.readline().strip() 
-        f.close()
-        return cfg
+        with open(script_dir + '/config.txt', 'r') as f:
+            return f.readline().strip(), f.readline().strip() 
 
     def ProcessArgs(self, url_args):
         clean_args = []
@@ -220,7 +218,11 @@ class CLIQuery:
             sys.stderr.write('Failed to retrieve webpage.\n')
 
     def OpenUrl(self, url_args):
-        br = webbrowser.get(self.br_name)
+        try:
+            br = webbrowser.get(self.br_name)
+        except webbrowser.Error:
+            sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct.\n')
+            sys.exit()
         if type(url_args) == list:
             for arg in url_args:
                 br.open(arg)
