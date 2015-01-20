@@ -1,5 +1,5 @@
-CLIQuery is a search engine consolidator for command-line use, combining the
-functionalities of Bing and Wolfram|Alpha.
+CLIQuery is a command-line search engine tool which combines the functions of
+both Bing and Wolfram|Alpha.
 
 A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
 
@@ -28,9 +28,7 @@ Steps towards setup:
     2. Enter fields in config.txt as follows
         i. Line one: enter your Wolfram|Alpha API key
         ii. Line two: enter your browser
-            a. Example for Linux users: iceweasel, firefox
-            b. Example for Cygwin users: 
-                /cygdrive/c/Program\ Files\ \(x86\)/Mozilla\ Firefox/firefox.exe
+            a. Example: iceweasel, firefox
         iii. Example config.txt:
                 AP1K3Y-EX5MPL3
                 iceweasel
