@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # VERSION: 0.2.1
 # AUTHOR: Hunter Hammond
 # DEPENDENCIES: pip install lxml
@@ -129,7 +130,7 @@ class CLIQuery:
 
         if links and link_descs:
             for i in xrange(len(links)):
-                print_desc = (str(i) + ". " + link_descs[i]).encode('ascii', 'ignore')
+                print_desc = (str(i) + ". " + link_descs[i]).encode('utf-8')
                 print print_desc # Print link choices
 
             try:
@@ -161,21 +162,21 @@ class CLIQuery:
                     if ' |' in entry:
                         entry = '\n\t' + entry.replace(' |', ':').replace('\n', '\n\t')
                     if title == 'Result':
-                        output_list.append(entry).encode('ascii', 'ignore')
+                        output_list.append(entry).encode('utf-8')
                     else:
-                        output_list.append(title + ': ' + entry).encode('ascii', 'ignore')
+                        output_list.append(title + ': ' + entry).encode('utf-8')
                 except (AttributeError, UnicodeEncodeError):
                     pass
             if not output_list:
                 return False
             elif len(output_list) > 2:
-                print '\n'.join(output_list[:2]).encode('ascii', 'ignore')
+                print '\n'.join(output_list[:2]).encode('utf-8')
                 print 'See more? (y/n):',
                 see_more = raw_input('')
                 if see_more == 'y' or see_more == 'Y':
-                    print '\n'.join(output_list[2:]).encode('ascii', 'ignore')
+                    print '\n'.join(output_list[2:]).encode('utf-8')
             else:
-                print '\n'.join(output_list).encode('ascii', 'ignore')
+                print '\n'.join(output_list).encode('utf-8')
             return True
         else:
             return False
@@ -187,16 +188,16 @@ class CLIQuery:
             # Check if calculation result is present or age/date
             if calc_result:
                 if len(calc_result) == 1:
-                    print (calc_result[0]).encode('ascii', 'ignore')
+                    print (calc_result[0]).encode('utf-8')
                 else:
-                    print ('\n'.join(calc_result)).encode('ascii', 'ignore')
+                    print ('\n'.join(calc_result)).encode('utf-8')
                 return True
             # Check if calculation result is a definition
             elif define_result:
                 if len(define_result) == 1:
-                    print (define_result[0]).encode('ascii', 'ignore')
+                    print (define_result[0]).encode('utf-8')
                 else:
-                    print ('\n'.join(define_result)).encode('ascii', 'ignore')
+                    print ('\n'.join(define_result)).encode('utf-8')
                 return True
         except AttributeError:
             pass
