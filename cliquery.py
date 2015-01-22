@@ -65,7 +65,7 @@ class CLIQuery:
                 sys.exit()
         else:
             for url_arg in clean_args:
-                if ".com" not in url_arg:
+                if "." not in url_arg:
                     new_url_args.append(url_arg + ".com")
                 else:
                     new_url_args.append(url_arg)
