@@ -217,6 +217,8 @@ class CLIQuery:
                         sys.exit()
         except IndexError:
             sys.stderr.write('Failed to retrieve webpage.\n')
+        except AttributeError:
+            sys.exit()
 
     def OpenUrl(self, url_args):
         try:
