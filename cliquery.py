@@ -52,14 +52,18 @@ class CLIQuery:
         new_url_args = []
         if not self.open_flag:
             try:
+                symbol_dict = { '@' : '%40',
+                                '$' : '%24',
+                                '%' : '%25',
+                                '&' : '%26',
+                                '+' : '%2B',
+                                '=' : '%3D' }
                 for url_arg in clean_args:
-                    if "+" in url_arg:
-                        url_arg = arg.replace('+', '%2B')
+                    for sym in symbol_dict:
+                        if sym in url_arg:
+                            url_arg = url_arg.replace(sym, symbol_dict[sym])
                     new_url_args.append(url_arg)
-                if len(new_url_args) > 1:
-                    new_url_args = '+'.join(new_url_args)
-                else:
-                    new_url_args = new_url_args[0]
+                new_url_args = '+'.join(new_url_args)
             except IndexError:
                 sys.stderr.write('No search terms entered.\n')
                 sys.exit()
@@ -76,6 +80,7 @@ class CLIQuery:
             if not self.wolfram_flag:
                 return self.GetBingHTML(self.url_args)
             else:
+                sys.stderr.write(self.url_args)
                 return self.GetWolframHTML(self.url_args)
         else:
             return ''
@@ -104,7 +109,10 @@ class CLIQuery:
     
     def BingSearch(self, html):
         # Parse Bing response and display link results
-        unprocessed_links = html.xpath('//h2/a/@href')
+        try:
+            unprocessed_links = html.xpath('//h2/a/@href')
+        except AttributeError:
+            sys.exit()
         if not unprocessed_links:
             sys.stderr.write('Failed to retrieve webpage.\n')
             return False
@@ -145,7 +153,10 @@ class CLIQuery:
 
     def WolframSearch(self, html):
         # Parse Wolfram|Alpha response for potential answers
-        titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation' and @title != 'Image' and @title != 'Manipulatives illustration' and @title != 'Quotient and remainder']/@title")))
+        try:
+            titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation' and @title != 'Image' and @title != 'Manipulatives illustration' and @title != 'Quotient and remainder']/@title")))
+        except AttributeError:
+            sys.exit()
         entries = []
         if titles:
             for title in titles:
@@ -182,8 +193,11 @@ class CLIQuery:
             return False
 
     def BingCalculation(self, html):
-        calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value')
-        define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()')
+        try:
+            calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value')
+            define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()')
+        except AttributeError:
+            sys.exit()
         try:
             # Check if calculation result is present or age/date
             if calc_result:
