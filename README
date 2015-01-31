@@ -4,7 +4,14 @@ both Bing and Wolfram|Alpha.
 A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
 
 Link results may be followed by entering the corresponding link number in the
-prompt, such as 0 for the top result.
+prompt, such as 0 for the top result. The link result page will be returned
+to afterwards until a non-integer is entered into the prompt.
+
+If describe flag is entered while choosing link results, entering the link
+number will print a description of that page before returning to the link result
+page. If you wish to open a link and override the describe flag, just enter
+o link_num, or open link_num, in the prompt where link_num is the link you wish
+to open. 
 
 
 usage: cliquery.py [-h] [-s] [-f] [-o] [-w] -d] [URL_ARGS [URL_ARGS ...]]
