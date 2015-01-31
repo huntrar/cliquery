@@ -167,16 +167,25 @@ class CLIQuery:
         if links and link_descs:
             print_links = True
             while print_links:
+                print '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
                 for i in xrange(len(links)):
                     print_desc = (str(i) + ". " + link_descs[i]).encode('utf-8')
                     print print_desc # Print link choices
+                print '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
                 try:
                     print ':',
                     link_num = raw_input('')
+                    override_desc = False
+                    if 'o ' in link_num:
+                        link_num = link_num.replace('o ', '').strip()
+                        override_desc = True
+                    if 'open ' in link_num:
+                        link_num = link_num.replace('open ', '').strip()
+                        override_desc = True
                     print_links = self.CheckInput(link_num)
                     print '\n'
                     if link_num and int(link_num) >= 0 and int(link_num) < len(links):
-                        self.OpenUrl(links[int(link_num)])
+                        self.OpenUrl(links[int(link_num)], override_desc)
                 except (ValueError, IndexError):
                     pass
 
@@ -262,25 +271,27 @@ class CLIQuery:
         except AttributeError:
             sys.exit()
 
-    def OpenUrl(self, links):
-        if not self.desc_flag:
-            try:
-                br = webbrowser.get(self.br_name)
-            except webbrowser.Error:
-                sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct.\n')
-                sys.exit()
-            if type(links) == list:
-                for link in links:
-                    br.open(link)
+    def OpenUrl(self, links, override_desc = False):
+        try:
+            br = webbrowser.get(self.br_name)
+        except webbrowser.Error:
+            pass
+        try:
+            if override_desc or not self.desc_flag:
+                if type(links) == list:
+                    for link in links:
+                        br.open(link)
+                else:
+                    br.open(links)
             else:
-                br.open(links)
-        else:
-            links, is_list = self.CleanUrls(links)
-            if is_list:
-                for link in links:
-                    self.DescribePage(link)
-            else:
-                self.DescribePage(links)
+                links, is_list = self.CleanUrls(links)
+                if is_list:
+                    for link in links:
+                        self.DescribePage(link)
+                else:
+                    self.DescribePage(links)
+        except UnboundLocalError:
+            sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct.\n')
 
     def DescribePage(self, url):
         try:
@@ -301,15 +312,17 @@ class CLIQuery:
             if not body:
                 body = html.xpath('//p/text()')
         if header and body:
-            print header.encode('utf-8')
+            print '\t' + header.encode('utf-8') + '\n'
             if type(body) == list and len(body) > 0:
                 msg_len = 0
                 max_print_len = 300
+                see_more = False
                 for i in xrange(len(body)):
                     print '\t' + '\n\t'.join(body[i].strip().encode('utf-8').split('\n'))
                     msg_len += len(body[i])
                     if msg_len > max_print_len:
                         print 'See more? (y/n):',
+                        see_more = True
                         ans = raw_input('')
                         if self.CheckInput(ans):
                             max_print_len += 300
@@ -320,8 +333,9 @@ class CLIQuery:
         else:
             sys.stderr.write('Description not found.\n')
             return False
-        time.sleep(3)
-        print '\n'
+        if not see_more: 
+            time.sleep(1)
+        print ''
         return True
 
     def Search(self):
