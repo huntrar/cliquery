@@ -278,28 +278,28 @@ class CLIQuery:
         else:
             if browser:
                 browser.open(link)
+            else:
+                sys.stderr.write("Could not locate runnable browser, make sure the browser path in config is correct. Cygwin users use 'cygwin'\n")
 
     def OpenUrl(self, links, override_desc = False):
         try:
             br = webbrowser.get(self.br_name)
         except webbrowser.Error:
             br = ''
-        try:
-            if override_desc or not self.desc_flag:
-                if type(links) == list:
-                    for link in links:
-                        self.BrowserOpen(br, link)
-                else:
-                    self.BrowserOpen(br, links)
+        if override_desc or not self.desc_flag:
+            links, is_list = self.CleanUrls(links)
+            if is_list:
+                for link in links:
+                    self.BrowserOpen(br, link)
             else:
-                links, is_list = self.CleanUrls(links)
-                if is_list:
-                    for link in links:
-                        self.DescribePage(link)
-                else:
-                    self.DescribePage(links)
-        except AttributeError:
-            sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct.\n')
+                self.BrowserOpen(br, links)
+        else:
+            links, is_list = self.CleanUrls(links)
+            if is_list:
+                for link in links:
+                    self.DescribePage(link)
+            else:
+                self.DescribePage(links)
 
     def DescribePage(self, url):
         try:
