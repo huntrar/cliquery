@@ -14,7 +14,7 @@ o link_num, or open link_num, in the prompt where link_num is the link you wish
 to open. 
 
 
-usage: cliquery.py [-h] [-s] [-f] [-o] [-w] -d] [URL_ARGS [URL_ARGS ...]]
+usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [URL_ARGS [URL_ARGS ...]]
 
 positional arguments:
   URL_ARGS       Search keywords
@@ -36,7 +36,8 @@ Steps towards setup:
     2. Enter fields in config.txt as follows
         i. Line one: enter your Wolfram|Alpha API key
         ii. Line two: enter your browser
-            a. Example: iceweasel, firefox, cygwin
+            a. Example: iceweasel, firefox
+            b. Cygwin users should enter 'cygwin' instead
         iii. Example config.txt:
                 AP1K3Y-EX5MPL3
                 iceweasel
