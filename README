@@ -36,7 +36,7 @@ Steps towards setup:
     2. Enter fields in config.txt as follows
         i. Line one: enter your Wolfram|Alpha API key
         ii. Line two: enter your browser
-            a. Example: iceweasel, firefox
+            a. Example: iceweasel, firefox, cygwin
         iii. Example config.txt:
                 AP1K3Y-EX5MPL3
                 iceweasel
