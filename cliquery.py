@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# VERSION: 0.2.1
+# VERSION: 0.2.2
 # AUTHOR: Hunter Hammond
 # DEPENDENCIES: pip install lxml
 
@@ -9,6 +9,7 @@ from collections import OrderedDict
 import itertools
 import os
 import re
+from subprocess import call
 import sys
 import time
 import urllib2
@@ -271,18 +272,25 @@ class CLIQuery:
         except AttributeError:
             sys.exit()
 
+    def BrowserOpen(self, browser, link):
+        if self.br_name == 'cygwin':
+            call(["cygstart", link])
+        else:
+            if browser:
+                browser.open(link)
+
     def OpenUrl(self, links, override_desc = False):
         try:
             br = webbrowser.get(self.br_name)
         except webbrowser.Error:
-            pass
+            br = ''
         try:
             if override_desc or not self.desc_flag:
                 if type(links) == list:
                     for link in links:
-                        br.open(link)
+                        self.BrowserOpen(br, link)
                 else:
-                    br.open(links)
+                    self.BrowserOpen(br, links)
             else:
                 links, is_list = self.CleanUrls(links)
                 if is_list:
@@ -290,7 +298,7 @@ class CLIQuery:
                         self.DescribePage(link)
                 else:
                     self.DescribePage(links)
-        except UnboundLocalError:
+        except AttributeError:
             sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct.\n')
 
     def DescribePage(self, url):
