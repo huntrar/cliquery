@@ -7,7 +7,7 @@ Link results may be followed by entering the corresponding link number in the
 prompt, such as 0 for the top result.
 
 
-usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [URL_ARGS [URL_ARGS ...]]
+usage: cliquery.py [-h] [-s] [-f] [-o] [-w] -d] [URL_ARGS [URL_ARGS ...]]
 
 positional arguments:
   URL_ARGS       Search keywords
@@ -18,6 +18,7 @@ positional arguments:
     -f, --first    Open first link result
     -o, --open     Open url directly
     -w, --wolfram  Get Wolfram|Alpha search results
+    -d, --describe Return a snippet of a page
 
 
 Steps towards setup:
