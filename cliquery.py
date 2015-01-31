@@ -10,6 +10,7 @@ import itertools
 import os
 import re
 import sys
+import time
 import urllib2
 import webbrowser
 
@@ -17,12 +18,13 @@ import lxml.html as lh
 
 
 class CLIQuery:
-    def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag):
+    def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag, desc_flag):
         self.api_key, self.br_name = self.ReadConfig()
         self.search_flag = search_flag
         self.first_flag = first_flag
         self.open_flag = open_flag
         self.wolfram_flag = wolfram_flag
+        self.desc_flag = desc_flag
         self.url_args = self.ProcessArgs(url_args)
         self.html = self.GetHTML()
 
@@ -30,6 +32,33 @@ class CLIQuery:
         script_dir = os.path.dirname(os.path.realpath(__file__))
         with open(script_dir + '/config.txt', 'r') as f:
             return f.readline().strip(), f.readline().strip() 
+
+    def CheckInput(self, u_input):
+        u_inp = u_input.lower()
+        if u_inp == 'y' or u_inp == 'yes':
+            return True
+        elif u_inp == 'q' or u_inp == 'quit':
+            sys.exit()
+        else:
+            try:
+                u_inp = int(u_input)
+                return True
+            except ValueError:
+                return False 
+
+    def CleanUrls(self, urls):
+        # Returns True if list, False otherwise
+        clean_urls = []
+        if type(urls) == list:
+            for url in urls:
+                if "http://" not in url and "https://" not in url:
+                    clean_urls.append("http://" + url)
+            return clean_urls, True
+        else:
+            if "http://" in urls or "https://" in urls:
+                return urls, False
+            else:
+                return ("http://" + urls), False
 
     def ProcessArgs(self, url_args):
         clean_args = []
@@ -80,7 +109,6 @@ class CLIQuery:
             if not self.wolfram_flag:
                 return self.GetBingHTML(self.url_args)
             else:
-                sys.stderr.write(self.url_args)
                 return self.GetWolframHTML(self.url_args)
         else:
             return ''
@@ -93,7 +121,7 @@ class CLIQuery:
             request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
             return lh.parse(urllib2.urlopen(request))
         except urllib2.URLError:
-            sys.stderr.write('Failed to retrieve webpage.\n')
+            sys.stderr.write('Failed to retrieve ' + url + '\n')
             return ''
 
     def GetWolframHTML(self, url_args):
@@ -104,7 +132,7 @@ class CLIQuery:
             request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
             return lh.parse(urllib2.urlopen(request))
         except urllib2.URLError:
-            sys.stderr.write('Failed to retrieve webpage.\n')
+            sys.stderr.write('Failed to retrieve ' + url + '\n')
             return ''
     
     def BingSearch(self, html):
@@ -114,7 +142,7 @@ class CLIQuery:
         except AttributeError:
             sys.exit()
         if not unprocessed_links:
-            sys.stderr.write('Failed to retrieve webpage.\n')
+            sys.stderr.write('Failed to retrieve links from Bing.\n')
             return False
         links = []
         link_descs = []
@@ -135,20 +163,23 @@ class CLIQuery:
                     if type(link_desc) == list:
                         link_desc = ''.join(link_desc)
                     link_descs.append(link_desc)
-
+        
         if links and link_descs:
-            for i in xrange(len(links)):
-                print_desc = (str(i) + ". " + link_descs[i]).encode('utf-8')
-                print print_desc # Print link choices
+            print_links = True
+            while print_links:
+                for i in xrange(len(links)):
+                    print_desc = (str(i) + ". " + link_descs[i]).encode('utf-8')
+                    print print_desc # Print link choices
+                try:
+                    print ':',
+                    link_num = raw_input('')
+                    print_links = self.CheckInput(link_num)
+                    print '\n'
+                    if link_num and int(link_num) >= 0 and int(link_num) < len(links):
+                        self.OpenUrl(links[int(link_num)])
+                except (ValueError, IndexError):
+                    pass
 
-            try:
-                print ':',
-                link_num = raw_input('')
-                if link_num and int(link_num) >= 0 and int(link_num) < len(links):
-                    self.OpenUrl(links[int(link_num)])
-                    return True
-            except (ValueError, IndexError):
-                pass
         return False
 
     def WolframSearch(self, html):
@@ -183,8 +214,7 @@ class CLIQuery:
             elif len(output_list) > 2:
                 print '\n'.join(output_list[:2]).encode('utf-8')
                 print 'See more? (y/n):',
-                see_more = raw_input('')
-                if see_more == 'y' or see_more == 'Y':
+                if self.CheckInput(raw_input('')):
                     print '\n'.join(output_list[2:]).encode('utf-8')
             else:
                 print '\n'.join(output_list).encode('utf-8')
@@ -229,22 +259,70 @@ class CLIQuery:
                         link = 'http://www.bing.com' + link
                         self.OpenUrl(link)
                         sys.exit()
-        except IndexError:
-            sys.stderr.write('Failed to retrieve webpage.\n')
         except AttributeError:
             sys.exit()
 
-    def OpenUrl(self, url_args):
-        try:
-            br = webbrowser.get(self.br_name)
-        except webbrowser.Error:
-            sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct.\n')
-            sys.exit()
-        if type(url_args) == list:
-            for arg in url_args:
-                br.open(arg)
+    def OpenUrl(self, links):
+        if not self.desc_flag:
+            try:
+                br = webbrowser.get(self.br_name)
+            except webbrowser.Error:
+                sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct.\n')
+                sys.exit()
+            if type(links) == list:
+                for link in links:
+                    br.open(link)
+            else:
+                br.open(links)
         else:
-            br.open(url_args)
+            links, is_list = self.CleanUrls(links)
+            if is_list:
+                for link in links:
+                    self.DescribePage(link)
+            else:
+                self.DescribePage(links)
+
+    def DescribePage(self, url):
+        try:
+            # Get HTML response
+            request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
+            html = lh.parse(urllib2.urlopen(request))
+        except urllib2.URLError:
+            sys.stderr.write('Failed to retrieve ' + url + '\n')
+            sys.exit()
+        header = html.xpath('//h1/text()')
+        if not header:
+            header = html.xpath('//title/text()')
+        if header:
+            header = header[0].strip()
+        body = html.xpath('//h2/text()')
+        if not body:
+            body = html.xpath('//h3/text()')
+            if not body:
+                body = html.xpath('//p/text()')
+        if header and body:
+            print header.encode('utf-8')
+            if type(body) == list and len(body) > 0:
+                msg_len = 0
+                max_print_len = 300
+                for i in xrange(len(body)):
+                    print '\t' + '\n\t'.join(body[i].strip().encode('utf-8').split('\n'))
+                    msg_len += len(body[i])
+                    if msg_len > max_print_len:
+                        print 'See more? (y/n):',
+                        ans = raw_input('')
+                        if self.CheckInput(ans):
+                            max_print_len += 300
+                        else:
+                            break;
+            else:
+                print body.encode('utf-8')
+        else:
+            sys.stderr.write('Description not found.\n')
+            return False
+        time.sleep(3)
+        print '\n'
+        return True
 
     def Search(self):
         continue_search = False
@@ -286,12 +364,15 @@ if __name__ == "__main__":
     action="store_true")
     parser.add_argument("-w", "--wolfram", help="Get Wolfram|Alpha search results",
     action="store_true")
+    parser.add_argument("-d", "--describe", help="Return a snippet of a page",
+    action="store_true")
     parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()
     search = bool(args.search)
     first = bool(args.first)
     openurl = bool(args.open)
     wolfram = bool(args.wolfram)
-    query = CLIQuery(args.URL_ARGS, search, first, openurl, wolfram)
+    describe = bool(args.describe)
+    query = CLIQuery(args.URL_ARGS, search, first, openurl, wolfram, describe)
     query.Search()
 
