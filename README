@@ -7,11 +7,12 @@ Link results may be followed by entering the corresponding link number in the
 prompt, such as 0 for the top result. The link result page will be returned
 to afterwards until a non-integer is entered into the prompt.
 
-If describe flag is entered while choosing link results, entering the link
-number will print a description of that page before returning to the link result
-page. If you wish to open a link and override the describe flag, just enter
-o link_num, or open link_num, in the prompt where link_num is the link you wish
-to open. 
+If passing -d as an argument, choosing a link will print a description of the
+page before returning to the prompt.
+If you wish to open a link and override the describe flag, prepend the link num
+with o, or open.
+Conversely, if you didn't pass in -d and wish to describe a link, prepend the
+link num with d, or describe.
 
 
 usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [URL_ARGS [URL_ARGS ...]]
