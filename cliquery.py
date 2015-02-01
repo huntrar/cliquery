@@ -177,16 +177,23 @@ class CLIQuery:
                     print ':',
                     link_num = raw_input('')
                     override_desc = False
+                    override_search = False
                     if 'o ' in link_num:
                         link_num = link_num.replace('o ', '').strip()
                         override_desc = True
-                    if 'open ' in link_num:
+                    elif 'open ' in link_num:
                         link_num = link_num.replace('open ', '').strip()
                         override_desc = True
+                    if 'd ' in link_num:
+                        link_num = link_num.replace('d ', '').strip()
+                        override_search = True
+                    elif 'describe ' in link_num:
+                        link_num = link_num.replace('describe ', '').strip()
+                        override_search = True
                     print_links = self.CheckInput(link_num)
                     print '\n'
                     if link_num and int(link_num) >= 0 and int(link_num) < len(links):
-                        self.OpenUrl(links[int(link_num)], override_desc)
+                        self.OpenUrl(links[int(link_num)], override_desc, override_search)
                 except (ValueError, IndexError):
                     pass
 
@@ -281,25 +288,32 @@ class CLIQuery:
             else:
                 sys.stderr.write("Could not locate runnable browser, make sure the browser path in config is correct. Cygwin users use 'cygwin'\n")
 
-    def OpenUrl(self, links, override_desc = False):
+    def OpenUrl(self, links, override_desc = False, override_search = False):
         try:
             br = webbrowser.get(self.br_name)
         except webbrowser.Error:
             br = ''
-        if override_desc or not self.desc_flag:
+        if override_desc:
             links, is_list = self.CleanUrls(links)
             if is_list:
                 for link in links:
                     self.BrowserOpen(br, link)
             else:
                 self.BrowserOpen(br, links)
-        else:
+        elif override_search or self.desc_flag:
             links, is_list = self.CleanUrls(links)
             if is_list:
                 for link in links:
                     self.DescribePage(link)
             else:
                 self.DescribePage(links)
+        else:
+            links, is_list = self.CleanUrls(links)
+            if is_list:
+                for link in links:
+                    self.BrowserOpen(br, link)
+            else:
+                self.BrowserOpen(br, links)
 
     def DescribePage(self, url):
         try:
