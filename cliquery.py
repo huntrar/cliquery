@@ -175,20 +175,20 @@ class CLIQuery:
                 print '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
                 try:
                     print ':',
-                    link_num = raw_input('')
+                    link_num = raw_input('').strip()
                     override_desc = False
                     override_search = False
-                    if 'o ' in link_num:
-                        link_num = link_num.replace('o ', '').strip()
+                    if 'o' in link_num and len(link_num) <= 4:
+                        link_num = link_num.replace('o', '').strip()
                         override_desc = True
-                    elif 'open ' in link_num:
-                        link_num = link_num.replace('open ', '').strip()
+                    elif 'open' in link_num:
+                        link_num = link_num.replace('open', '').strip()
                         override_desc = True
-                    if 'd ' in link_num:
-                        link_num = link_num.replace('d ', '').strip()
+                    if 'd' in link_num and len(link_num) <= 4:
+                        link_num = link_num.replace('d', '').strip()
                         override_search = True
-                    elif 'describe ' in link_num:
-                        link_num = link_num.replace('describe ', '').strip()
+                    elif 'describe' in link_num:
+                        link_num = link_num.replace('describe', '').strip()
                         override_search = True
                     print_links = self.CheckInput(link_num)
                     print '\n'
