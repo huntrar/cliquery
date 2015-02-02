@@ -180,6 +180,7 @@ class CLIQuery:
                     override_search = False
                     start_num = ''
                     end_num = ''
+                    link_nums = []
                     if 'open' in link_num:
                         link_num = link_num.replace('open', '').strip()
                         override_desc = True
@@ -195,14 +196,28 @@ class CLIQuery:
                     if '-' in link_num and len(link_num) >= 2:
                         start_num = link_num.split('-')[0].strip()
                         end_num = link_num.split('-')[1].strip()
+                    if ',' in link_num and len(link_num) >= 3:
+                        link_nums = link_num.split(',')
+                        for num in link_nums:
+                            if not self.CheckInput(num):
+                                print_links = False
+
                     print '\n'
-                    if self.CheckInput(start_num) and self.CheckInput(end_num):
+                    if link_nums and print_links:
+                        for num in link_nums:
+                            if int(num) >= 0 and int(num) < len(links):
+                                self.OpenUrl(links[int(num)], override_desc, override_search) 
+                    elif self.CheckInput(start_num) and self.CheckInput(end_num):
                         if int(start_num) >= 0 and int(end_num) < len(links):
                             for i in xrange(int(start_num), int(end_num)+1, 1):
                                 self.OpenUrl(links[i], override_desc, override_search) 
                     elif self.CheckInput(start_num):
                         if int(start_num) >= 0:
                             for i in xrange(int(start_num), len(links), 1):
+                                self.OpenUrl(links[i], override_desc, override_search) 
+                    elif self.CheckInput(end_num):
+                        if int(end_num) >= len(links):
+                            for i in xrange(0, int(end_num)+1, 1):
                                 self.OpenUrl(links[i], override_desc, override_search) 
                     else:
                         print_links = self.CheckInput(link_num)
