@@ -37,16 +37,10 @@ positional arguments:
 Steps towards setup:
 
     1. Sign up for a Wolfram|Alpha API key (https://developer.wolframalpha.com/portal/apisignup.html)
-        i. API Key allows 2000 Wolfram|Alpha searches/month
+        i. 2000 Wolfram|Alpha searches/month
 
-    2. Enter fields in config.txt as follows
-        i. Line one: enter your Wolfram|Alpha API key
-        ii. Line two: enter your browser
-            a. Example: iceweasel, firefox
-            b. Cygwin users should enter 'cygwin' instead
-        iii. Example config.txt:
-                AP1K3Y-EX5MPL3
-                iceweasel
+    2. Enter API key and browser in .cliqrc
+        i. Cygwin users should enter 'cygwin' under browser
 
     3. Resolve dependencies:
         i. lxml (pip install lxml)

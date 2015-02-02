@@ -31,8 +31,25 @@ class CLIQuery:
 
     def ReadConfig(self):
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(script_dir + '/config.txt', 'r') as f:
-            return f.readline().strip(), f.readline().strip() 
+        with open(script_dir + '/.cliqrc', 'r') as f:
+            api_key = ''
+            browser = ''
+            lines = []
+            for i in xrange(2):
+                line = f.readline()
+                if 'api_key:' in line:
+                    api_key = line.replace('api_key:', '').strip()
+                elif 'browser' in line:
+                    browser = line.replace('browser:', '').strip()
+                else:
+                    lines.append(line)
+            if api_key and browser:
+                return api_key, browser
+            else:
+                try:
+                    return lines[0].strip(), lines[1].strip() 
+                except IndexError:
+                    pass
 
     def CheckInput(self, u_input):
         u_inp = u_input.lower()
