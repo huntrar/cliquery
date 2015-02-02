@@ -237,8 +237,7 @@ class CLIQuery:
 
                     print '\n'
                     if bookmk_page:
-                        with open('.cliqrc', 'a') as f:
-                            f.write(links[int(link_num)] + '\n')
+                        self.AddBookmark(links, link_num)
                     elif link_nums and print_links:
                         for num in link_nums:
                             if int(num) >= 0 and int(num) < len(links):
@@ -344,9 +343,24 @@ class CLIQuery:
         except AttributeError:
             sys.exit()
 
-    def BookmarkOpen(self, entry_num):
-        if self.CheckInput(entry_num):
-            self.OpenUrl(self.bookmarks[int(entry_num) - 1])
+    def BookmarkOpen(self, link_num):
+        if self.CheckInput(link_num):
+            self.OpenUrl(self.bookmarks[int(link_num) - 1])
+        else:
+            if "." in link_num:
+                if "http://" in link_num or "https://" in link_num:
+                    self.AddBookmark(link_num)
+                else:
+                    self.AddBookmark('http://' + link_num)
+
+    def AddBookmark(self, links, link_num = []):
+        with open('.cliqrc', 'a') as f:
+            if type(links) == list and link_num:
+                sys.stderr.write('links list')
+                f.write(links[int(link_num)] + '\n')
+            elif type(links) == str:
+                sys.stderr.write('links str: ' + links)
+                f.write(links + '\n')
 
     def BrowserOpen(self, browser, link):
         if self.br_name == 'cygwin':

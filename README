@@ -20,9 +20,10 @@ blank will mean go until the end of that range. For example, if given 10 links
 and I wish to open the second half, entering 5- would work the same as 5-9.
 
 To open a bookmark use -b flag and the number corresponding to the link in your
-.cliqrc, indices start at 1
-To save a bookmark edit .cliqrc or enter in the prompt b link_num or
-bookmark link_num
+.cliqrc, indices starting at 1
+To save a bookmark you can edit .cliqrc or instead enter -b flag followed by the
+link to the bookmark, or enter in the search prompt b link_num or bookmark 
+link_num
 
 usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [URL_ARGS [URL_ARGS ...]]
 
