@@ -132,6 +132,8 @@ class CLIQuery:
         return new_url_args
 
     def GetHTML(self):
+        if self.bookmk_flag:
+            return ''
         if not self.open_flag:
             if not self.wolfram_flag:
                 return self.GetBingHTML(self.url_args)
@@ -345,7 +347,10 @@ class CLIQuery:
 
     def BookmarkOpen(self, link_num):
         if self.CheckInput(link_num):
-            self.OpenUrl(self.bookmarks[int(link_num) - 1])
+            try:
+                self.OpenUrl(self.bookmarks[int(link_num) - 1])
+            except IndexError:
+                sys.stderr.write('Bookmark ' + link_num + ' not found.\n')
         else:
             if "." in link_num:
                 if "http://" in link_num or "https://" in link_num:
