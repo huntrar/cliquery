@@ -19,7 +19,9 @@ import lxml.html as lh
 
 
 class CLIQuery:
-    def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag, desc_flag):
+    def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag, desc_flag, bookmk_flag):
+        self.bookmarks = []
+        self.bookmk_flag = bookmk_flag
         self.api_key, self.br_name = self.ReadConfig()
         self.search_flag = search_flag
         self.first_flag = first_flag
@@ -43,6 +45,13 @@ class CLIQuery:
                     browser = line.replace('browser:', '').strip()
                 else:
                     lines.append(line)
+            if self.bookmk_flag:
+                bookmarks = f.read()
+                if 'bookmarks:' in bookmarks:
+                    bookmarks = bookmarks.replace('bookmarks:', '').split('\n')
+                    for bookmk in bookmarks:
+                        if bookmk:
+                            self.bookmarks.append(bookmk)
             if api_key and browser:
                 return api_key, browser
             else:
@@ -195,9 +204,16 @@ class CLIQuery:
                     link_num = raw_input('').strip()
                     override_desc = False
                     override_search = False
+                    bookmk_page = False
                     start_num = ''
                     end_num = ''
                     link_nums = []
+                    if 'bookmark' in link_num:
+                        link_num = link_num.replace('bookmark', '').strip()
+                        bookmk_page = True
+                    elif 'b' in link_num:
+                        link_num = link_num.replace('b', '').strip()
+                        bookmk_page = True
                     if 'open' in link_num:
                         link_num = link_num.replace('open', '').strip()
                         override_desc = True
@@ -220,7 +236,10 @@ class CLIQuery:
                                 print_links = False
 
                     print '\n'
-                    if link_nums and print_links:
+                    if bookmk_page:
+                        with open('.cliqrc', 'a') as f:
+                            f.write(links[int(link_num)] + '\n')
+                    elif link_nums and print_links:
                         for num in link_nums:
                             if int(num) >= 0 and int(num) < len(links):
                                 self.OpenUrl(links[int(num)], override_desc, override_search) 
@@ -325,6 +344,10 @@ class CLIQuery:
         except AttributeError:
             sys.exit()
 
+    def BookmarkOpen(self, entry_num):
+        if self.CheckInput(entry_num):
+            self.OpenUrl(self.bookmarks[int(entry_num) - 1])
+
     def BrowserOpen(self, browser, link):
         if self.br_name == 'cygwin':
             call(["cygstart", link])
@@ -411,7 +434,9 @@ class CLIQuery:
 
     def Search(self):
         continue_search = False
-        if self.open_flag:
+        if self.bookmk_flag:
+            self.BookmarkOpen(self.url_args) 
+        elif self.open_flag:
             self.OpenUrl(self.url_args)
         elif self.search_flag:
             self.BingSearch(self.html)
@@ -451,6 +476,8 @@ if __name__ == "__main__":
     action="store_true")
     parser.add_argument("-d", "--describe", help="Return a snippet of a page",
     action="store_true")
+    parser.add_argument("-b", "--bookmark", help="Open a bookmark number",
+    action="store_true")
     parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()
     search = bool(args.search)
@@ -458,6 +485,7 @@ if __name__ == "__main__":
     openurl = bool(args.open)
     wolfram = bool(args.wolfram)
     describe = bool(args.describe)
-    query = CLIQuery(args.URL_ARGS, search, first, openurl, wolfram, describe)
+    bookmk = bool(args.bookmark)
+    query = CLIQuery(args.URL_ARGS, search, first, openurl, wolfram, describe, bookmk)
     query.Search()
 
