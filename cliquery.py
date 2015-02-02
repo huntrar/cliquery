@@ -178,22 +178,36 @@ class CLIQuery:
                     link_num = raw_input('').strip()
                     override_desc = False
                     override_search = False
-                    if 'o' in link_num and len(link_num) <= 4:
-                        link_num = link_num.replace('o', '').strip()
-                        override_desc = True
-                    elif 'open' in link_num:
+                    start_num = ''
+                    end_num = ''
+                    if 'open' in link_num:
                         link_num = link_num.replace('open', '').strip()
                         override_desc = True
-                    if 'd' in link_num and len(link_num) <= 4:
-                        link_num = link_num.replace('d', '').strip()
-                        override_search = True
-                    elif 'describe' in link_num:
+                    elif 'o' in link_num:
+                        link_num = link_num.replace('op', '').strip()
+                        override_desc = True
+                    if 'describe' in link_num:
                         link_num = link_num.replace('describe', '').strip()
                         override_search = True
-                    print_links = self.CheckInput(link_num)
+                    elif 'd' in link_num:
+                        link_num = link_num.replace('d', '').strip()
+                        override_search = True
+                    if '-' in link_num and len(link_num) >= 2:
+                        start_num = link_num.split('-')[0].strip()
+                        end_num = link_num.split('-')[1].strip()
                     print '\n'
-                    if link_num and int(link_num) >= 0 and int(link_num) < len(links):
-                        self.OpenUrl(links[int(link_num)], override_desc, override_search)
+                    if self.CheckInput(start_num) and self.CheckInput(end_num):
+                        if int(start_num) >= 0 and int(end_num) < len(links):
+                            for i in xrange(int(start_num), int(end_num)+1, 1):
+                                self.OpenUrl(links[i], override_desc, override_search) 
+                    elif self.CheckInput(start_num):
+                        if int(start_num) >= 0:
+                            for i in xrange(int(start_num), len(links), 1):
+                                self.OpenUrl(links[i], override_desc, override_search) 
+                    else:
+                        print_links = self.CheckInput(link_num)
+                        if link_num and int(link_num) >= 0 and int(link_num) < len(links):
+                            self.OpenUrl(links[int(link_num)], override_desc, override_search)
                 except (ValueError, IndexError):
                     pass
 
