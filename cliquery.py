@@ -49,7 +49,7 @@ class CLIQuery:
                 try:
                     return lines[0].strip(), lines[1].strip() 
                 except IndexError:
-                    pass
+                    return '', ''
 
     def CheckInput(self, u_input):
         u_inp = u_input.lower()
@@ -336,7 +336,10 @@ class CLIQuery:
 
     def OpenUrl(self, links, override_desc = False, override_search = False):
         try:
-            br = webbrowser.get(self.br_name)
+            if self.br_name:
+                br = webbrowser.get(self.br_name)
+            else:
+                br = ''
         except webbrowser.Error:
             br = ''
         if override_desc:
