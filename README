@@ -19,8 +19,12 @@ enter multiple numbers with a space in between. Leaving one end of the range
 blank will mean go until the end of that range. For example, if given 10 links
 and I wish to open the second half, entering 5- would work the same as 5-9.
 
+To open a bookmark use -b flag and the number corresponding to the link in your
+.cliqrc, indices start at 1
+To save a bookmark edit .cliqrc or enter in the prompt b link_num or
+bookmark link_num
 
-usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [URL_ARGS [URL_ARGS ...]]
+usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [URL_ARGS [URL_ARGS ...]]
 
 positional arguments:
   URL_ARGS       Search keywords
@@ -32,6 +36,7 @@ positional arguments:
     -o, --open     Open url directly
     -w, --wolfram  Get Wolfram|Alpha search results
     -d, --describe Return a snippet of a page
+    -b, --bookmark Open a bookmark number
 
 
 Steps towards setup:
