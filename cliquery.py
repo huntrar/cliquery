@@ -230,23 +230,23 @@ class CLIQuery:
                         self.AddBookmark(links, link_num)
                     elif link_nums and print_links:
                         for num in link_nums:
-                            if int(num) >= 0 and int(num) < len(links):
+                            if int(num) > 0 and int(num) < len(links):
                                 self.OpenUrl(links[int(num)-1], override_desc, override_search) 
                     elif self.CheckInput(start_num) and self.CheckInput(end_num):
-                        if int(start_num) >= 0 and int(end_num) < len(links):
+                        if int(start_num) > 0 and int(end_num) < len(links):
                             for i in xrange(int(start_num), int(end_num)+1, 1):
                                 self.OpenUrl(links[i-1], override_desc, override_search) 
                     elif self.CheckInput(start_num):
-                        if int(start_num) >= 0:
+                        if int(start_num) > 0:
                             for i in xrange(int(start_num), len(links), 1):
                                 self.OpenUrl(links[i-1], override_desc, override_search) 
                     elif self.CheckInput(end_num):
-                        if int(end_num) >= len(links):
-                            for i in xrange(0, int(end_num)+1, 1):
+                        if int(end_num) < len(links):
+                            for i in xrange(1, int(end_num)+1, 1):
                                 self.OpenUrl(links[i-1], override_desc, override_search) 
                     else:
                         print_links = self.CheckInput(link_num)
-                        if link_num and int(link_num) >= 0 and int(link_num) < len(links):
+                        if link_num and int(link_num) > 0 and int(link_num) < len(links):
                             self.OpenUrl(links[int(link_num)-1], override_desc, override_search)
                 except (ValueError, IndexError):
                     pass
