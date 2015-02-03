@@ -51,7 +51,7 @@ class CLIQuery:
                     bookmarks = bookmarks.replace('bookmarks:', '').split('\n')
                     for bookmk in bookmarks:
                         if bookmk:
-                            self.bookmarks.append(bookmk)
+                            self.bookmarks.append(bookmk.strip())
             if api_key and browser:
                 return api_key, browser
             else:
@@ -91,18 +91,15 @@ class CLIQuery:
         clean_args = []
         if url_args:
             for arg in url_args:
-                try:
-                    if " " in arg:
-                        for split_arg in arg.split(" "):
-                            clean_args.append(split_arg)
-                    else:
-                        clean_args.append(arg)
-                except IndexError:
-                    sys.stderr.write('No search terms entered.\n')
-                    sys.exit()
+                if " " in arg:
+                    for split_arg in arg.split(" "):
+                        clean_args.append(split_arg)
+                else:
+                    clean_args.append(arg)
         else:
-            sys.stderr.write('No search terms entered.\n')
-            sys.exit()
+            if not self.bookmk_flag:
+                sys.stderr.write('No search terms entered.\n')
+                sys.exit()
 
         # Further processing of args before they are added to base_url
         new_url_args = []
@@ -346,7 +343,11 @@ class CLIQuery:
             sys.exit()
 
     def BookmarkOpen(self, link_num):
-        if self.CheckInput(link_num):
+        if not link_num:
+            print 'Bookmarks:'
+            for i in xrange(len(self.bookmarks)):
+                print str(i+1) + '. ' + self.bookmarks[i]
+        elif self.CheckInput(link_num):
             try:
                 self.OpenUrl(self.bookmarks[int(link_num) - 1])
             except IndexError:
