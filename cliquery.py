@@ -22,6 +22,7 @@ class CLIQuery:
     def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag, desc_flag, bookmk_flag):
         self.bookmarks = []
         self.bookmk_flag = bookmk_flag
+        self.config = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
         self.api_key, self.br_name = self.ReadConfig()
         self.search_flag = search_flag
         self.first_flag = first_flag
@@ -32,8 +33,7 @@ class CLIQuery:
         self.html = self.GetHTML()
 
     def ReadConfig(self):
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(script_dir + '/.cliqrc', 'r') as f:
+        with open(self.config, 'r') as f:
             api_key = ''
             browser = ''
             lines = []
@@ -351,7 +351,7 @@ class CLIQuery:
                     self.AddBookmark('http://' + link_num)
 
     def AddBookmark(self, links, link_num = []):
-        with open('.cliqrc', 'a') as f:
+        with open(self.config, 'a') as f:
             if type(links) == list and link_num:
                 f.write(links[int(link_num)] + '\n')
             elif type(links) == str:
