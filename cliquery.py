@@ -207,21 +207,12 @@ class CLIQuery:
                     start_num = ''
                     end_num = ''
                     link_nums = []
-                    if 'bookmark' in link_num:
-                        link_num = link_num.replace('bookmark', '').strip()
-                        bookmk_page = True
-                    elif 'b' in link_num:
+                    if 'b' in link_num:
                         link_num = link_num.replace('b', '').strip()
                         bookmk_page = True
-                    if 'open' in link_num:
-                        link_num = link_num.replace('open', '').strip()
-                        override_desc = True
                     elif 'o' in link_num:
                         link_num = link_num.replace('o', '').strip()
                         override_desc = True
-                    if 'describe' in link_num:
-                        link_num = link_num.replace('describe', '').strip()
-                        override_search = True
                     elif 'd' in link_num:
                         link_num = link_num.replace('d', '').strip()
                         override_search = True

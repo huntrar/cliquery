@@ -10,9 +10,9 @@ to afterwards until a non-integer is entered into the prompt.
 If passing -d as an argument, choosing a link will print a description of the
 page before returning to the prompt.
 If you wish to open a link and override the describe flag, prepend the link num
-with o, or open.
+with o.
 Conversely, if you didn't pass in -d and wish to describe a link, prepend the
-link num with d, or describe.
+link num with d.
 
 To open or describe multiple links at once, you may specify a range with - or
 enter multiple numbers with a space in between. Leaving one end of the range 
@@ -23,8 +23,7 @@ To list bookmarks enter -b with no other arguments.
 To open a bookmark use -b flag and the number corresponding to the link in your
 .cliqrc, indices starting at 1
 To save a bookmark you can edit .cliqrc or instead enter -b flag followed by the
-link to the bookmark, or enter in the search prompt b link_num or bookmark 
-link_num
+link to the bookmark, or enter in the search prompt b link_num
 
 usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [URL_ARGS [URL_ARGS ...]]
 
