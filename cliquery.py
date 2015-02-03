@@ -41,7 +41,7 @@ class CLIQuery:
                 line = f.readline()
                 if 'api_key:' in line:
                     api_key = line.replace('api_key:', '').strip()
-                elif 'browser' in line:
+                elif 'browser:' in line:
                     browser = line.replace('browser:', '').strip()
                 else:
                     lines.append(line)
@@ -361,10 +361,8 @@ class CLIQuery:
     def AddBookmark(self, links, link_num = []):
         with open('.cliqrc', 'a') as f:
             if type(links) == list and link_num:
-                sys.stderr.write('links list')
                 f.write(links[int(link_num)] + '\n')
             elif type(links) == str:
-                sys.stderr.write('links str: ' + links)
                 f.write(links + '\n')
 
     def BrowserOpen(self, browser, link):
