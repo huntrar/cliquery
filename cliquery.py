@@ -217,7 +217,7 @@ class CLIQuery:
                         link_num = link_num.replace('open', '').strip()
                         override_desc = True
                     elif 'o' in link_num:
-                        link_num = link_num.replace('op', '').strip()
+                        link_num = link_num.replace('o', '').strip()
                         override_desc = True
                     if 'describe' in link_num:
                         link_num = link_num.replace('describe', '').strip()
