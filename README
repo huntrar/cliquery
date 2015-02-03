@@ -4,7 +4,7 @@ both Bing and Wolfram|Alpha.
 A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
 
 Link results may be followed by entering the corresponding link number in the
-prompt, such as 0 for the top result. The link result page will be returned
+prompt, such as 1 for the top result. The link result page will be returned
 to afterwards until a non-integer is entered into the prompt.
 
 If passing -d as an argument, choosing a link will print a description of the
