@@ -31,6 +31,13 @@ class CLIQuery:
         self.desc_flag = desc_flag
         self.url_args = self.ProcessArgs(url_args)
         self.html = self.GetHTML()
+        try:
+            if self.br_name:
+                self.br = webbrowser.get(self.br_name)
+            else:
+                self.br = ''
+        except webbrowser.Error:
+            self.br = ''
 
     def ReadConfig(self):
         with open(self.config, 'r') as f:
@@ -230,23 +237,23 @@ class CLIQuery:
                         self.AddBookmark(links, link_num)
                     elif link_nums and print_links:
                         for num in link_nums:
-                            if int(num) > 0 and int(num) < len(links):
+                            if int(num) > 0 and int(num) <= len(links):
                                 self.OpenUrl(links[int(num)-1], override_desc, override_search) 
                     elif self.CheckInput(start_num) and self.CheckInput(end_num):
-                        if int(start_num) > 0 and int(end_num) < len(links):
+                        if int(start_num) > 0 and int(end_num) <= len(links)+1:
                             for i in xrange(int(start_num), int(end_num)+1, 1):
                                 self.OpenUrl(links[i-1], override_desc, override_search) 
                     elif self.CheckInput(start_num):
                         if int(start_num) > 0:
-                            for i in xrange(int(start_num), len(links), 1):
+                            for i in xrange(int(start_num), len(links)+1, 1):
                                 self.OpenUrl(links[i-1], override_desc, override_search) 
                     elif self.CheckInput(end_num):
-                        if int(end_num) < len(links):
+                        if int(end_num) < len(links)+1:
                             for i in xrange(1, int(end_num)+1, 1):
                                 self.OpenUrl(links[i-1], override_desc, override_search) 
                     else:
                         print_links = self.CheckInput(link_num)
-                        if link_num and int(link_num) > 0 and int(link_num) < len(links):
+                        if link_num and int(link_num) > 0 and int(link_num) < len(links)+1:
                             self.OpenUrl(links[int(link_num)-1], override_desc, override_search)
                 except (ValueError, IndexError):
                     pass
@@ -357,30 +364,23 @@ class CLIQuery:
             elif type(links) == str:
                 f.write(links + '\n')
 
-    def BrowserOpen(self, browser, link):
+    def BrowserOpen(self, link):
         if self.br_name == 'cygwin':
             call(["cygstart", link])
         else:
-            if browser:
-                browser.open(link)
+            if self.br:
+                self.br.open(link)
             else:
                 sys.stderr.write("Could not locate runnable browser, make sure the browser path in config is correct. Cygwin users use 'cygwin'\n")
 
     def OpenUrl(self, links, override_desc = False, override_search = False):
-        try:
-            if self.br_name:
-                br = webbrowser.get(self.br_name)
-            else:
-                br = ''
-        except webbrowser.Error:
-            br = ''
         if override_desc:
             links, is_list = self.CleanUrls(links)
             if is_list:
                 for link in links:
-                    self.BrowserOpen(br, link)
+                    self.BrowserOpen(link)
             else:
-                self.BrowserOpen(br, links)
+                self.BrowserOpen(links)
         elif override_search or self.desc_flag:
             links, is_list = self.CleanUrls(links)
             if is_list:
@@ -392,18 +392,18 @@ class CLIQuery:
             links, is_list = self.CleanUrls(links)
             if is_list:
                 for link in links:
-                    self.BrowserOpen(br, link)
+                    self.BrowserOpen(link)
             else:
-                self.BrowserOpen(br, links)
+                self.BrowserOpen(links)
 
     def DescribePage(self, url):
         try:
             # Get HTML response
             request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
             html = lh.parse(urllib2.urlopen(request))
-        except urllib2.URLError:
+        except Exception as e:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
-            sys.exit()
+            return
         header = html.xpath('//h1/text()')
         if not header:
             header = html.xpath('//title/text()')
