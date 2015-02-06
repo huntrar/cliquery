@@ -500,7 +500,7 @@ if __name__ == "__main__":
     action="store_true")
     parser.add_argument("-d", "--describe", help="Return a snippet of a page",
     action="store_true")
-    parser.add_argument("-b", "--bookmark", help="Open a bookmark number",
+    parser.add_argument("-b", "--bookmark", help="Open add and delete bookmarks",
     action="store_true")
     parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
     args = parser.parse_args()
