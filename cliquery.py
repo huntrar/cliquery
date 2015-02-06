@@ -183,7 +183,10 @@ class CLIQuery:
             if not re.search('(ad|Ad|AD)(?=\W)', link): # Basic ad blocker
                 if "http://" in link or "https://" in link: 
                     links.append(link)
-                    ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
+                    if "'" in link:
+                        ld_xpath = '//h2/a[@href="' + str(link) + '"]//text()'
+                    else:
+                        ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
                     link_desc = html.xpath(ld_xpath)
                     if type(link_desc) == list:
                         link_desc = ''.join(link_desc)
