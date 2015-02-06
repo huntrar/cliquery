@@ -23,7 +23,7 @@ class CLIQuery:
         self.bookmarks = []
         self.bookmk_flag = bookmk_flag
         self.config = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
-        self.api_key, self.br_name = self.ReadConfig()
+        self.api_key, self.browser = self.ReadConfig()
         self.search_flag = search_flag
         self.first_flag = first_flag
         self.open_flag = open_flag
@@ -32,8 +32,8 @@ class CLIQuery:
         self.url_args = self.ProcessArgs(url_args)
         self.html = self.GetHTML()
         try:
-            if self.br_name:
-                self.br = webbrowser.get(self.br_name)
+            if self.browser:
+                self.br = webbrowser.get(self.browser)
             else:
                 self.br = ''
         except webbrowser.Error:
@@ -354,6 +354,9 @@ class CLIQuery:
             except IndexError:
                 sys.stderr.write('Bookmark ' + link_num + ' not found.\n')
         else:
+            if 'del+' in link_num:
+                link_num = link_num.replace('del+', '').strip()
+                self.DelBookmark(link_num)
             if "." in link_num:
                 if "http://" in link_num or "https://" in link_num:
                     self.AddBookmark(link_num)
@@ -367,8 +370,17 @@ class CLIQuery:
             elif type(links) == str:
                 f.write(links + '\n')
 
+    def DelBookmark(self, link_num):
+        with open(self.config, 'w') as f:
+            f.write('api_key: ' + self.api_key)
+            f.write('\nbrowser: ' + self.browser)
+            f.write('\nbookmarks: ')
+            for i in xrange(len(self.bookmarks)):
+                if i != int(link_num)-1:
+                    f.write(self.bookmarks[i] + '\n')
+
     def BrowserOpen(self, link):
-        if self.br_name == 'cygwin':
+        if self.browser == 'cygwin':
             call(["cygstart", link])
         else:
             if self.br:

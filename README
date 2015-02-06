@@ -24,6 +24,7 @@ To open a bookmark use -b flag and the number corresponding to the link in your
 .cliqrc, indices starting at 1
 To save a bookmark you can edit .cliqrc or instead enter -b flag followed by the
 link to the bookmark, or enter in the search prompt b link_num
+To delete a bookmark enter -b flag followed by del bookmark_num
 
 usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [URL_ARGS [URL_ARGS ...]]
 
@@ -37,7 +38,7 @@ positional arguments:
     -o, --open     Open url directly
     -w, --wolfram  Get Wolfram|Alpha search results
     -d, --describe Return a snippet of a page
-    -b, --bookmark Open a bookmark number
+    -b, --bookmark Open add and delete bookmarks
 
 
 Steps towards setup:
