@@ -153,7 +153,7 @@ class CLIQuery:
             # Get HTML response
             request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
             return lh.parse(urllib2.urlopen(request))
-        except urllib2.URLError:
+        except Exception as e:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
             return ''
 
@@ -164,7 +164,7 @@ class CLIQuery:
             # Get HTML response
             request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
             return lh.parse(urllib2.urlopen(request))
-        except urllib2.URLError:
+        except Exception as e:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
             return ''
     
