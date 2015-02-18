@@ -85,21 +85,21 @@ class CLIQuery:
         clean_urls = []
         if type(urls) == list:
             for url in urls:
-                if "http://" not in url and "https://" not in url:
-                    clean_urls.append("http://" + url)
+                if 'http://' not in url and 'https://' not in url:
+                    clean_urls.append('http://' + url)
             return clean_urls, True
         else:
-            if "http://" in urls or "https://" in urls:
+            if 'http://' in urls or 'https://' in urls:
                 return urls, False
             else:
-                return ("http://" + urls), False
+                return ('http://' + urls), False
 
     def ProcessArgs(self, url_args):
         clean_args = []
         if url_args:
             for arg in url_args:
-                if " " in arg:
-                    for split_arg in arg.split(" "):
+                if ' ' in arg:
+                    for split_arg in arg.split(' '):
                         clean_args.append(split_arg)
                 else:
                     clean_args.append(arg)
@@ -129,8 +129,8 @@ class CLIQuery:
                 sys.exit()
         else:
             for url_arg in clean_args:
-                if "." not in url_arg:
-                    new_url_args.append(url_arg + ".com")
+                if '.' not in url_arg and 'localhost' not in url_arg:
+                    new_url_args.append(url_arg + '.com')
                 else:
                     new_url_args.append(url_arg)
         return new_url_args
@@ -181,7 +181,7 @@ class CLIQuery:
         link_descs = []
         for link in unprocessed_links:
             if not re.search('(ad|Ad|AD)(?=\W)', link): # Basic ad blocker
-                if "http://" in link or "https://" in link: 
+                if 'http://' in link or 'https://' in link: 
                     links.append(link)
                     if "'" in link:
                         ld_xpath = '//h2/a[@href="' + str(link) + '"]//text()'
@@ -191,10 +191,13 @@ class CLIQuery:
                     if type(link_desc) == list:
                         link_desc = ''.join(link_desc)
                     link_descs.append(link_desc)
-                elif '/images/' in link and "www.bing.com" not in link:
+                elif '/images/' in link and 'www.bing.com' not in link:
                     # Fix image links that are not prepended with www.bing.com
                     links.append('http://www.bing.com' + link)
-                    ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
+                    if "'" in link:
+                        ld_xpath = '//h2/a[@href="' + str(link) + '"]//text()'
+                    else:
+                        ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
                     link_desc = html.xpath(ld_xpath)
                     if type(link_desc) == list:
                         link_desc = ''.join(link_desc)
@@ -205,7 +208,7 @@ class CLIQuery:
             while print_links:
                 print '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
                 for i in xrange(len(links)):
-                    print_desc = (str(i+1) + ". " + link_descs[i]).encode('utf-8')
+                    print_desc = (str(i+1) + '. ' + link_descs[i]).encode('utf-8')
                     print print_desc # Print link choices
                 print '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
                 try:
@@ -333,7 +336,7 @@ class CLIQuery:
             unprocessed_links = html.xpath('//h2/a/@href')
             for link in unprocessed_links:
                 if not re.search('(ad|Ad|AD)(?=\W)', link): # Basic ad block
-                    if "http://" in link or "https://" in link:
+                    if 'http://' in link or 'https://' in link:
                         self.OpenUrl(link)
                         sys.exit()
                     elif '/images/' in link:
@@ -357,8 +360,8 @@ class CLIQuery:
             if 'del+' in link_num:
                 link_num = link_num.replace('del+', '').strip()
                 self.DelBookmark(link_num)
-            if "." in link_num:
-                if "http://" in link_num or "https://" in link_num:
+            if '.' in link_num:
+                if 'http://' in link_num or 'https://' in link_num:
                     self.AddBookmark(link_num)
                 else:
                     self.AddBookmark('http://' + link_num)
@@ -381,12 +384,12 @@ class CLIQuery:
 
     def BrowserOpen(self, link):
         if self.browser == 'cygwin':
-            call(["cygstart", link])
+            call(['cygstart', link])
         else:
             if self.br:
                 self.br.open(link)
             else:
-                sys.stderr.write("Could not locate runnable browser, make sure the browser path in config is correct. Cygwin users use 'cygwin'\n")
+                sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct. Cygwin users use "cygwin"\n')
 
     def OpenUrl(self, links, override_desc = False, override_search = False):
         if override_desc:
@@ -487,22 +490,22 @@ class CLIQuery:
                     self.BingSearch(bing_html)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--search", help="Get Bing search results",
-    action="store_true")
-    parser.add_argument("-f", "--first", help="Open first link result",
-    action="store_true")
-    parser.add_argument("-o", "--open", help="Open url directly",
-    action="store_true")
-    parser.add_argument("-w", "--wolfram", help="Get Wolfram|Alpha search results",
-    action="store_true")
-    parser.add_argument("-d", "--describe", help="Return a snippet of a page",
-    action="store_true")
-    parser.add_argument("-b", "--bookmark", help="Open add and delete bookmarks",
-    action="store_true")
-    parser.add_argument("URL_ARGS", nargs='*', help="Search keywords")
+    parser.add_argument('-s', '--search', help='Get Bing search results',
+    action='store_true')
+    parser.add_argument('-f', '--first', help='Open first link result',
+    action='store_true')
+    parser.add_argument('-o', '--open', help='Open url directly',
+    action='store_true')
+    parser.add_argument('-w', '--wolfram', help='Get Wolfram|Alpha search results',
+    action='store_true')
+    parser.add_argument('-d', '--describe', help='Return a snippet of a page',
+    action='store_true')
+    parser.add_argument('-b', '--bookmark', help='Open add and delete bookmarks',
+    action='store_true')
+    parser.add_argument('URL_ARGS', nargs='*', help='Search keywords')
     args = parser.parse_args()
     search = bool(args.search)
     first = bool(args.first)
