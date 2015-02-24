@@ -23,14 +23,14 @@ class CLIQuery:
         self.bookmarks = []
         self.bookmk_flag = bookmk_flag
         self.config = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
-        self.api_key, self.browser = self.ReadConfig()
+        self.api_key, self.browser = self.read_config()
         self.search_flag = search_flag
         self.first_flag = first_flag
         self.open_flag = open_flag
         self.wolfram_flag = wolfram_flag
         self.desc_flag = desc_flag
-        self.url_args = self.ProcessArgs(url_args)
-        self.html = self.GetHTML()
+        self.url_args = self.process_args(url_args)
+        self.html = self.get_html()
         try:
             if self.browser:
                 self.br = webbrowser.get(self.browser)
@@ -39,7 +39,7 @@ class CLIQuery:
         except webbrowser.Error:
             self.br = ''
 
-    def ReadConfig(self):
+    def read_config(self):
         with open(self.config, 'r') as f:
             api_key = ''
             browser = ''
@@ -67,7 +67,7 @@ class CLIQuery:
                 except IndexError:
                     return '', ''
 
-    def CheckInput(self, u_input):
+    def check_input(self, u_input):
         u_inp = u_input.lower()
         if u_inp == 'y' or u_inp == 'yes':
             return True
@@ -80,7 +80,7 @@ class CLIQuery:
             except ValueError:
                 return False 
 
-    def CleanUrls(self, urls):
+    def clean_url(self, urls):
         # Returns True if list, False otherwise
         clean_urls = []
         if type(urls) == list:
@@ -94,7 +94,7 @@ class CLIQuery:
             else:
                 return ('http://' + urls), False
 
-    def ProcessArgs(self, url_args):
+    def process_args(self, url_args):
         clean_args = []
         if url_args:
             for arg in url_args:
@@ -135,18 +135,18 @@ class CLIQuery:
                     new_url_args.append(url_arg)
         return new_url_args
 
-    def GetHTML(self):
+    def get_html(self):
         if self.bookmk_flag:
             return ''
         if not self.open_flag:
             if not self.wolfram_flag:
-                return self.GetBingHTML(self.url_args)
+                return self.get_bing_html(self.url_args)
             else:
-                return self.GetWolframHTML(self.url_args)
+                return self.get_wolfram_html(self.url_args)
         else:
             return ''
 
-    def GetBingHTML(self, url_args): 
+    def get_bing_html(self, url_args): 
         base_url = 'http://www.bing.com/search?q='
         url = base_url + url_args
         try:
@@ -157,7 +157,7 @@ class CLIQuery:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
             return ''
 
-    def GetWolframHTML(self, url_args):
+    def get_wolfram_html(self, url_args):
         base_url = 'http://api.wolframalpha.com/v2/query?input='
         url = base_url + url_args + '&appid=' + self.api_key
         try:
@@ -168,7 +168,7 @@ class CLIQuery:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
             return ''
     
-    def BingSearch(self, html):
+    def bing_search(self, html):
         # Parse Bing response and display link results
         try:
             unprocessed_links = html.xpath('//h2/a/@href')
@@ -235,38 +235,38 @@ class CLIQuery:
                     if ',' in link_num and len(link_num) >= 3:
                         link_nums = link_num.split(',')
                         for num in link_nums:
-                            if not self.CheckInput(num):
+                            if not self.check_input(num):
                                 print_links = False
 
                     print '\n'
                     if bookmk_page:
-                        self.AddBookmark(links, link_num)
+                        self.add_bookmark(links, link_num)
                     elif link_nums and print_links:
                         for num in link_nums:
                             if int(num) > 0 and int(num) <= len(links):
-                                self.OpenUrl(links[int(num)-1], override_desc, override_search) 
-                    elif self.CheckInput(start_num) and self.CheckInput(end_num):
+                                self.open_url(links[int(num)-1], override_desc, override_search) 
+                    elif self.check_input(start_num) and self.check_input(end_num):
                         if int(start_num) > 0 and int(end_num) <= len(links)+1:
                             for i in xrange(int(start_num), int(end_num)+1, 1):
-                                self.OpenUrl(links[i-1], override_desc, override_search) 
-                    elif self.CheckInput(start_num):
+                                self.open_url(links[i-1], override_desc, override_search) 
+                    elif self.check_input(start_num):
                         if int(start_num) > 0:
                             for i in xrange(int(start_num), len(links)+1, 1):
-                                self.OpenUrl(links[i-1], override_desc, override_search) 
-                    elif self.CheckInput(end_num):
+                                self.open_url(links[i-1], override_desc, override_search) 
+                    elif self.check_input(end_num):
                         if int(end_num) < len(links)+1:
                             for i in xrange(1, int(end_num)+1, 1):
-                                self.OpenUrl(links[i-1], override_desc, override_search) 
+                                self.open_url(links[i-1], override_desc, override_search) 
                     else:
-                        print_links = self.CheckInput(link_num)
+                        print_links = self.check_input(link_num)
                         if link_num and int(link_num) > 0 and int(link_num) < len(links)+1:
-                            self.OpenUrl(links[int(link_num)-1], override_desc, override_search)
+                            self.open_url(links[int(link_num)-1], override_desc, override_search)
                 except (ValueError, IndexError):
                     pass
 
         return False
 
-    def WolframSearch(self, html):
+    def wolfram_search(self, html):
         # Parse Wolfram|Alpha response for potential answers
         try:
             titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation' and @title != 'Image' and @title != 'Manipulatives illustration' and @title != 'Quotient and remainder']/@title")))
@@ -298,7 +298,7 @@ class CLIQuery:
             elif len(output_list) > 2:
                 print '\n'.join(output_list[:2]).encode('utf-8')
                 print 'See more? (y/n):',
-                if self.CheckInput(raw_input('')):
+                if self.check_input(raw_input('')):
                     print '\n'.join(output_list[2:]).encode('utf-8')
             else:
                 print '\n'.join(output_list).encode('utf-8')
@@ -306,7 +306,7 @@ class CLIQuery:
         else:
             return False
 
-    def BingCalculation(self, html):
+    def bing_calculate(self, html):
         try:
             calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value')
             define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()')
@@ -331,49 +331,49 @@ class CLIQuery:
             pass
         return False
 
-    def OpenFirstLink(self, html):
+    def open_first(self, html):
         try:
             unprocessed_links = html.xpath('//h2/a/@href')
             for link in unprocessed_links:
                 if not re.search('(ad|Ad|AD)(?=\W)', link): # Basic ad block
                     if 'http://' in link or 'https://' in link:
-                        self.OpenUrl(link)
+                        self.open_url(link)
                         sys.exit()
                     elif '/images/' in link:
                         link = 'http://www.bing.com' + link
-                        self.OpenUrl(link)
+                        self.open_url(link)
                         sys.exit()
         except AttributeError:
             sys.exit()
 
-    def BookmarkOpen(self, link_num):
+    def open_bookmark(self, link_num):
         if not link_num:
             print 'Bookmarks:'
             for i in xrange(len(self.bookmarks)):
                 print str(i+1) + '. ' + self.bookmarks[i]
-        elif self.CheckInput(link_num):
+        elif self.check_input(link_num):
             try:
-                self.OpenUrl(self.bookmarks[int(link_num) - 1])
+                self.open_url(self.bookmarks[int(link_num) - 1])
             except IndexError:
                 sys.stderr.write('Bookmark ' + link_num + ' not found.\n')
         else:
             if 'del+' in link_num:
                 link_num = link_num.replace('del+', '').strip()
-                self.DelBookmark(link_num)
+                self.del_bookmark(link_num)
             if '.' in link_num:
                 if 'http://' in link_num or 'https://' in link_num:
-                    self.AddBookmark(link_num)
+                    self.add_bookmark(link_num)
                 else:
-                    self.AddBookmark('http://' + link_num)
+                    self.add_bookmark('http://' + link_num)
 
-    def AddBookmark(self, links, link_num = []):
+    def add_bookmark(self, links, link_num = []):
         with open(self.config, 'a') as f:
             if type(links) == list and link_num:
                 f.write(links[int(link_num)] + '\n')
             elif type(links) == str:
                 f.write(links + '\n')
 
-    def DelBookmark(self, link_num):
+    def del_bookmark(self, link_num):
         with open(self.config, 'w') as f:
             f.write('api_key: ' + self.api_key)
             f.write('\nbrowser: ' + self.browser)
@@ -382,7 +382,7 @@ class CLIQuery:
                 if i != int(link_num)-1:
                     f.write(self.bookmarks[i] + '\n')
 
-    def BrowserOpen(self, link):
+    def open_browser(self, link):
         if self.browser == 'cygwin':
             call(['cygstart', link])
         else:
@@ -391,30 +391,30 @@ class CLIQuery:
             else:
                 sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct. Cygwin users use "cygwin"\n')
 
-    def OpenUrl(self, links, override_desc = False, override_search = False):
+    def open_url(self, links, override_desc = False, override_search = False):
         if override_desc:
-            links, is_list = self.CleanUrls(links)
+            links, is_list = self.clean_url(links)
             if is_list:
                 for link in links:
-                    self.BrowserOpen(link)
+                    self.open_browser(link)
             else:
-                self.BrowserOpen(links)
+                self.open_browser(links)
         elif override_search or self.desc_flag:
-            links, is_list = self.CleanUrls(links)
+            links, is_list = self.clean_url(links)
             if is_list:
                 for link in links:
-                    self.DescribePage(link)
+                    self.describe_page(link)
             else:
-                self.DescribePage(links)
+                self.describe_page(links)
         else:
-            links, is_list = self.CleanUrls(links)
+            links, is_list = self.clean_url(links)
             if is_list:
                 for link in links:
-                    self.BrowserOpen(link)
+                    self.open_browser(link)
             else:
-                self.BrowserOpen(links)
+                self.open_browser(links)
 
-    def DescribePage(self, url):
+    def describe_page(self, url):
         try:
             # Get HTML response
             request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
@@ -445,7 +445,7 @@ class CLIQuery:
                         print 'See more? (y/n):',
                         see_more = True
                         ans = raw_input('')
-                        if self.CheckInput(ans):
+                        if self.check_input(ans):
                             max_print_len += 300
                         else:
                             break;
@@ -459,35 +459,35 @@ class CLIQuery:
         print ''
         return True
 
-    def Search(self):
+    def search(self):
         continue_search = False
         if self.bookmk_flag:
-            self.BookmarkOpen(self.url_args) 
+            self.open_bookmark(self.url_args) 
         elif self.open_flag:
-            self.OpenUrl(self.url_args)
+            self.open_url(self.url_args)
         elif self.search_flag:
-            self.BingSearch(self.html)
+            self.bing_search(self.html)
         elif self.first_flag:
-            self.OpenFirstLink(self.html)        
+            self.open_first(self.html)        
         elif self.wolfram_flag:
-            success = self.WolframSearch(self.html)
+            success = self.wolfram_search(self.html)
             if not success:
                 continue_search = True
         else:
             continue_search = True
 
         if continue_search:
-            # Defaults to BingCalculation, then WolframSearch, then BingSearch
+            # Defaults to bing_calculate, then wolfram_search, then bing_search
             if self.wolfram_flag:
-                bing_html = self.GetBingHTML(self.url_args) 
+                bing_html = self.get_bing_html(self.url_args) 
                 wolf_html = self.html
             else:
                 bing_html = self.html
-            if not self.BingCalculation(bing_html):
+            if not self.bing_calculate(bing_html):
                 if not self.wolfram_flag:
-                    wolf_html = self.GetWolframHTML(self.url_args)
-                if not self.WolframSearch(wolf_html):
-                    self.BingSearch(bing_html)
+                    wolf_html = self.get_wolfram_html(self.url_args)
+                if not self.wolfram_search(wolf_html):
+                    self.bing_search(bing_html)
 
 
 if __name__ == '__main__':
@@ -514,5 +514,5 @@ if __name__ == '__main__':
     describe = bool(args.describe)
     bookmk = bool(args.bookmark)
     query = CLIQuery(args.URL_ARGS, search, first, openurl, wolfram, describe, bookmk)
-    query.Search()
+    query.search()
 
