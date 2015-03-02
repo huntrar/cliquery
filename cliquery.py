@@ -155,6 +155,7 @@ class CLIQuery:
             return lh.parse(urllib2.urlopen(request))
         except Exception as e:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
+            sys.stderr.write(str(e))
             return ''
 
     def get_wolfram_html(self, url_args):
@@ -166,6 +167,7 @@ class CLIQuery:
             return lh.parse(urllib2.urlopen(request))
         except Exception as e:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
+            sys.stderr.write(str(e))
             return ''
     
     def bing_search(self, html):
@@ -421,6 +423,7 @@ class CLIQuery:
             html = lh.parse(urllib2.urlopen(request))
         except Exception as e:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
+            sys.stderr.write(str(e))
             return
 
         body = ''.join(html.xpath('//body//*[not(self::script) and not(self::style)]/text()')).split('\n')
