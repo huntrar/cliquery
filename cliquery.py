@@ -422,35 +422,35 @@ class CLIQuery:
         except Exception as e:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
             return
-        header = html.xpath('//h1/text()')
-        if not header:
-            header = html.xpath('//title/text()')
-        if header:
-            header = header[0].strip()
-        body = html.xpath('//h2/text()')
+
+        body = ''.join(html.xpath('//body//*[not(self::script) and not(self::style)]/text()')).split('\n')
         if not body:
-            body = html.xpath('//h3/text()')
-            if not body:
-                body = html.xpath('//p/text()')
-        if header and body:
-            print '\t' + header.encode('utf-8') + '\n'
-            if type(body) == list and len(body) > 0:
-                msg_len = 0
-                max_print_len = 300
-                see_more = False
-                for i in xrange(len(body)):
-                    print '\t' + '\n\t'.join(body[i].strip().encode('utf-8').split('\n'))
-                    msg_len += len(body[i])
-                    if msg_len > max_print_len:
-                        print 'See more? (y/n):',
-                        see_more = True
-                        ans = raw_input('')
-                        if self.check_input(ans):
-                            max_print_len += 300
-                        else:
-                            break;
-            else:
-                print body.encode('utf-8')
+            sys.stderr.write('Description not found.\n')
+            return False
+        stripped_body = []
+        for b in body:
+            stripped_body.append(b.strip())
+        filtered_body = filter(None, stripped_body)
+        if not filtered_body:
+            sys.stderr.write('Description not found.\n')
+            return False
+        body_sum = 0
+        for b in filtered_body:
+            body_sum += len(b)
+        body_avg_sum = body_sum / len(filtered_body)
+        print_body = []
+        for b in filtered_body:
+            if len(b) > body_avg_sum: 
+                print_body.append(b)
+        if print_body:
+            see_more = False
+            for msg in print_body:
+                print '\n' + msg.encode('utf-8')
+                print 'See more? (y/n):',
+                ans = raw_input('')
+                if not self.check_input(ans):
+                    break
+                see_more = True
         else:
             sys.stderr.write('Description not found.\n')
             return False
