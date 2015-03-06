@@ -146,9 +146,7 @@ class CLIQuery:
         else:
             return ''
 
-    def get_bing_html(self, url_args): 
-        base_url = 'http://www.bing.com/search?q='
-        url = base_url + url_args
+    def get_html_resp(self, url):
         try:
             # Get HTML response
             request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
@@ -158,17 +156,15 @@ class CLIQuery:
             sys.stderr.write(str(e))
             return ''
 
+    def get_bing_html(self, url_args): 
+        base_url = 'http://www.bing.com/search?q='
+        url = base_url + url_args
+        return self.get_html_resp(url)
+
     def get_wolfram_html(self, url_args):
         base_url = 'http://api.wolframalpha.com/v2/query?input='
         url = base_url + url_args + '&appid=' + self.api_key
-        try:
-            # Get HTML response
-            request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
-            return lh.parse(urllib2.urlopen(request))
-        except Exception as e:
-            sys.stderr.write('Failed to retrieve ' + url + '\n')
-            sys.stderr.write(str(e))
-            return ''
+        return self.get_html_resp(url)
     
     def bing_search(self, html):
         # Parse Bing response and display link results
@@ -417,15 +413,7 @@ class CLIQuery:
                 self.open_browser(links)
 
     def describe_page(self, url):
-        try:
-            # Get HTML response
-            request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
-            html = lh.parse(urllib2.urlopen(request))
-        except Exception as e:
-            sys.stderr.write('Failed to retrieve ' + url + '\n')
-            sys.stderr.write(str(e))
-            return
-
+        html = self.get_html_resp(url)
         body = ''.join(html.xpath('//body//*[not(self::script) and not(self::style)]/text()')).split('\n')
         if not body:
             sys.stderr.write('Description not found.\n')
@@ -446,6 +434,7 @@ class CLIQuery:
             if len(b) > body_avg_sum: 
                 print_body.append(b)
         if print_body:
+            print url.encode('utf-8') + '\n'
             see_more = False
             for msg in print_body:
                 print '\n' + msg.encode('utf-8')
