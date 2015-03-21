@@ -44,6 +44,7 @@ class CLIQuery:
             api_key = ''
             browser = ''
             lines = []
+            # API key and browser name should be in first two lines of .cliqrc
             for i in xrange(2):
                 line = f.readline()
                 if 'api_key:' in line:
@@ -111,13 +112,13 @@ class CLIQuery:
         # Further processing of args before they are added to base_url
         new_url_args = []
         if not self.open_flag:
+            symbol_dict = { '@' : '%40',
+                            '$' : '%24',
+                            '%' : '%25',
+                            '&' : '%26',
+                            '+' : '%2B',
+                            '=' : '%3D' }
             try:
-                symbol_dict = { '@' : '%40',
-                                '$' : '%24',
-                                '%' : '%25',
-                                '&' : '%26',
-                                '+' : '%2B',
-                                '=' : '%3D' }
                 for url_arg in clean_args:
                     for sym in symbol_dict:
                         if sym in url_arg:
@@ -431,7 +432,8 @@ class CLIQuery:
         body_avg_sum = body_sum / len(filtered_body)
         print_body = []
         for b in filtered_body:
-            if len(b) > body_avg_sum: 
+            # Qualifying describe statements are at least half the average statement length
+            if len(b) > (body_avg_sum / 2): 
                 print_body.append(b)
         if print_body:
             print url.encode('utf-8') + '\n'
