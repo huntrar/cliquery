@@ -487,19 +487,19 @@ class CLIQuery:
 if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--search', help='Get Bing search results',
+    parser.add_argument('-s', '--search', help='display search links',
     action='store_true')
-    parser.add_argument('-f', '--first', help='Open first link result',
+    parser.add_argument('-f', '--first', help='open first link',
     action='store_true')
-    parser.add_argument('-o', '--open', help='Open url directly',
+    parser.add_argument('-o', '--open', help='open link manually',
     action='store_true')
-    parser.add_argument('-w', '--wolfram', help='Get Wolfram|Alpha search results',
+    parser.add_argument('-w', '--wolfram', help='display wolfram results',
     action='store_true')
-    parser.add_argument('-d', '--describe', help='Return a snippet of a page',
+    parser.add_argument('-d', '--describe', help='display page snippet',
     action='store_true')
-    parser.add_argument('-b', '--bookmark', help='Open add and delete bookmarks',
+    parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
     action='store_true')
-    parser.add_argument('URL_ARGS', nargs='*', help='Search keywords')
+    parser.add_argument('QUERY', nargs='*', help='keywords to search')
     args = parser.parse_args()
     search = bool(args.search)
     first = bool(args.first)
@@ -507,6 +507,6 @@ if __name__ == '__main__':
     wolfram = bool(args.wolfram)
     describe = bool(args.describe)
     bookmk = bool(args.bookmark)
-    query = CLIQuery(args.URL_ARGS, search, first, openurl, wolfram, describe, bookmk)
+    query = CLIQuery(args.QUERY, search, first, openurl, wolfram, describe, bookmk)
     query.search()
 
