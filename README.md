@@ -1,7 +1,7 @@
 # CLIQuery
 
 ## a command line search engine and browsing tool
-CLIQuery is an intermediary tool between the command line and a GUI based browser. It supports searching, browsing, bookmarking, and previewing webpages through a mix of command line output and browser invocation. It is **_NOT_** a command line browser (if that's what you are searching for, search for Lynx instead)!
+CLIQuery is an intermediary tool between the command line and any GUI based browser. It supports searching, browsing, bookmarking, and previewing webpages through a mix of command line output and browser invocation. It is **_NOT_** a command line browser (if that's what you are searching for, search for Lynx instead)!
 
 The results? Less clicking, faster results, and *no limitations to normal browsing!*
 
@@ -50,7 +50,11 @@ The results? Less clicking, faster results, and *no limitations to normal browsi
     > http://www.cs.rit.edu/~ncs/Courses/570/UserGuide/OpenGLonWin-11.html
 
 
-    > NextPrevUpTopContentsIndex Using OpenGL on Windows: A Simple ExampleAny OpenGL program for Windows has to take care of some window-dependent setup. There are several ways this setup can be done, for example, using the GLUT library or using GDI and WGL directly. This guide focuses on using the Windows OpenGL API directly.
+    > NextPrevUpTopContentsIndex Using OpenGL on Windows: A Simple Example
+    > Any OpenGL program for Windows has to take care of some window-dependent
+    > setup. There are several ways this setup can be done, for example, using
+    > the GLUT library or using GDI and WGL directly. This guide focuses on
+    > using the Windows OpenGL API directly.
     > See more? (y/n): n
     ```
 
