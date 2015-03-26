@@ -96,6 +96,8 @@ class CLIQuery:
             for url in urls:
                 if 'http://' not in url and 'https://' not in url:
                     clean_urls.append('http://' + url)
+                else:
+                    clean_urls.append(url)
             return clean_urls, True
         else:
             if 'http://' in urls or 'https://' in urls:
@@ -138,7 +140,7 @@ class CLIQuery:
                 sys.exit()
         else:
             for url_arg in clean_args:
-                if '.' not in url_arg and ':' not in url_arg:
+                if '.' not in url_arg and 'localhost' not in url_arg:
                     new_url_args.append(url_arg + '.com')
                 else:
                     new_url_args.append(url_arg)
