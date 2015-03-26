@@ -8,6 +8,7 @@ import argparse
 from collections import OrderedDict
 import itertools
 import os
+import random
 import re
 from subprocess import call
 import sys
@@ -17,9 +18,16 @@ import webbrowser
 
 import lxml.html as lh
 
+USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
+                'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0',
+                'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0',
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5',
+                'Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5')
+
 
 class CLIQuery:
-    def __init__(self, url_args, search_flag, first_flag, open_flag, wolfram_flag, desc_flag, bookmk_flag):
+    def __init__(self, url_args, search_flag, first_flag, open_flag, 
+            wolfram_flag, desc_flag, bookmk_flag):
         self.bookmarks = []
         self.bookmk_flag = bookmk_flag
         self.config = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
@@ -150,7 +158,7 @@ class CLIQuery:
     def get_html_resp(self, url):
         try:
             # Get HTML response
-            request = urllib2.Request(url, headers={ 'User-Agent' : 'Mozilla/5.0' })
+            request = urllib2.Request(url, headers={'User-Agent' : random.choice(USER_AGENTS)})
             return lh.parse(urllib2.urlopen(request))
         except Exception as e:
             sys.stderr.write('Failed to retrieve ' + url + '\n')
@@ -205,11 +213,13 @@ class CLIQuery:
         if links and link_descs:
             print_links = True
             while print_links:
-                print '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+                print ('- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+                     ' - - - - - - - - - - - -')
                 for i in xrange(len(links)):
                     print_desc = (str(i+1) + '. ' + link_descs[i]).encode('utf-8')
                     print print_desc # Print link choices
-                print '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+                print ('- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+                     ' - - - - - - - - - - - -')
                 try:
                     print ':',
                     link_num = raw_input('').strip()
@@ -268,7 +278,11 @@ class CLIQuery:
     def wolfram_search(self, html):
         # Parse Wolfram|Alpha response for potential answers
         try:
-            titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and @title != 'Number line' and @title != 'Input' and @title != 'Visual representation' and @title != 'Image' and @title != 'Manipulatives illustration' and @title != 'Quotient and remainder']/@title")))
+            titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and "
+                "@title != 'Number line' and @title != 'Input' and "
+                "@title != 'Visual representation' and @title != 'Image' and "
+                "@title != 'Manipulatives illustration' and "
+                "@title != 'Quotient and remainder']/@title")))
         except AttributeError:
             sys.exit()
         entries = []
@@ -307,7 +321,11 @@ class CLIQuery:
 
     def bing_calculate(self, html):
         try:
-            calc_result = html.xpath('//span[@id="rcTB"]/text()|//div[@class="b_focusTextMedium"]/text()|//p[@class="b_secondaryFocus df_p"]/text()|//div[@class="b_xlText b_secondaryText"]/text()|//input[@id="uc_rv"]/@value')
+            calc_result = html.xpath('//span[@id="rcTB"]/text()'
+                '|//div[@class="b_focusTextMedium"]/text()'
+                '|//p[@class="b_secondaryFocus df_p"]/text()'
+                '|//div[@class="b_xlText b_secondaryText"]/text()'
+                '|//input[@id="uc_rv"]/@value')
             define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()')
         except AttributeError:
             sys.exit()
@@ -388,7 +406,8 @@ class CLIQuery:
             if self.br:
                 self.br.open(link)
             else:
-                sys.stderr.write('Could not locate runnable browser, make sure the browser path in config is correct. Cygwin users use "cygwin"\n')
+                sys.stderr.write('Could not locate runnable browser, make sure '                    'the browser path in config is correct.'
+                    ' Cygwin users use "cygwin"\n')
 
     def open_url(self, links, override_desc = False, override_search = False):
         if override_desc:
@@ -415,7 +434,8 @@ class CLIQuery:
 
     def describe_page(self, url):
         html = self.get_html_resp(url)
-        body = ''.join(html.xpath('//body//*[not(self::script) and not(self::style)]/text()')).split('\n')
+        body = ''.join(html.xpath('//body//*[not(self::script) and '
+             'not(self::style)]/text()')).split('\n')
         if not body:
             sys.stderr.write('Description not found.\n')
             return False
