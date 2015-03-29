@@ -12,22 +12,25 @@ The results? Less clicking, faster results, and *no limitations to normal browsi
 * Resolve dependencies: `pip install lxml`
 
 ## Usage
-    usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [QUERY [QUERY ...]]
+usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-v] [QUERY [QUERY ...]]
 
-    positional arguments:
-      QUERY           keywords to search
+a command line search engine and browsing tool
 
-    optional arguments:
-      -h, --help      show this help message and exit
-      -s, --search    display search links
-      -f, --first     open first link
-      -o, --open      open link manually
-      -w, --wolfram   display wolfram results
-      -d, --describe  display page snippet
-      -b, --bookmark  view and modify bookmarks
+  positional arguments:
+    QUERY           keywords to search
+
+  optional arguments:
+    -h, --help      show this help message and exit
+    -s, --search    display search links
+    -f, --first     open first link
+    -o, --open      open link manually
+    -w, --wolfram   display wolfram results
+    -d, --describe  display page snippet
+    -b, --bookmark  view and modify bookmarks
+    -v, --version   display current version
 
 ## Author
-* Hunter Hammond 
+* Hunter Hammond (huntrar@gmail.com)
 
 ## Notes
 * A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
