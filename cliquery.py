@@ -273,7 +273,6 @@ def bing_search(cfg, args, html):
 
 
 def wolfram_search(html):
-    # Parse Wolfram|Alpha response for potential answers
     try:
         titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and "
             "@title != 'Number line' and @title != 'Input' and "
@@ -317,30 +316,30 @@ def wolfram_search(html):
         return False
 
 
-def bing_calculate(html):
+def bing_instant(html):
     try:
-        calc_result = html.xpath('//span[@id="rcTB"]/text()'
+        inst_result = html.xpath('//span[@id="rcTB"]/text()'
             '|//div[@class="b_focusTextMedium"]/text()'
             '|//p[@class="b_secondaryFocus df_p"]/text()'
             '|//div[@class="b_xlText b_secondaryText"]/text()'
             '|//input[@id="uc_rv"]/@value')
-        define_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()')
+        def_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()')
     except AttributeError:
         sys.exit()
     try:
         # Check if calculation result is present or age/date
-        if calc_result:
-            if len(calc_result) == 1:
-                print (calc_result[0]).encode('utf-8')
+        if inst_result:
+            if len(inst_result) == 1:
+                print (inst_result[0]).encode('utf-8')
             else:
-                print ('\n'.join(calc_result)).encode('utf-8')
+                print ('\n'.join(inst_result)).encode('utf-8')
             return True
-        # Check if calculation result is a definition
-        elif define_result:
-            if len(define_result) == 1:
-                print (define_result[0]).encode('utf-8')
+        # Check if definition is present
+        elif def_result:
+            if len(def_result) == 1:
+                print (def_result[0]).encode('utf-8')
             else:
-                print ('\n'.join(define_result)).encode('utf-8')
+                print ('\n'.join(def_result)).encode('utf-8')
             return True
     except AttributeError:
         pass
@@ -518,7 +517,7 @@ def search(cfg, args):
             wolf_html = html
         else:
             bing_html = html
-        if not bing_calculate(bing_html):
+        if not bing_instant(bing_html):
             if not args['wolfram']:
                 wolf_html = get_wolfram_html(cfg, url_args)
             if not wolfram_search(wolf_html):
@@ -582,6 +581,7 @@ def command_line_runner():
     else:
         cliquery(args)
         
+
 if __name__ == '__main__':
     command_line_runner()
 
