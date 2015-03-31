@@ -18,10 +18,10 @@ import sys
 import time
 import urllib2
 import webbrowser
+from . import __version__
 
 import lxml.html as lh
 
-__version__ = '0.2.3'
 
 USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
                 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0',
@@ -210,15 +210,15 @@ def bing_search(cfg, args, html):
     if links and link_descs:
         print_links = True
         while print_links:
-            print ('- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+            print('- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
                  ' - - - - - - - - - - - -')
             for i in xrange(len(links)):
                 print_desc = (str(i+1) + '. ' + link_descs[i]).encode('utf-8')
-                print print_desc # Print link choices
-            print ('- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+                print(print_desc) # Print link choices
+            print('- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
                  ' - - - - - - - - - - - -')
             try:
-                print ':',
+                print(':'),
                 link_num = raw_input('').strip()
                 override_desc = False
                 override_search = False
@@ -244,7 +244,7 @@ def bing_search(cfg, args, html):
                         if not check_input(num):
                             print_links = False
 
-                print '\n'
+                print('\n')
                 if bookmk_page:
                     add_bookmark(links, link_num)
                 elif link_nums and print_links:
@@ -305,12 +305,12 @@ def wolfram_search(html):
         if not output_list:
             return False
         elif len(output_list) > 2:
-            print '\n'.join(output_list[:2]).encode('utf-8')
-            print 'See more? (y/n):',
+            print('\n'.join(output_list[:2]).encode('utf-8'))
+            print('See more? (y/n):'),
             if check_input(raw_input('')):
-                print '\n'.join(output_list[2:]).encode('utf-8')
+                print ('\n'.join(output_list[2:]).encode('utf-8'))
         else:
-            print '\n'.join(output_list).encode('utf-8')
+            print ('\n'.join(output_list).encode('utf-8'))
         return True
     else:
         return False
@@ -330,16 +330,16 @@ def bing_instant(html):
         # Check if calculation result is present or age/date
         if inst_result:
             if len(inst_result) == 1:
-                print (inst_result[0]).encode('utf-8')
+                print(inst_result[0].encode('utf-8'))
             else:
-                print ('\n'.join(inst_result)).encode('utf-8')
+                print('\n'.join(inst_result).encode('utf-8'))
             return True
         # Check if definition is present
         elif def_result:
             if len(def_result) == 1:
-                print (def_result[0]).encode('utf-8')
+                print(def_result[0].encode('utf-8'))
             else:
-                print ('\n'.join(def_result)).encode('utf-8')
+                print('\n'.join(def_result).encode('utf-8'))
             return True
     except AttributeError:
         pass
@@ -368,9 +368,9 @@ def open_first(cfg, args, html):
 def open_bookmark(cfg, args, link_arg):
     bookmarks = cfg['BOOKMARKS']
     if not link_arg:
-        print 'Bookmarks:'
+        print('Bookmarks:')
         for i in xrange(len(bookmarks)):
-            print str(i+1) + '. ' + bookmarks[i]
+            print(str(i+1) + '. ' + bookmarks[i])
     elif check_input(link_arg):
         try:
             open_url(cfg, args, bookmarks[int(link_arg) - 1])
@@ -466,11 +466,11 @@ def describe_page(url):
         if len(b) > (body_avg_sum / 2): 
             print_body.append(b)
     if print_body:
-        print url.encode('utf-8') + '\n'
+        print(url.encode('utf-8') + '\n')
         see_more = False
         for msg in print_body:
-            print '\n' + msg.encode('utf-8')
-            print 'See more? (y/n):',
+            print('\n' + msg.encode('utf-8'))
+            print('See more? (y/n):'),
             ans = raw_input('')
             if not check_input(ans):
                 break
@@ -480,7 +480,7 @@ def describe_page(url):
         return False
     if not see_more: 
         time.sleep(1)
-    print ''
+    print('')
     return True
     
 

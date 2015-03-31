@@ -6,10 +6,9 @@ CLIQuery is an intermediary tool between the command line and any GUI based brow
 The results? Less clicking, faster results, and *no limitations to normal browsing!*
 
 ## Installation
-* Clone this git repository: `git clone https://github.com/huntrar/CLIQuery`
+* `pip install cliquery`
 * [Sign up](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key.
 * Enter your API key and choice of browser in .cliqrc (cygwin users should enter `cygwin` as their browser)
-* Resolve dependencies: `pip install lxml`
 
 ## Usage
 usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-v] [QUERY [QUERY ...]]
@@ -37,7 +36,7 @@ a command line search engine and browsing tool
 
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility
     ```
-    $ cliq a simple example
+    $ cliquery a simple example
     > - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     > 1. simple sentence - definition and examples of simple ...
     > 2. HTML Examples - W3Schools Online Web Tutorials

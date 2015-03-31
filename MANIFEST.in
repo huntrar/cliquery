@@ -1,0 +1,2 @@
+include CHANGES.txt
+include cliquery/.cliqrc

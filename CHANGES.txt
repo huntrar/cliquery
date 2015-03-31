@@ -1,0 +1,9 @@
+0.2.4
+------
+
+ - Now available on PyPI
+
+0.2.3
+------
+
+ - First entry
