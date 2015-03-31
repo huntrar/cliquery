@@ -29,17 +29,15 @@ USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/2010
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5',
                 'Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5')
 
-CFG_FILE = '.cliqrc'
+CONFIG = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
 
-if not os.path.isfile(CFG_FILE):
-    with open(CFG_FILE, 'w') as f:
+if not os.path.isfile(CONFIG):
+    with open(CONFIG, 'w') as f:
         f.write('api_key:\n')
         f.write('browser:\n')
         f.write('bookmarks:\n')
     sys.stderr.write('Enter your WolframAlpha API Key and browser in .cliqrc')
     sys.exit()
-
-CONFIG = os.path.dirname(os.path.realpath(__file__)) + '/' + CFG_FILE
 
 
 def read_config(args):
