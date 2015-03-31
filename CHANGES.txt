@@ -1,3 +1,8 @@
+0.2.8
+------
+
+ - updates to .cliqrc creation and error messages
+
 0.2.5
 ------
 
