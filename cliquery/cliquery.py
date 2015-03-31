@@ -541,13 +541,12 @@ def cliquery(args):
         cfg['BROWSER'] = BROWSER
         cfg['BOOKMARKS'] = BOOKMARKS
         try:
-            if BROWSER:
+            if BROWSER and BROWSER != 'cygwin':
                 cfg['br'] = webbrowser.get(BROWSER)
             else:
                 cfg['br'] = ''
         except webbrowser.Error as w:
-            sys.stderr.write('Error loading browser object\n')
-            sys.stderr.write(str(w))
+            sys.stderr.write(str(w) + ': ' + BROWSER)
         search(cfg, args)
     except Exception as e:
         sys.stderr.write('Search failed, see error below:\n')
