@@ -422,7 +422,8 @@ def open_browser(cfg, link):
         if cfg['br']:
             cfg['br'].open(link)
         else:
-            sys.stderr.write('Could not locate runnable browser, make sure '                    'you entered a valid browser in .cliqrc'
+            sys.stderr.write('Could not locate runnable browser, make sure '
+                'you entered a valid browser in .cliqrc'
                 ' Cygwin users use "cygwin"\n')
 
 
