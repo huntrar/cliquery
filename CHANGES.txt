@@ -1,3 +1,8 @@
+0.2.5
+------
+
+ - .cliqrc now created on first run
+
 0.2.4
 ------
 
