@@ -36,7 +36,7 @@ if not os.path.isfile(CONFIG):
         f.write('api_key:\n')
         f.write('browser:\n')
         f.write('bookmarks:\n')
-    sys.stderr.write('Enter your WolframAlpha API Key and browser in .cliqrc')
+    sys.stderr.write('Enter your WolframAlpha API Key and browser in %s' % CONFIG)
     sys.exit()
 
 
