@@ -29,7 +29,17 @@ USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/2010
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5',
                 'Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5')
 
-CONFIG = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
+CFG_FILE = '.cliqrc'
+
+if not os.path.isfile(CFG_FILE):
+    with open(CFG_FILE, 'w') as f:
+        f.write('api_key:\n')
+        f.write('browser:\n')
+        f.write('bookmarks:\n')
+    sys.stderr.write('Enter your WolframAlpha API Key and browser in .cliqrc')
+    sys.exit()
+
+CONFIG = os.path.dirname(os.path.realpath(__file__)) + '/' + CFG_FILE
 
 
 def read_config(args):
@@ -53,13 +63,13 @@ def read_config(args):
                 for bookmk in bookmks:
                     if bookmk:
                         BOOKMARKS.append(bookmk.strip())
-        if not API_KEY and BROWSER:
+        if not API_KEY and not BROWSER:
+            sys.stderr.write('API_KEY or browser missing in .cliqrc! Attempting anyways..\n')
             try:
                 API_KEY = lines[0].strip()
                 BROWSER = lines[1].strip() 
                 return API_KEY, BROWSER, BOOKMARKS
             except IndexError:
-                sys.stderr.write('Error reading config\n')
                 return '', '', ''
         else:
             return API_KEY, BROWSER, BOOKMARKS
@@ -414,7 +424,7 @@ def open_browser(cfg, link):
         if cfg['br']:
             cfg['br'].open(link)
         else:
-            sys.stderr.write('Could not locate runnable browser, make sure '                    'the browser path in config is correct.'
+            sys.stderr.write('Could not locate runnable browser, make sure '                    'you entered a valid browser in .cliqrc'
                 ' Cygwin users use "cygwin"\n')
 
 
@@ -521,7 +531,7 @@ def search(cfg, args):
             if not args['wolfram']:
                 wolf_html = get_wolfram_html(cfg, url_args)
             if not wolfram_search(wolf_html):
-                bing_search(args, bing_html)
+                bing_search(cfg, args, bing_html)
 
 
 def cliquery(args):
