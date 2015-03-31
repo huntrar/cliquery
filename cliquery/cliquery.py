@@ -18,7 +18,7 @@ import sys
 import time
 import urllib2
 import webbrowser
-#from . import __version__
+from . import __version__
 
 import lxml.html as lh
 
