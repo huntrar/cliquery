@@ -18,7 +18,7 @@ import sys
 import time
 import urllib2
 import webbrowser
-from . import __version__
+#from . import __version__
 
 import lxml.html as lh
 
@@ -62,7 +62,7 @@ def read_config(args):
                     if bookmk:
                         BOOKMARKS.append(bookmk.strip())
         if not API_KEY and not BROWSER:
-            sys.stderr.write('API_KEY or browser missing in .cliqrc! Attempting anyways..\n')
+            sys.stderr.write('API_KEY or browser missing in %s. Attempting anyways..\n' % CONFIG) 
             try:
                 API_KEY = lines[0].strip()
                 BROWSER = lines[1].strip() 
