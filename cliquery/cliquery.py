@@ -361,7 +361,14 @@ def open_first(cfg, args, html):
             if not re.search('(ad|Ad|AD)(?=\W)', link): # Basic ad block
                 if 'http://' in link or 'https://' in link:
                     if args['describe']:
-                        describe_page(link)
+                        query = args['query']
+                        if not '.' in query:
+                            describe_page(link)
+                        else:
+                            if 'http://' not in query or 'https://' not in query:
+                                describe_page('http://' + query)
+                            else:
+                                describe_page(query)
                     else:
                         open_url(cfg, args, link)
                     sys.exit()
@@ -504,13 +511,8 @@ def search(cfg, args):
         open_url(cfg, args, url_args)
     elif args['search']:
         bing_search(cfg, args, html)
-    elif args['describe']:
-        if '.' in url_args:
-            open_first(cfg, args, html)   
-        else:
-            describe_page(url_args)
-    elif args['first']:
-        open_first(cfg, args, html)
+    elif args['describe'] or args['first']:
+        open_first(cfg, args, html)   
     elif args['wolfram']:
         success = wolfram_search(html)
         if not success:
