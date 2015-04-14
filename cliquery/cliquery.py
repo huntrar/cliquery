@@ -218,13 +218,13 @@ def bing_search(cfg, args, html):
     if links and link_descs:
         print_links = True
         while print_links:
-            print('- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
-                 ' - - - - - - - - - - - -')
+            print('+ + + + + + + + + + + + + + + + + + + + + + + + + + + +'
+                 ' + + + + + + + + + + + +')
             for i in xrange(len(links)):
                 print_desc = (str(i+1) + '. ' + link_descs[i]).encode('utf-8')
                 print(print_desc) # Print link choices
-            print('- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
-                 ' - - - - - - - - - - - -')
+            print('+ + + + + + + + + + + + + + + + + + + + + + + + + + + +'
+                 ' + + + + + + + + + + + +')
             try:
                 print(':'),
                 link_num = raw_input('').strip()
@@ -463,14 +463,16 @@ def describe_page(url):
     body = ''.join(html.xpath('//body//*[not(self::script) and '
          'not(self::style)]/text()')).split('\n')
     if not body:
-        sys.stderr.write('Description not found.\n')
+        print(url.encode('utf-8') + '\n')
+        print('Extended description not found.\n')
         return False
     stripped_body = []
     for b in body:
         stripped_body.append(b.strip())
     filtered_body = filter(None, stripped_body)
     if not filtered_body:
-        sys.stderr.write('Description not found.\n')
+        print(url.encode('utf-8') + '\n')
+        print('Extended description not found.\n')
         return False
     body_sum = 0
     for b in filtered_body:
@@ -484,15 +486,22 @@ def describe_page(url):
     if print_body:
         print(url.encode('utf-8') + '\n')
         see_more = False
+        MAX_MSG = 200
+        msg_count = 0
         for msg in print_body:
-            print('\n' + msg.encode('utf-8'))
-            print('See more? (y/n):'),
-            ans = raw_input('')
-            if not check_input(ans):
-                break
-            see_more = True
+            msg_count += len(msg)
+            print(msg.encode('utf-8'))
+            if msg_count > MAX_MSG:
+                print('See more? (y/n):'),
+                if not check_input(raw_input('')):
+                    break
+                see_more = True
+                msg_count = 0
+                print('\n+ + + + + + + + + + + + + + + + + + + + + + + + + + + +'
+                 ' + + + + + + + + + + + +')
     else:
-        sys.stderr.write('Description not found.\n')
+        print(url.encode('utf-8') + '\n')
+        print('Extended description not found.\n')
         return False
     if not see_more: 
         time.sleep(1)
