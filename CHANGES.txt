@@ -1,3 +1,18 @@
+0.3.2
+------
+
+ - renamed CLIQuery to cliquery
+
+0.3.1
+------
+
+ - improved description output readability 
+
+0.3.0
+------
+
+ - fixed desc flag behavior when given standalone
+
 0.2.9
 ------
 

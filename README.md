@@ -1,7 +1,7 @@
-# CLIQuery
+# cliquery
 
 ## a command line search engine and browsing tool
-CLIQuery is an intermediary tool between the command line and any GUI based browser. It supports searching, browsing, bookmarking, and previewing webpages through a mix of command line output and browser invocation. It is **_NOT_** a command line browser (if that's what you are searching for, search for Lynx instead)!
+cliquery is an intermediary tool between the command line and any GUI based browser. It supports searching, browsing, bookmarking, and previewing webpages through a mix of command line output and browser invocation. It is **_NOT_** a command line browser (if that's what you are searching for, search for Lynx instead)!
 
 The results? Less clicking, faster results, and *no limitations to normal browsing!*
 

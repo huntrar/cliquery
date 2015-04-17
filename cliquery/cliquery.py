@@ -2,7 +2,7 @@
 
 #############################################################
 #                                                           #
-# CLIQuery - a command line search engine and browsing tool #
+# cliquery - a command line search engine and browsing tool #
 # written by Hunter Hammond (huntrar@gmail.com)             #
 #                                                           #
 #############################################################
