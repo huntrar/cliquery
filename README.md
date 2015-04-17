@@ -15,18 +15,30 @@ usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-v] [QUERY [QUERY ...]]
 
 a command line search engine and browsing tool
 
-  positional arguments:
-    QUERY           keywords to search
 
-  optional arguments:
-    -h, --help      show this help message and exit
-    -s, --search    display search links
-    -f, --first     open first link
-    -o, --open      open link manually
-    -w, --wolfram   display wolfram results
-    -d, --describe  display page snippet
-    -b, --bookmark  view and modify bookmarks
-    -v, --version   display current version
+&nbsp;&nbsp;positional arguments:
+
+&nbsp;&nbsp;&nbsp;&nbsp;QUERY           keywords to search
+
+
+&nbsp;&nbsp;optional arguments:
+
+&nbsp;&nbsp;&nbsp;&nbsp;-h, --help      show this help message and exit
+
+&nbsp;&nbsp;&nbsp;&nbsp;-s, --search    display search links
+
+&nbsp;&nbsp;&nbsp;&nbsp;-f, --first     open first link
+
+&nbsp;&nbsp;&nbsp;&nbsp;-o, --open      open link manually
+
+&nbsp;&nbsp;&nbsp;&nbsp;-w, --wolfram   display wolfram results
+
+&nbsp;&nbsp;&nbsp;&nbsp;-d, --describe  display page snippet
+
+&nbsp;&nbsp;&nbsp;&nbsp;-b, --bookmark  view and modify bookmarks
+
+&nbsp;&nbsp;&nbsp;&nbsp;-v, --version   display current version
+
 
 ## Author
 * Hunter Hammond (huntrar@gmail.com)
