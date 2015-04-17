@@ -63,7 +63,10 @@ a command line search engine and browsing tool
 
     http://www.cs.rit.edu/~ncs/Courses/570/UserGuide/OpenGLonWin-11.html
 
-    NextPrevUpTopContentsIndex Using OpenGL on Windows: A Simple ExampleAny OpenGL program for Windows has to take care of some window-dependent setup. There are several ways this setup can be done, for example, using the GLUT library or using GDI and WGL directly. This guide focuses on using the Windows OpenGL API directly.
+    NextPrevUpTopContentsIndex Using OpenGL on Windows: A Simple ExampleAny OpenGL program for Windows 
+    has to take care of some window-dependent setup. There are several ways this setup can be done, for 
+    example, using the GLUT library or using GDI and WGL directly. This guide focuses on using the 
+    Windows OpenGL API directly.
     See more? (y/n): n
     ```
 
