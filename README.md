@@ -48,28 +48,23 @@ a command line search engine and browsing tool
 
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility
     ```
-    $ cliquery a simple example
-    > - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    > 1. simple sentence - definition and examples of simple ...
-    > 2. HTML Examples - W3Schools Online Web Tutorials
-    > 3. A Simple Example | A Quick Rexx Tutorial | InformIT
-    > 4. Leaflet.js - A Simple Example - CodeProject
-    > 5. Using OpenGL on Windows: A Simple Example - Computer ??
-    > 6. Simple HTML example - Java Tutorials - Learn Java Online ...
-    > 7. Example of a simple HTML page
-    > - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    > : d 5
+    + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+    1. simple sentence - definition and examples of simple ...
+    2. Leaflet.js - A Simple Example - CodeProject
+    3. Simple random sample - Wikipedia, the free encyclopedia
+    4. A Simple Guide to HTML - Welcome
+    5. MVC3 DropDownListFor - a simple example? - Stack Overflow
+    6. Using OpenGL on Windows: A Simple Example
+    7. Reconstructing trees: A simple example - Evolution
+    8. A Simple Example - Logarithms
+    + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+    : d 6
 
 
-    > http://www.cs.rit.edu/~ncs/Courses/570/UserGuide/OpenGLonWin-11.html
+    http://www.cs.rit.edu/~ncs/Courses/570/UserGuide/OpenGLonWin-11.html
 
-
-    > NextPrevUpTopContentsIndex Using OpenGL on Windows: A Simple Example
-    > Any OpenGL program for Windows has to take care of some window-dependent
-    > setup. There are several ways this setup can be done, for example, using
-    > the GLUT library or using GDI and WGL directly. This guide focuses on
-    > using the Windows OpenGL API directly.
-    > See more? (y/n): n
+    NextPrevUpTopContentsIndex Using OpenGL on Windows: A Simple ExampleAny OpenGL program for Windows has to take care of some window-dependent setup. There are several ways this setup can be done, for example, using the GLUT library or using GDI and WGL directly. This guide focuses on using the Windows OpenGL API directly.
+    See more? (y/n): n
     ```
 
 * To choose multiple links at once, a range may be specified by separating the start and end range with a dash. Leaving one end of the range blank will choose all links until the other end of that range. For example, given 10 links, entering 5- would effectively be the same as entering 5-10.
