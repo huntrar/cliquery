@@ -1,7 +1,7 @@
 # cliquery
 
-## a command line search engine and browsing tool
-cliquery is an intermediary tool between the command line and any GUI based browser. It supports searching, browsing, bookmarking, and previewing webpages through a mix of command line output and browser invocation. It is **_NOT_** a command line browser (if that's what you are searching for, search for Lynx instead)!
+## a command-line browsing interface
+cliquery is a tool meant to intertwine the features of a conventional browser and the quickness of the command-line. It not only speeds up browsing and searching, but also supports other features such as bookmarks and webpage previews. cliquery is **_NOT_** a command-line browser such as Lynx, but instead provides a mixture of terminal output and browser invocation for optimal usage speed.
 
 The results? Less clicking, faster results, and *no limitations to normal browsing!*
 
@@ -13,7 +13,7 @@ The results? Less clicking, faster results, and *no limitations to normal browsi
 ## Usage
 usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-v] [QUERY [QUERY ...]]
 
-a command line search engine and browsing tool
+a command-line browsing interfaace
 
 
 &nbsp;&nbsp;positional arguments:
