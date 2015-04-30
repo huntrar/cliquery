@@ -1,7 +1,7 @@
 # cliquery
 
 ## a command-line browsing interface
-cliquery is a tool meant to intertwine the features of a conventional browser and the quickness of the command-line. It not only speeds up browsing and searching, but also supports other features such as bookmarks and webpage previews. cliquery is **_NOT_** a command-line browser such as Lynx, but instead provides a mixture of terminal output and browser invocation.
+cliquery is a command-line interface meant to bundle important features of a conventional browser and the quickness of the command-line. It supports previewing webpages, bookmarks, 'Feeling Lucky' searches, as well as regular web searches or simply entering URI's directly. cliquery is **_NOT_** a command-line browser such as Lynx, but instead shares a mixture of terminal output and browser invocation.
 
 The results? Less clicking, faster results, and *no limitations to normal browsing!*
 
