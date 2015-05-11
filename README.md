@@ -37,6 +37,8 @@ a command-line browsing interfaace
 
 &nbsp;&nbsp;&nbsp;&nbsp;-b, --bookmark  view and modify bookmarks
 
+&nbsp;&nbsp;&nbsp;&nbsp;-c, --config   print location of config file
+
 &nbsp;&nbsp;&nbsp;&nbsp;-v, --version   display current version
 
 

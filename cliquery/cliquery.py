@@ -581,6 +581,8 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
                         action='store_true')
+    parser.add_argument('-c', '--config', help='print location of config file',
+                        action='store_true')
     parser.add_argument('-v', '--version', help='display current version',
                         action='store_true')
     return parser
@@ -592,6 +594,10 @@ def command_line_runner():
     
     if args['version']:
         print(__version__)
+        return
+
+    if args['config']:
+        print(CONFIG)
         return
         
     if not args['query'] and not args['bookmark']:
