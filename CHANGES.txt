@@ -1,3 +1,8 @@
+0.4.0
+------
+
+ - rehaul of interactive mode, can now reuse most flags without exiting the prompt
+
 0.3.3
 ------
 
