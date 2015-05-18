@@ -1,3 +1,8 @@
+0.4.1
+------
+
+ - python 3 support, switched urllib2 to requests and other minor changes
+
 0.4.0
 ------
 

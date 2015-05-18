@@ -9,16 +9,15 @@
 
 import argparse
 from collections import OrderedDict
-import itertools
 import os
 import random
 import re
 from subprocess import call
 import sys
 import time
-import urllib2
+import requests
 import webbrowser
-from . import __version__
+from __init__ import __version__
 
 import lxml.html as lh
 
@@ -28,6 +27,12 @@ USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/2010
                 'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0',
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5',
                 'Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5')
+
+if sys.version < '3':
+    try:
+        input = raw_input
+    except NameError:
+        pass
 
 CONFIG_FPATH = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
 
@@ -172,8 +177,9 @@ def get_html(args):
 def get_html_resp(url):
     try:
         # Get HTML response
-        request = urllib2.Request(url, headers={'User-Agent' : random.choice(USER_AGENTS)})
-        return lh.parse(urllib2.urlopen(request))
+        headers={'User-Agent' : random.choice(USER_AGENTS)}
+        request = requests.get(url, headers=headers)
+        return lh.fromstring(request.text.encode('utf-8'))
     except Exception as e:
         sys.stderr.write('Failed to retrieve ' + url + '\n')
         sys.stderr.write(str(e))
@@ -232,13 +238,13 @@ def bing_search(args, html):
         while print_links:
             print('+ + + + + + + + + + + + + + + + + + + + + + + + + + + +'
                  ' + + + + + + + + + + + +')
-            for i in xrange(len(links)):
+            for i in range(len(links)):
                 print_desc = (str(i+1) + '. ' + link_descs[i]).encode('utf-8')
                 print(print_desc) # Print link choices
             print('+ + + + + + + + + + + + + + + + + + + + + + + + + + + +'
                  ' + + + + + + + + + + + +')
             try:
-                link_num = raw_input(': ').strip()
+                link_num = input(': ').strip()
                 flag_lookup = { 's' : 'search',
                                 'o' : 'open',
                                 'w' : 'wolfram',
@@ -255,7 +261,7 @@ def bing_search(args, html):
                         '\tw, wolfram   display wolfram results\n'
                         '\td, describe  display page snippet\n'
                         '\tb, bookmark  view and modify bookmarks\n')
-                    link_num = raw_input(': ').strip()
+                    link_num = input(': ').strip()
                     link_cmd = link_num.split(' ')[0]
 
                 print('\n')
@@ -263,7 +269,7 @@ def bing_search(args, html):
                 open_override = False
                 desc_override = False
                 continue_exec = True
-                for k,v in flag_lookup.iteritems():
+                for k,v in flag_lookup.items():
                     if k == link_cmd or v == link_cmd:
                         if k == 'o':
                             link_num = ''.join(link_num.strip().split(' ')[1:])
@@ -296,15 +302,15 @@ def bing_search(args, html):
                                 open_url(args, links[int(num)-1], open_override, desc_override) 
                     elif check_input(start_num) and check_input(end_num):
                         if int(start_num) > 0 and int(end_num) <= len(links)+1:
-                            for i in xrange(int(start_num), int(end_num)+1, 1):
+                            for i in range(int(start_num), int(end_num)+1, 1):
                                 open_url(args, links[i-1], open_override, desc_override) 
                     elif check_input(start_num):
                         if int(start_num) > 0:
-                            for i in xrange(int(start_num), len(links)+1, 1):
+                            for i in range(int(start_num), len(links)+1, 1):
                                 open_url(args, links[i-1], open_override, desc_override) 
                     elif check_input(end_num):
                         if int(end_num) < len(links)+1:
-                            for i in xrange(1, int(end_num)+1, 1):
+                            for i in range(1, int(end_num)+1, 1):
                                 open_url(args, links[i-1], open_override, desc_override) 
                     else:
                         print_links = check_input(link_num)
@@ -335,12 +341,12 @@ def wolfram_search(html):
         output_list = []
         if len(entries) == 1 and entries[0] == '{}':
             return False
-        for title, entry in itertools.izip(titles, entries):
+        for title, entry in zip(titles, entries):
             try:
                 if ' |' in entry:
                     entry = '\n\t' + entry.replace(' |', ':').replace('\n', '\n\t')
                 if title == 'Result':
-                    output_list.append(entry).encode('utf-8')
+                    output_list.append(entry.encode('utf-8'))
                 else:
                     output_list.append(title + ': ' + entry).encode('utf-8')
             except (AttributeError, UnicodeEncodeError):
@@ -349,7 +355,7 @@ def wolfram_search(html):
             return False
         elif len(output_list) > 2:
             print('\n'.join(output_list[:2]).encode('utf-8'))
-            if check_input(raw_input('See more? (y/n): ')):
+            if check_input(input('See more? (y/n): ')):
                 print ('\n'.join(output_list[2:]).encode('utf-8'))
         else:
             print ('\n'.join(output_list).encode('utf-8'))
@@ -418,7 +424,7 @@ def open_bookmark(args, link_arg, link_num = []):
     bookmarks = CONFIG['bookmarks']
     if not link_arg:
         print('Bookmarks:')
-        for i in xrange(len(bookmarks)):
+        for i in range(len(bookmarks)):
             print(str(i+1) + '. ' + bookmarks[i])
     elif check_input(link_arg):
         try:
@@ -451,7 +457,7 @@ def del_bookmark(link_num):
         f.write('api_key: ' + CONFIG['api_key'])
         f.write('\nbrowser: ' + CONFIG['browser'])
         f.write('\nbookmarks: ')
-        for i in xrange(len(bookmarks)):
+        for i in range(len(bookmarks)):
             if i != int(link_num)-1:
                 f.write(bookmarks[i] + '\n')
 
@@ -497,28 +503,28 @@ def describe_page(url):
     body = ''.join(html.xpath('//body//*[not(self::script) and '
          'not(self::style)]/text()')).split('\n')
     if not body:
-        print(url.encode('utf-8') + '\n')
+        print(url.encode('utf-8') + '\n'.encode('ascii'))
         print('Extended description not found.\n')
         return False
     stripped_body = []
     for b in body:
         stripped_body.append(b.strip())
-    filtered_body = filter(None, stripped_body)
+    filtered_body = list(filter(None, stripped_body))
     if not filtered_body:
-        print(url.encode('utf-8') + '\n')
+        print(url.encode('utf-8') + '\n'.encode('ascii'))
         print('Extended description not found.\n')
         return False
     body_sum = 0
     for b in filtered_body:
         body_sum += len(b)
-    body_avg_sum = body_sum / len(filtered_body)
+    body_avg_sum = body_sum / len(filtered_body)+1
     print_body = []
     for b in filtered_body:
         # Qualifying describe statements are at least half the average statement length
         if len(b) > (body_avg_sum / 2): 
             print_body.append(b)
     if print_body:
-        print(url.encode('utf-8') + '\n')
+        print(url.encode('utf-8') + '\n'.encode('ascii'))
         see_more = False
         MAX_MSG = 200
         msg_count = 0
@@ -526,14 +532,14 @@ def describe_page(url):
             msg_count += len(msg)
             print(msg.encode('utf-8'))
             if msg_count > MAX_MSG:
-                if not check_input(raw_input('See more? (y/n): ')):
+                if not check_input(input('See more? (y/n): ')):
                     break
                 see_more = True
                 msg_count = 0
                 print('\n+ + + + + + + + + + + + + + + + + + + + + + + + + + + +'
                  ' + + + + + + + + + + + +')
     else:
-        print(url.encode('utf-8') + '\n')
+        print(url.encode('utf-8') + '\n'.encode('ascii'))
         print('Extended description not found.\n')
         return False
     if not see_more: 
