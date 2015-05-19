@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 #############################################################
 #                                                           #
@@ -6,6 +5,7 @@
 # written by Hunter Hammond (huntrar@gmail.com)             #
 #                                                           #
 #############################################################
+
 
 import argparse
 from collections import OrderedDict
@@ -17,7 +17,7 @@ import sys
 import time
 import requests
 import webbrowser
-from __init__ import __version__
+from . import __version__
 
 import lxml.html as lh
 
