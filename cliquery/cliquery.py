@@ -12,10 +12,10 @@ from collections import OrderedDict
 import os
 import random
 import re
+import requests
 from subprocess import call
 import sys
 import time
-import requests
 import webbrowser
 from . import __version__
 
@@ -281,7 +281,7 @@ def bing_search(args, html):
                             link_num = link_num.strip().split(' ')[1:]
                             args = change_args(args, link_num, v)
                             continue_exec = False
-                            cliquery(args)
+                            search(args)
 
                 if continue_exec:
                     link_nums = []
@@ -490,12 +490,16 @@ def open_url(args, links, open_override = False, desc_override = False):
         else:
             describe_page(links)
     else:
-        links, is_list = clean_url(links)
-        if is_list:
-            for link in links:
-                open_browser(link)
+        if not links:
+            open_browser('')
         else:
-            open_browser(links)
+            links, is_list = clean_url(links)
+            if is_list:
+                for link in links:
+                    open_browser(link)
+            else:
+                open_browser(links)
+
 
 
 def describe_page(url):
@@ -549,6 +553,7 @@ def describe_page(url):
     
 
 def search(args):
+    args['query'] = process_args(args)
     html = get_html(args)
     url_args = args['query']
     continue_search = False
@@ -583,11 +588,6 @@ def search(args):
                 bing_search(args, bing_html)
 
 
-def cliquery(args):
-    args['query'] = process_args(args)
-    search(args)
-
-
 def get_parser():
     parser = argparse.ArgumentParser(description='a command line search engine and browsing tool')
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*', 
@@ -596,7 +596,7 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-f', '--first', help='open first link',
                         action='store_true')
-    parser.add_argument('-o', '--open', help='open link manually',
+    parser.add_argument('-o', '--open', help='open link or browser manually',
                         action='store_true')
     parser.add_argument('-w', '--wolfram', help='display wolfram results',
                         action='store_true')
@@ -636,12 +636,12 @@ def command_line_runner():
         print(CONFIG_FPATH)
         return
         
-    if not args['query'] and not args['bookmark']:
+    if not args['query'] and not args['bookmark'] and not args['open']:
         parser = get_parser()
         parser.print_help()
         return 
     else:
-        cliquery(args)
+        search(args)
         
 
 if __name__ == '__main__':

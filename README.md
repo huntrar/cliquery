@@ -29,7 +29,7 @@ a command-line browsing interfaace
 
 &nbsp;&nbsp;&nbsp;&nbsp;-f, --first     open first link
 
-&nbsp;&nbsp;&nbsp;&nbsp;-o, --open      open link manually
+&nbsp;&nbsp;&nbsp;&nbsp;-o, --open      open link or browser manually
 
 &nbsp;&nbsp;&nbsp;&nbsp;-w, --wolfram   display wolfram results
 
@@ -37,7 +37,7 @@ a command-line browsing interfaace
 
 &nbsp;&nbsp;&nbsp;&nbsp;-b, --bookmark  view and modify bookmarks
 
-&nbsp;&nbsp;&nbsp;&nbsp;-c, --config   print location of config file
+&nbsp;&nbsp;&nbsp;&nbsp;-c, --config    print location of config file
 
 &nbsp;&nbsp;&nbsp;&nbsp;-v, --version   display current version
 
