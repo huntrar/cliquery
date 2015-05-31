@@ -65,6 +65,9 @@ def read_config(args):
         bookmarks = []
         if args['bookmark']:
             bookmks = f.read()
+            print('testing')
+            for f in bookmks:
+                print(f)
             if 'bookmarks:' in bookmks:
                 bookmks = bookmks.replace('bookmarks:', '').split('\n')
                 for bookmk in bookmks:
@@ -589,7 +592,7 @@ def search(args):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='a command line search engine and browsing tool')
+    parser = argparse.ArgumentParser(description='a command-line browsing interface')
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*', 
                         help='keywords to search')
     parser.add_argument('-s', '--search', help='display search links',

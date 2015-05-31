@@ -13,7 +13,7 @@ The results? Less clicking, faster results, and *no limitations to regular brows
 ## Usage
 usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-v] [QUERY [QUERY ...]]
 
-a command-line browsing interfaace
+a command-line browsing interface
 
 
 &nbsp;&nbsp;positional arguments:
