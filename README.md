@@ -15,7 +15,6 @@ usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-v] [QUERY [QUERY ...]]
 
 a command-line browsing interface
 
-
 &nbsp;&nbsp;positional arguments:
 
 &nbsp;&nbsp;&nbsp;&nbsp;QUERY           keywords to search
