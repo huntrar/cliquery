@@ -1,3 +1,8 @@
+0.4.5
+------
+
+ - removed bookmark test code that snuck into commit
+
 0.4.4
 ------
 

@@ -65,9 +65,6 @@ def read_config(args):
         bookmarks = []
         if args['bookmark']:
             bookmks = f.read()
-            print('testing')
-            for f in bookmks:
-                print(f)
             if 'bookmarks:' in bookmks:
                 bookmks = bookmks.replace('bookmarks:', '').split('\n')
                 for bookmk in bookmks:
