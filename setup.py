@@ -47,7 +47,7 @@ setup(
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
     ],
-    keywords='cliquery command line serach open bookmark console answer',
+    keywords='cliquery command line search browser bookmark console answer',
     author='Hunter Hammond',
     author_email='huntrar@gmail.com',
     maintainer='Hunter Hammond',
