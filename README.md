@@ -16,29 +16,27 @@ usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-v] [QUERY [QUERY ...]]
 a command-line browsing interface
 
 &nbsp;&nbsp;positional arguments:
-
-&nbsp;&nbsp;&nbsp;&nbsp;QUERY           keywords to search
+&nbsp;&nbsp;&nbsp;&nbsp;QUERY&nbsp;&nbsp;&nbsp;keywords to search
 
 
 &nbsp;&nbsp;optional arguments:
+&nbsp;&nbsp;&nbsp;&nbsp;-h, --help&nbsp;&nbsp;show this help message and exit
 
-&nbsp;&nbsp;&nbsp;&nbsp;-h, --help      show this help message and exit
+&nbsp;&nbsp;&nbsp;&nbsp;-s, --search&nbsp;&nbsp;display search links
 
-&nbsp;&nbsp;&nbsp;&nbsp;-s, --search    display search links
+&nbsp;&nbsp;&nbsp;&nbsp;-f, --first&nbsp;&nbsp;open first link
 
-&nbsp;&nbsp;&nbsp;&nbsp;-f, --first     open first link
+&nbsp;&nbsp;&nbsp;&nbsp;-o, --open&nbsp;&nbsp;open link or browser manually
 
-&nbsp;&nbsp;&nbsp;&nbsp;-o, --open      open link or browser manually
+&nbsp;&nbsp;&nbsp;&nbsp;-w, --wolfram&nbsp;display wolfram results
 
-&nbsp;&nbsp;&nbsp;&nbsp;-w, --wolfram   display wolfram results
+&nbsp;&nbsp;&nbsp;&nbsp;-d, --describe&nbsp;display page snippet
 
-&nbsp;&nbsp;&nbsp;&nbsp;-d, --describe  display page snippet
+&nbsp;&nbsp;&nbsp;&nbsp;-b, --bookmark&nbsp;view and modify bookmarks
 
-&nbsp;&nbsp;&nbsp;&nbsp;-b, --bookmark  view and modify bookmarks
+&nbsp;&nbsp;&nbsp;&nbsp;-c, --config&nbsp;print location of config file
 
-&nbsp;&nbsp;&nbsp;&nbsp;-c, --config    print location of config file
-
-&nbsp;&nbsp;&nbsp;&nbsp;-v, --version   display current version
+&nbsp;&nbsp;&nbsp;&nbsp;-v, --version&nbsp;display current version
 
 
 ## Author
