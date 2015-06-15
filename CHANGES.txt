@@ -1,3 +1,9 @@
+0.4.6
+------
+
+ - can add and delete bookmarks using -b add [url] and -b del [url] or [num]
+ - can now open and delete bookmarks using a substring of the url
+
 0.4.5
 ------
 
