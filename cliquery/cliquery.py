@@ -17,7 +17,7 @@ from subprocess import call
 import sys
 import time
 import webbrowser
-from . import __version__
+#from . import __version__
 
 import lxml.html as lh
 
@@ -91,19 +91,25 @@ def change_args(args, new_query, new_arg):
 
 
 def check_input(u_input, num = False):
-    is_num = False
     try:
         u_inp = u_input.lower()
     except AttributeError:
-        u_inp = u_input
-        is_num = True
+        pass
     if u_inp == 'q' or u_inp == 'quit' or u_inp == 'exit':
         sys.exit()
     if not num:
         if u_inp == 'y' or u_inp == 'yes':
             return True
         return False
-    return is_num
+    return check_num(u_input)
+
+
+def check_num(num):
+    try:
+        n = int(num)
+        return True
+    except ValueError:
+        return False
 
 
 def clean_url(urls):
@@ -450,6 +456,8 @@ def open_bookmark(args, link_arg, link_num = []):
                 link_arg = bk_idx
         if check_input(link_arg, num=True):
             del_bookmark(link_arg)
+        else:
+            sys.stderr.write('Could not delete bookmark ' + str(link_arg))
     elif 'add+' in link_arg:
         link_arg = link_arg.replace('add+', '').strip()
         if 'http://' not in link_arg or 'https://' not in link_arg:
@@ -470,9 +478,9 @@ def open_bookmark(args, link_arg, link_num = []):
             sys.stderr.write('Bookmark ' + link_arg + ' not found.\n')
     else:
         sys.stderr.write('Usage: '
-                        '\nopen: [num] or [url]'
+                        '\nopen: [num] or [suburl]'
                         '\nadd: add [url]'
-                        '\ndelete: del [num] or [url]'
+                        '\ndelete: del [num] or [suburl]'
                         '\n')
 
 
