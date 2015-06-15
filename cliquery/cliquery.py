@@ -90,18 +90,20 @@ def change_args(args, new_query, new_arg):
     return args
 
 
-def check_input(u_input):
-    u_inp = u_input.lower()
-    if u_inp == 'y' or u_inp == 'yes':
-        return True
-    elif u_inp == 'q' or u_inp == 'quit' or u_inp == 'exit':
+def check_input(u_input, num = False):
+    is_num = False
+    try:
+        u_inp = u_input.lower()
+    except AttributeError:
+        u_inp = u_input
+        is_num = True
+    if u_inp == 'q' or u_inp == 'quit' or u_inp == 'exit':
         sys.exit()
-    else:
-        try:
-            u_inp = int(u_input)
+    if not num:
+        if u_inp == 'y' or u_inp == 'yes':
             return True
-        except ValueError:
-            return False 
+        return False
+    return is_num
 
 
 def clean_url(urls):
@@ -293,29 +295,33 @@ def bing_search(args, html):
                     if ',' in link_num and len(link_num) >= 3:
                         link_nums = link_num.split(',')
                         for num in link_nums:
-                            if not check_input(num):
+                            if not check_input(num, num=True):
                                 print_links = False
 
                     if link_nums and print_links:
                         for num in link_nums:
                             if int(num) > 0 and int(num) <= len(links):
                                 open_url(args, links[int(num)-1], open_override, desc_override) 
-                    elif check_input(start_num) and check_input(end_num):
-                        if int(start_num) > 0 and int(end_num) <= len(links)+1:
-                            for i in range(int(start_num), int(end_num)+1, 1):
-                                open_url(args, links[i-1], open_override, desc_override) 
-                    elif check_input(start_num):
-                        if int(start_num) > 0:
-                            for i in range(int(start_num), len(links)+1, 1):
-                                open_url(args, links[i-1], open_override, desc_override) 
-                    elif check_input(end_num):
-                        if int(end_num) < len(links)+1:
-                            for i in range(1, int(end_num)+1, 1):
-                                open_url(args, links[i-1], open_override, desc_override) 
                     else:
-                        print_links = check_input(link_num)
-                        if link_num and int(link_num) > 0 and int(link_num) < len(links)+1:
-                            open_url(args, links[int(link_num)-1], open_override, desc_override)
+                        start = check_input(start_num, num=True)
+                        end = check_input(end_num, num=True)
+
+                        if start and end:
+                            if int(start_num) > 0 and int(end_num) <= len(links)+1:
+                                for i in range(int(start_num), int(end_num)+1, 1):
+                                    open_url(args, links[i-1], open_override, desc_override) 
+                        elif start:
+                            if int(start_num) > 0:
+                                for i in range(int(start_num), len(links)+1, 1):
+                                    open_url(args, links[i-1], open_override, desc_override) 
+                        elif end:
+                            if int(end_num) < len(links)+1:
+                                for i in range(1, int(end_num)+1, 1):
+                                    open_url(args, links[i-1], open_override, desc_override) 
+                        else:
+                            print_links = check_input(link_num, num=True)
+                            if link_num and int(link_num) > 0 and int(link_num) < len(links)+1:
+                                open_url(args, links[int(link_num)-1], open_override, desc_override)
             except (ValueError, IndexError):
                 pass
     return False
@@ -420,27 +426,54 @@ def open_first(args, html):
         sys.exit()
 
 
+def search_bookmark(link_arg):
+    bookmarks = CONFIG['bookmarks']
+    link_arg = link_arg.strip()
+    for i in range(len(bookmarks)):
+        if link_arg in bookmarks[i]:
+            return i+1
+    return -1
+
+
 def open_bookmark(args, link_arg, link_num = []):
     bookmarks = CONFIG['bookmarks']
+    bk_idx = search_bookmark(link_arg)
     if not link_arg:
         print('Bookmarks:')
         for i in range(len(bookmarks)):
             print(str(i+1) + '. ' + bookmarks[i])
-    elif check_input(link_arg):
+    elif 'del+' in link_arg:
+        link_arg = link_arg.replace('del+', '').strip()
+        if not check_input(link_arg, num=True):
+            bk_idx = search_bookmark(link_arg)
+            if bk_idx > 0:
+                link_arg = bk_idx
+        if check_input(link_arg, num=True):
+            del_bookmark(link_arg)
+    elif 'add+' in link_arg:
+        link_arg = link_arg.replace('add+', '').strip()
+        if 'http://' not in link_arg or 'https://' not in link_arg:
+            link_arg = 'http://' + link_arg
+        if '.' not in link_arg:
+            link_arg = link_arg + '.com'
+        add_bookmark(link_arg, link_num)
+    elif check_input(link_arg, num=True):
+        try:
+            open_url(args, bookmarks[int(link_arg) - 1])
+        except IndexError:
+            sys.stderr.write('Bookmark ' + link_arg + ' not found.\n')
+    elif bk_idx > 0:
+        link_arg = bk_idx
         try:
             open_url(args, bookmarks[int(link_arg) - 1])
         except IndexError:
             sys.stderr.write('Bookmark ' + link_arg + ' not found.\n')
     else:
-        if 'del+' in link_arg:
-            link_arg = link_arg.replace('del+', '').strip()
-            del_bookmark(bookmarks, link_arg)
-        else:
-            if 'http://' not in link_arg or 'https://' not in link_arg:
-                link_arg = 'http://' + link_arg
-            if '.' not in link_arg:
-                link_arg = link_arg + '.com'
-            add_bookmark(link_arg, link_num)
+        sys.stderr.write('Usage: '
+                        '\nopen: [num] or [url]'
+                        '\nadd: add [url]'
+                        '\ndelete: del [num] or [url]'
+                        '\n')
 
 
 def add_bookmark(links, link_num):
