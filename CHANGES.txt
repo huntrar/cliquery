@@ -1,3 +1,9 @@
+0.4.9
+------
+
+ - fixed UnboundLocalError when api_key not in config
+ - made Wolfram API key optional
+
 0.4.8
 ------
 

@@ -52,7 +52,9 @@ def read_config(args):
     check_config()
     with open(CONFIG_FPATH, 'r') as f:
         lines = []
-        # API key and browser name should be in first two lines of .cliqrc
+        api_key = ''
+        browser = ''
+        # api_key: and browser: must be in first two lines
         for i in range(2):
             line = f.readline()
             if 'api_key:' in line:
@@ -71,7 +73,6 @@ def read_config(args):
                     if bookmk:
                         bookmarks.append(bookmk.strip())
         if not api_key and not browser:
-            sys.stderr.write('api_key or browser missing in %s. Attempting anyways..\n' % CONFIG_FPATH) 
             try:
                 api_key = lines[0].strip()
                 browser = lines[1].strip() 
@@ -676,6 +677,9 @@ def command_line_runner():
     if args['config']:
         print(CONFIG_FPATH)
         return
+
+    if not api_key:
+        args['wolfram'] = False
         
     if not args['query'] and not args['bookmark'] and not args['open']:
         parser = get_parser()
