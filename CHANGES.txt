@@ -1,3 +1,13 @@
+0.5.3
+------
+
+ - changed instances of type() to isinstance()
+
+0.5.2
+------
+
+ - removed some misplaced lines
+
 0.5.1
 ------
 

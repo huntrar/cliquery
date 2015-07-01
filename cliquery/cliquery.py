@@ -131,7 +131,7 @@ def check_num(num):
 def clean_url(urls):
     # Returns True if list, False otherwise
     clean_urls = []
-    if type(urls) == list:
+    if isinstance(urls, list):
         for url in urls:
             if 'http://' not in url and 'https://' not in url:
                 clean_urls.append('http://' + url)
@@ -250,7 +250,7 @@ def bing_search(args, html):
                 else:
                     ld_xpath = "//h2/a[@href='" + link + "']//text()"
                 link_desc = html.xpath(ld_xpath)
-                if type(link_desc) == list:
+                if isinstance(link_desc, list):
                     link_desc = ''.join(link_desc)
                 link_descs.append(link_desc)
             elif '/images/' in link and 'www.bing.com' not in link:
@@ -261,7 +261,7 @@ def bing_search(args, html):
                 else:
                     ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
                 link_desc = html.xpath(ld_xpath)
-                if type(link_desc) == list:
+                if isinstance(link_desc, list):
                     link_desc = ''.join(link_desc)
                 link_descs.append(link_desc)
     
@@ -280,10 +280,6 @@ def bing_search(args, html):
                 link_cmd = link_input.split(' ')[0]
                 link_args = link_input.strip().split(' ')[1:]
                 while link_cmd == 'h' or link_cmd == 'help':
-    parser.add_argument('-c', '--config', help='print location of config file',
-                        action='store_true')
-    parser.add_argument('-v', '--version', help='display current version',
-                        action='store_true')
                     print('Enter one of the following flags abbreviated or not, possibly followed by a link number:\n'
                         '\th, help      show this help message\n'
                         '\ts, search    display search links\n'
@@ -529,9 +525,9 @@ def open_bookmark(args, link_arg, link_num = []):
 
 def add_bookmark(links, link_arg):
     with open(CONFIG_FPATH, 'a') as f:
-        if type(links) == list and link_arg:
+        if isinstance(links, list) and link_arg:
             f.write(links[int(link_arg)] + '\n')
-        elif type(links) == str:
+        elif isinstance(links, str):
             f.write(links + '\n')
 
 
