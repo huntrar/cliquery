@@ -1,3 +1,9 @@
+0.5.0
+------
+
+ - reworked a lot of logic in bing_search for more flexibility when changing flags
+ - bookmarks are read even when bookmark flag isnt specified from command line runner also for flexibility
+
 0.4.9
 ------
 
