@@ -58,26 +58,26 @@ Enter the following to fix:
 
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility.
     ```
-    + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
-    1. simple sentence - definition and examples of simple ...
-    2. Leaflet.js - A Simple Example - CodeProject
-    3. Simple random sample - Wikipedia, the free encyclopedia
+    + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+    1. A Simple Makefile Tutorial
+    2. simple sentence - definition and examples of simple ...
+    3. HTML Examples - W3Schools
     4. A Simple Guide to HTML - Welcome
-    5. MVC3 DropDownListFor - a simple example? - Stack Overflow
-    6. Using OpenGL on Windows: A Simple Example
-    7. Reconstructing trees: A simple example - Evolution
-    8. A Simple Example - Logarithms
-    + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
-    : d 6
+    5. What Is Simple Future Tense With Example - Askives Docs
+    6. A Simple Example: After Cache - How Caching Works
+    7. Basic HTML Sample Page - Sheldon Brown
+    8. ENG 1001: Sentences: Simple, Compound, and Complex
+    + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+    : d 4
 
 
-    http://www.cs.rit.edu/~ncs/Courses/570/UserGuide/OpenGLonWin-11.html
+    http://www.simplehtmlguide.com/
 
-    NextPrevUpTopContentsIndex Using OpenGL on Windows: A Simple ExampleAny OpenGL program for Windows 
-    has to take care of some window-dependent setup. There are several ways this setup can be done, for 
-    example, using the GLUT library or using GDI and WGL directly. This guide focuses on using the 
-    Windows OpenGL API directly.
-    See more? (y/n): n
+    A Simple Guide to HTML
+    html cheat sheet
+    Welcome to my HTML Guide -- I hope you find it useful :)
+    This easy guide for beginners covers several topics, with short and basic descriptions of the HTML tags you are likely to need when learning how to make your own website.
+    See more? [Press Enter] 
     ```
 * Entering h or help will bring up the list of possible commands to pass to the prompt.
 
