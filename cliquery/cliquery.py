@@ -280,13 +280,19 @@ def bing_search(args, html):
                 link_cmd = link_input.split(' ')[0]
                 link_args = link_input.strip().split(' ')[1:]
                 while link_cmd == 'h' or link_cmd == 'help':
+    parser.add_argument('-c', '--config', help='print location of config file',
+                        action='store_true')
+    parser.add_argument('-v', '--version', help='display current version',
+                        action='store_true')
                     print('Enter one of the following flags abbreviated or not, possibly followed by a link number:\n'
                         '\th, help      show this help message\n'
                         '\ts, search    display search links\n'
                         '\to, open      open link manually\n'
                         '\tw, wolfram   display wolfram results\n'
                         '\td, describe  display page snippet\n'
-                        '\tb, bookmark  view and modify bookmarks\n')
+                        '\tb, bookmark  view and modify bookmarks\n'
+                        '\tc, config    print location of config file\n'
+                        '\tv, version   display current version\n')
                     link_input = input(': ').strip()
                     link_cmd = link_input.split(' ')[0]
                     link_args = link_input.strip().split(' ')[1:]

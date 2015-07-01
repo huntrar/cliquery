@@ -1,3 +1,8 @@
+0.5.1
+------
+
+ - updated link prompt help message
+
 0.5.0
 ------
 
