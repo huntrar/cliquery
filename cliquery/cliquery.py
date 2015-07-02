@@ -16,7 +16,7 @@ from subprocess import call
 import sys
 import time
 import webbrowser
-from . import __version__
+#from . import __version__
 
 import lxml.html as lh
 
@@ -240,6 +240,13 @@ def get_wolfram_html(url_args):
     return get_html_resp(url)
 
 
+def bing_open(args, link):
+    if args['describe']:
+        describe(args, link)
+    else:
+        open_url(args, link)
+
+
 def bing_search(args, html):
     # Parse Bing response and display link results
     try:
@@ -315,6 +322,10 @@ def bing_search(args, html):
                             if not check_input(link_arg, num=True):
                                 continue_exec = False
                             break
+                        elif k == 'f':
+                            bing_open(args, links[0])
+                            continue_exec = False
+                            break
                         elif k == 'o':
                             # Default behavior, just leave continue_exec True
                             break
@@ -354,7 +365,7 @@ def bing_search(args, html):
                     if link_args and print_links:
                         for num in link_args:
                             if int(num) > 0 and int(num) <= len(links):
-                                open_url(args, links[int(num)-1]) 
+                                bing_open(args, links[int(num)-1]) 
                     else:
                         # Handle a range or a single number
                         start = check_input(start_num, num=True)
@@ -363,20 +374,19 @@ def bing_search(args, html):
                         if start and end:
                             if int(start_num) > 0 and int(end_num) <= len(links)+1:
                                 for i in range(int(start_num), int(end_num)+1, 1):
-                                    open_url(args, links[i-1]) 
+                                    bing_open(args, links[i-1]) 
                         elif start:
                             if int(start_num) > 0:
                                 for i in range(int(start_num), len(links)+1, 1):
-                                    open_url(args, links[i-1]) 
+                                    bing_open(args, links[i-1]) 
                         elif end:
                             if int(end_num) < len(links)+1:
                                 for i in range(1, int(end_num)+1, 1):
-                                    open_url(args, links[i-1]) 
+                                    bing_open(args, links[i-1]) 
                         else:
                             # Handle single number
-                            print 'else'
                             if link_arg and int(link_arg) > 0 and int(link_arg) < len(links)+1:
-                                open_url(args, links[int(link_arg)-1])
+                                bing_open(args, links[int(link_arg)-1])
             except (ValueError, IndexError):
                 pass
     return False
@@ -455,9 +465,8 @@ def bing_instant(html):
     return False
 
 
-def describe(args, html):
+def describe(args, link):
     try:
-        link = html.xpath('//h2/a/@href')[0]
         if 'http://' in link or 'https://' in link:
             query = args['query']
             if '.' not in query:
@@ -655,7 +664,7 @@ def search(args):
     elif args['search']:
         bing_search(args, html)
     elif args['describe']:
-        describe(args, html)
+        bing_search(args, html)
     elif args['first']:
         open_first(args, html)   
     elif args['wolfram']:

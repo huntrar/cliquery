@@ -1,3 +1,9 @@
+0.5.5
+------
+
+ - more flag support, 'first' now works in link prompt
+ - description flag now allows ranges and multiple numbers
+
 0.5.4
 ------
 
