@@ -1,3 +1,9 @@
+0.5.4
+------
+
+ - more improvements to link prompt flags and command line behavior
+ - removed ad block regex, too broad
+
 0.5.3
 ------
 
