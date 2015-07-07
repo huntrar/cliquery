@@ -50,6 +50,29 @@ CONFIG_FPATH = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
 CONFIG = {}
 
 
+def get_parser():
+    parser = argparse.ArgumentParser(description='a command-line browsing interface')
+    parser.add_argument('query', metavar='QUERY', type=str, nargs='*', 
+                        help='keywords to search')
+    parser.add_argument('-s', '--search', help='display search links',
+                        action='store_true')
+    parser.add_argument('-f', '--first', help='open first link',
+                        action='store_true')
+    parser.add_argument('-o', '--open', help='open link or browser manually',
+                        action='store_true')
+    parser.add_argument('-w', '--wolfram', help='display wolfram results',
+                        action='store_true')
+    parser.add_argument('-d', '--describe', help='display page snippet',
+                        action='store_true')
+    parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
+                        action='store_true')
+    parser.add_argument('-c', '--config', help='print location of config file',
+                        action='store_true')
+    parser.add_argument('-v', '--version', help='display current version',
+                        action='store_true')
+    return parser
+
+
 def check_config():
     if not os.path.isfile(CONFIG_FPATH):
         with open(CONFIG_FPATH, 'w') as f:
@@ -569,29 +592,6 @@ def search(args):
                 bing_search(args, bing_html)
 
 
-def get_parser():
-    parser = argparse.ArgumentParser(description='a command-line browsing interface')
-    parser.add_argument('query', metavar='QUERY', type=str, nargs='*', 
-                        help='keywords to search')
-    parser.add_argument('-s', '--search', help='display search links',
-                        action='store_true')
-    parser.add_argument('-f', '--first', help='open first link',
-                        action='store_true')
-    parser.add_argument('-o', '--open', help='open link or browser manually',
-                        action='store_true')
-    parser.add_argument('-w', '--wolfram', help='display wolfram results',
-                        action='store_true')
-    parser.add_argument('-d', '--describe', help='display page snippet',
-                        action='store_true')
-    parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
-                        action='store_true')
-    parser.add_argument('-c', '--config', help='print location of config file',
-                        action='store_true')
-    parser.add_argument('-v', '--version', help='display current version',
-                        action='store_true')
-    return parser
-
-
 def command_line_runner():
     parser = get_parser()
     args = vars(parser.parse_args()) 
@@ -626,6 +626,7 @@ def command_line_runner():
     else:
         search(args)
         
+
 
 if __name__ == '__main__':
     command_line_runner()
