@@ -16,6 +16,8 @@ from subprocess import call
 import sys
 import time
 import webbrowser
+
+from utils import *
 from . import __version__
 
 import lxml.html as lh
@@ -31,11 +33,6 @@ if sys.version < '3':
     except NameError:
         pass
 
-USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
-                'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0',
-                'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0',
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5',
-                'Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5')
 
 LINK_HELP = ('Enter one of the following flags abbreviated or not, possibly followed by a link number:\n'
     '\th, help      show this help message\n'
@@ -46,14 +43,12 @@ LINK_HELP = ('Enter one of the following flags abbreviated or not, possibly foll
     '\tb, bookmark  view and modify bookmarks\n'
     '\tc, config    print location of config file\n'
     '\tv, version   display current version\n')
-
 BORDER_LEN = 28
-
 BORDER = ' '.join(['+' for i in range(BORDER_LEN)])
 
 CONFIG_FPATH = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
-
 CONFIG = {}
+
 
 def check_config():
     if not os.path.isfile(CONFIG_FPATH):
@@ -61,8 +56,9 @@ def check_config():
             f.write('api_key:\n')
             f.write('browser:\n')
             f.write('bookmarks:\n')
-        sys.stderr.write('Enter your WolframAlpha API Key and browser in %s.\n' % CONFIG_FPATH)
+        sys.stderr.write('Enter your WolframAlpha API Key and browser in {}.\n'.format(CONFIG_FPATH))
         sys.exit()
+
 
 def read_config(args):
     check_config()
@@ -98,103 +94,8 @@ def read_config(args):
         else:
             return api_key, browser, bookmarks
 
-def change_flag(args, new_query, new_arg):
-    for k in args.keys():
-        args[k] = False
-    args['query'] = new_query
-    args[new_arg] = True
-    return args
 
-def check_input(u_input, num = False, empty=False):
-    if isinstance(u_input, list):
-        u_input = ''.join(u_input)
-
-    try:
-        u_inp = u_input.lower().strip()
-    except AttributeError:
-        pass
-
-    if u_inp == 'q' or u_inp == 'quit' or u_inp == 'exit':
-        sys.exit()
-
-    if num:
-        return check_num(u_input)
-    elif empty:
-        if not u_input and not num:
-            return True
-        else:
-            return False
-    return True
-
-def check_num(num):
-    try:
-        n = int(num)
-        return True
-    except ValueError:
-        return False
-
-def clean_url(urls):
-    # Returns True if list, False otherwise
-    clean_urls = []
-    if isinstance(urls, list):
-        for url in urls:
-            if 'http://' not in url and 'https://' not in url:
-                clean_urls.append('http://' + url)
-            else:
-                clean_urls.append(url)
-        return clean_urls, True
-    else:
-        if 'http://' in urls or 'https://' in urls:
-            return urls, False
-        else:
-            return ('http://' + urls), False
-
-def process_args(args):
-    # Process and returns only query arguments
-    url_args = args['query']
-    clean_args = []
-    if url_args:
-        for arg in url_args:
-            if ' ' in arg:
-                for split_arg in arg.split(' '):
-                    clean_args.append(split_arg)
-            else:
-                clean_args.append(arg)
-
-    # Further processing of url args before they are added to base_url
-    new_url_args = []
-    if not args['open']:
-        symbol_dict = { '@' : '%40',
-                        '$' : '%24',
-                        '%' : '%25',
-                        '&' : '%26',
-                        '+' : '%2B',
-                        '=' : '%3D' }
-        try:
-            for url_arg in clean_args:
-                for sym in symbol_dict:
-                    if sym in url_arg:
-                        url_arg = url_arg.replace(sym, symbol_dict[sym])
-                new_url_args.append(url_arg)
-            new_url_args = '+'.join(new_url_args)
-        except IndexError:
-            sys.stderr.write('No search terms entered.\n')
-            sys.exit()
-    else:
-        for url_arg in clean_args:
-            if '.' not in url_arg and 'localhost' not in url_arg:
-                new_url_args.append(url_arg + '.com')
-            else:
-                new_url_args.append(url_arg)
-    return new_url_args
-
-def reset_flags(args):
-    return {k: False if isinstance(v, bool) else v for k, v in args.items()}
-
-def get_flags(args):
-    return {k[0]: k for k, v in args.items() if isinstance(v, bool)}
-
-def get_html(args):
+def get_search_html(args):
     url_args = args['query']
     if args['bookmark']:
         return ''
@@ -206,33 +107,25 @@ def get_html(args):
     else:
         return ''
 
-def get_html_resp(url):
-    try:
-        # Get HTML response
-        headers={'User-Agent' : random.choice(USER_AGENTS)}
-        request = requests.get(url, headers=headers)
-        return lh.fromstring(request.text.encode('utf-8'))
-    except Exception as e:
-        sys.stderr.write('Failed to retrieve %s.\n' % url)
-        sys.stderr.write(str(e))
-        return ''
 
 def get_bing_html(url_args): 
     base_url = 'http://www.bing.com/search?q='
     url = base_url + url_args
-    return get_html_resp(url)
+    return get_html(url)
 
 
 def get_wolfram_html(url_args):
     base_url = 'http://api.wolframalpha.com/v2/query?input='
     url = base_url + url_args + '&appid=' + CONFIG['api_key']
-    return get_html_resp(url)
+    return get_html(url)
+
 
 def bing_open(args, link):
     if args['describe']:
         describe(args, link)
     else:
         open_url(args, link)
+
 
 def bing_search(args, html):
     # Parse Bing response and display link results
@@ -378,6 +271,7 @@ def bing_search(args, html):
                 pass
     return False
 
+
 def wolfram_search(html):
     try:
         titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and "
@@ -420,6 +314,7 @@ def wolfram_search(html):
     else:
         return False
 
+
 def bing_instant(html):
     try:
         inst_result = html.xpath('//span[@id="rcTB"]/text()'
@@ -449,6 +344,7 @@ def bing_instant(html):
         pass
     return False
 
+
 def describe(args, link):
     try:
         if 'http://' in link or 'https://' in link:
@@ -465,7 +361,8 @@ def describe(args, link):
             if not args['first']:
                 print(LINK_HELP)
     except AttributeError:
-        sys.stderr.write('Failed to describe link %s\n.' % link)
+        sys.stderr.write('Failed to describe link {}\n.'.format(link))
+
 
 def open_first(args, html):
     try:
@@ -478,6 +375,7 @@ def open_first(args, html):
     except AttributeError:
         sys.stderr.write('Failed to open first link.\n')
 
+
 def search_bookmark(link_arg):
     bookmarks = CONFIG['bookmarks']
     link_arg = link_arg.strip()
@@ -485,6 +383,7 @@ def search_bookmark(link_arg):
         if link_arg in bookmarks[i]:
             return i+1
     return -1
+
 
 def open_bookmark(args, link_arg, link_num = []):
     bookmarks = CONFIG['bookmarks']
@@ -502,7 +401,7 @@ def open_bookmark(args, link_arg, link_num = []):
         if check_input(link_arg, num=True):
             del_bookmark(link_arg)
         else:
-            sys.stderr.write('Could not delete bookmark %s.\n' % str(link_arg))
+            sys.stderr.write('Could not delete bookmark {}.\n'.format(str(link_arg)))
     elif 'add+' in link_arg:
         link_arg = link_arg.replace('add+', '').strip()
         if 'http://' not in link_arg or 'https://' not in link_arg:
@@ -514,13 +413,13 @@ def open_bookmark(args, link_arg, link_num = []):
         try:
             open_url(args, bookmarks[int(link_arg) - 1])
         except IndexError:
-            sys.stderr.write('Bookmark %s not found.\n' % link_arg)
+            sys.stderr.write('Bookmark {} not found.\n'.format(link_arg))
     elif bk_idx > 0:
         link_arg = bk_idx
         try:
             open_url(args, bookmarks[int(link_arg) - 1])
         except IndexError:
-            sys.stderr.write('Bookmark %s not found.\n' % link_arg)
+            sys.stderr.write('Bookmark {} not found.\n'.format(link_arg))
     else:
         sys.stderr.write('Usage: '
                         '\nopen: [num] or [suburl]'
@@ -528,12 +427,14 @@ def open_bookmark(args, link_arg, link_num = []):
                         '\ndelete: del [num] or [suburl]'
                         '\n')
 
+
 def add_bookmark(links, link_arg):
     with open(CONFIG_FPATH, 'a') as f:
         if isinstance(links, list) and link_arg:
             f.write(links[int(link_arg)] + '\n')
         elif isinstance(links, str):
             f.write(links + '\n')
+
 
 def del_bookmark(link_arg):
     bookmarks = CONFIG['bookmarks']
@@ -545,6 +446,7 @@ def del_bookmark(link_arg):
             if i != int(link_arg)-1:
                 f.write(bookmarks[i] + '\n')
 
+
 def open_browser(link):
     if CONFIG['browser'] == 'cygwin':
         call(['cygstart', link])
@@ -555,6 +457,7 @@ def open_browser(link):
             sys.stderr.write('Could not locate runnable browser, make sure '
                 'you entered a valid browser in .cliqrc'
                 ' Cygwin users use "cygwin".\n')
+
 
 def open_url(args, links):
     if args['describe']:
@@ -575,8 +478,9 @@ def open_url(args, links):
             else:
                 open_browser(links)
 
+
 def describe_link(url):
-    html = get_html_resp(url)
+    html = get_html(url)
     body = ''.join(html.xpath('//body//*[not(self::script) and '
          'not(self::style)]/text()')).split('\n')
     if not body:
@@ -626,9 +530,10 @@ def describe_link(url):
     print('')
     return True
     
+
 def search(args):
     args['query'] = process_args(args)
-    html = get_html(args)
+    html = get_search_html(args)
     url_args = args['query']
     continue_search = False
 
@@ -663,6 +568,7 @@ def search(args):
             if not wolfram_search(wolf_html):
                 bing_search(args, bing_html)
 
+
 def get_parser():
     parser = argparse.ArgumentParser(description='a command-line browsing interface')
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*', 
@@ -685,6 +591,7 @@ def get_parser():
                         action='store_true')
     return parser
 
+
 def command_line_runner():
     parser = get_parser()
     args = vars(parser.parse_args()) 
@@ -701,7 +608,6 @@ def command_line_runner():
     except webbrowser.Error as w:
         sys.stderr.write(str(w) + ': ' + browser)
     
-
     if args['version']:
         print(__version__)
         return

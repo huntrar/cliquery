@@ -1,3 +1,9 @@
+0.5.7
+------
+
+ - moved a lot of generic functions to utils.py
+ - fixed some spacing formatting and changed % to format()
+
 0.5.6
 ------
 
