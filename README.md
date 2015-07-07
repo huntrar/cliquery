@@ -11,35 +11,24 @@ The results? Less clicking, faster results, and *no limitations to regular brows
 * Enter your API key and choice of browser in .cliqrc (cygwin users should enter `cygwin` as their browser). An example .rc file is available in cliquery/.cliqrc, or will be created after an initial run. The API key field may be left blank if you did not sign up for a key.
 
 ## Usage
-usage: cliquery.py [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-v] [QUERY [QUERY ...]]
-
-a command-line browsing interface
-
-&nbsp;&nbsp;positional arguments:
-
-&nbsp;&nbsp;&nbsp;&nbsp;QUERY&nbsp;&nbsp;&nbsp;keywords to search
-
-
-&nbsp;&nbsp;optional arguments:
-
-&nbsp;&nbsp;&nbsp;&nbsp;-h, --help&nbsp;&nbsp;show this help message and exit
-
-&nbsp;&nbsp;&nbsp;&nbsp;-s, --search&nbsp;&nbsp;display search links
-
-&nbsp;&nbsp;&nbsp;&nbsp;-f, --first&nbsp;&nbsp;open first link
-
-&nbsp;&nbsp;&nbsp;&nbsp;-o, --open&nbsp;&nbsp;open link or browser manually
-
-&nbsp;&nbsp;&nbsp;&nbsp;-w, --wolfram&nbsp;display wolfram results
-
-&nbsp;&nbsp;&nbsp;&nbsp;-d, --describe&nbsp;display page snippet
-
-&nbsp;&nbsp;&nbsp;&nbsp;-b, --bookmark&nbsp;view and modify bookmarks
-
-&nbsp;&nbsp;&nbsp;&nbsp;-c, --config&nbsp;print location of config file
-
-&nbsp;&nbsp;&nbsp;&nbsp;-v, --version&nbsp;display current version
-
+    usage: cliquery [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-c] [-v]
+                    [QUERY [QUERY ...]]
+    
+    a command-line browsing interface
+    
+    positional arguments:
+      QUERY           keywords to search
+    
+    optional arguments:
+      -h, --help      show this help message and exit
+      -s, --search    display search links
+      -f, --first     open first link
+      -o, --open      open link or browser manually
+      -w, --wolfram   display wolfram results
+      -d, --describe  display page snippet
+      -b, --bookmark  view and modify bookmarks
+      -c, --config    print location of config file
+      -v, --version   display current version
 
 ## Author
 * Hunter Hammond (huntrar@gmail.com)
