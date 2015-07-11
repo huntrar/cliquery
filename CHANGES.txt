@@ -1,3 +1,9 @@
+0.5.8
+------
+
+ - reformatting to conform with PEP 8
+ - added shebang
+
 0.5.7
 ------
 

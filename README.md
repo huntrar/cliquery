@@ -11,8 +11,8 @@ The results? Less clicking, faster results, and *no limitations to regular brows
 * Enter your API key and choice of browser in .cliqrc (cygwin users should enter `cygwin` as their browser). An example .rc file is available in cliquery/.cliqrc, or will be created after an initial run. The API key field may be left blank if you did not sign up for a key.
 
 ## Usage
-    usage: cliquery [-h] [-s] [-f] [-o] [-w] [-d] [-b] [-c] [-v]
-                    [QUERY [QUERY ...]]
+    usage: cliquery.py [-h] [-b] [-c] [-d] [-f] [-o] [-s] [-v] [-w]
+                       [QUERY [QUERY ...]]
     
     a command-line browsing interface
     
@@ -21,14 +21,14 @@ The results? Less clicking, faster results, and *no limitations to regular brows
     
     optional arguments:
       -h, --help      show this help message and exit
-      -s, --search    display search links
-      -f, --first     open first link
-      -o, --open      open link or browser manually
-      -w, --wolfram   display wolfram results
-      -d, --describe  display page snippet
       -b, --bookmark  view and modify bookmarks
       -c, --config    print location of config file
+      -d, --describe  display page snippet
+      -f, --first     open first link
+      -o, --open      open link or browser manually
+      -s, --search    display search links
       -v, --version   display current version
+      -w, --wolfram   display wolfram results
 
 ## Author
 * Hunter Hammond (huntrar@gmail.com)

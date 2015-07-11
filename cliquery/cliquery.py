@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 #############################################################
 #                                                           #
@@ -17,10 +18,10 @@ import sys
 import time
 import webbrowser
 
-from utils import *
-from . import __version__
-
 import lxml.html as lh
+
+import utils
+from . import __version__
 
 
 if sys.version < '3':
@@ -33,7 +34,6 @@ if sys.version < '3':
     except NameError:
         pass
 
-
 LINK_HELP = ('Enter one of the following flags abbreviated or not, possibly followed by a link number:\n'
     '\th, help      show this help message\n'
     '\ts, search    display search links\n'
@@ -43,10 +43,13 @@ LINK_HELP = ('Enter one of the following flags abbreviated or not, possibly foll
     '\tb, bookmark  view and modify bookmarks\n'
     '\tc, config    print location of config file\n'
     '\tv, version   display current version\n')
+
 BORDER_LEN = 28
+
 BORDER = ' '.join(['+' for i in range(BORDER_LEN)])
 
 CONFIG_FPATH = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
+
 CONFIG = {}
 
 
@@ -54,21 +57,21 @@ def get_parser():
     parser = argparse.ArgumentParser(description='a command-line browsing interface')
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*', 
                         help='keywords to search')
-    parser.add_argument('-s', '--search', help='display search links',
+    parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
+                        action='store_true')
+    parser.add_argument('-c', '--config', help='print location of config file',
+                        action='store_true')
+    parser.add_argument('-d', '--describe', help='display page snippet',
                         action='store_true')
     parser.add_argument('-f', '--first', help='open first link',
                         action='store_true')
     parser.add_argument('-o', '--open', help='open link or browser manually',
                         action='store_true')
-    parser.add_argument('-w', '--wolfram', help='display wolfram results',
-                        action='store_true')
-    parser.add_argument('-d', '--describe', help='display page snippet',
-                        action='store_true')
-    parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
-                        action='store_true')
-    parser.add_argument('-c', '--config', help='print location of config file',
+    parser.add_argument('-s', '--search', help='display search links',
                         action='store_true')
     parser.add_argument('-v', '--version', help='display current version',
+                        action='store_true')
+    parser.add_argument('-w', '--wolfram', help='display wolfram results',
                         action='store_true')
     return parser
 
@@ -134,13 +137,13 @@ def get_search_html(args):
 def get_bing_html(url_args): 
     base_url = 'http://www.bing.com/search?q='
     url = base_url + url_args
-    return get_html(url)
+    return utils.get_html(url)
 
 
 def get_wolfram_html(url_args):
     base_url = 'http://api.wolframalpha.com/v2/query?input='
     url = base_url + url_args + '&appid=' + CONFIG['api_key']
-    return get_html(url)
+    return utils.get_html(url)
 
 
 def bing_open(args, link):
@@ -169,6 +172,7 @@ def bing_search(args, html):
                 ld_xpath = '//h2/a[@href="' + link + '"]//text()'
             else:
                 ld_xpath = "//h2/a[@href='" + link + "']//text()"
+
             link_desc = html.xpath(ld_xpath)
             if isinstance(link_desc, list):
                 link_desc = ''.join(link_desc)
@@ -180,6 +184,7 @@ def bing_search(args, html):
                 ld_xpath = '//h2/a[@href="' + str(link) + '"]//text()'
             else:
                 ld_xpath = "//h2/a[@href='" + str(link) + "']//text()"
+
             link_desc = html.xpath(ld_xpath)
             if isinstance(link_desc, list):
                 link_desc = ''.join(link_desc)
@@ -193,8 +198,10 @@ def bing_search(args, html):
                 print_desc = (str(i+1) + '. ' + link_descs[i]).encode('utf-8')
                 print(print_desc) # Print link choices
             print(BORDER)
+
             try:
-                flag_lookup = get_flags(args)
+                flag_lookup = utils.get_flags(args)
+
                 link_input = input(': ').strip()
                 link_cmd = link_input.split(' ')[0]
                 link_args = link_input.strip().split(' ')[1:]
@@ -205,7 +212,7 @@ def bing_search(args, html):
                     link_args = link_input.strip().split(' ')[1:]
                 print('\n')
 
-                check_input(link_input) # In case of quit
+                utils.check_input(link_input) # In case of quit
                 continue_exec = True
                 link_arg = ''.join(link_args)
                 if not link_arg:
@@ -213,16 +220,16 @@ def bing_search(args, html):
 
                 for k, v in flag_lookup.items():
                     if k == link_cmd or v == link_cmd:
-                        args = reset_flags(args)
+                        args = utils.reset_flags(args)
                         args[v] = True
                         if k == 'b':
-                            if check_input(link_arg):
+                            if utils.check_input(link_arg):
                                 args['query'] = link_args
                                 continue_exec = False
                                 search(args)
                             break
                         elif k == 'd':
-                            if not check_input(link_arg, num=True):
+                            if not utils.check_input(link_arg, num=True):
                                 continue_exec = False
                             break
                         elif k == 'f':
@@ -261,7 +268,7 @@ def bing_search(args, html):
                     if ',' in link_arg and len(link_arg) > 2:
                         link_args = link_arg.split(',')
                         for num in link_args:
-                            if not check_input(num.strip(), num=True):
+                            if not utils.check_input(num.strip(), num=True):
                                 print_links = False
 
                     # Handle the multiple numbers
@@ -271,8 +278,8 @@ def bing_search(args, html):
                                 bing_open(args, links[int(num)-1]) 
                     else:
                         # Handle a range or a single number
-                        start = check_input(start_num, num=True)
-                        end = check_input(end_num, num=True)
+                        start = utils.check_input(start_num, num=True)
+                        end = utils.check_input(end_num, num=True)
 
                         if start and end:
                             if int(start_num) > 0 and int(end_num) <= len(links)+1:
@@ -311,10 +318,12 @@ def wolfram_search(html):
             entry = html.xpath(entry_xpath)
             if entry:
                 entries.append(entry[0])
+
         entries = list(OrderedDict.fromkeys(entries))
         output_list = []
         if len(entries) == 1 and entries[0] == '{}':
             return False
+
         for title, entry in zip(titles, entries):
             try:
                 if ' |' in entry:
@@ -325,11 +334,12 @@ def wolfram_search(html):
                     output_list.append(title + ': ' + entry).encode('utf-8')
             except (AttributeError, UnicodeEncodeError):
                 pass
+
         if not output_list:
             return False
         elif len(output_list) > 2:
             print('\n'.join(output_list[:2]).encode('utf-8'))
-            if check_input(input('See more? [Press Enter] '), empty=True):
+            if utils.check_input(input('See more? [Press Enter] '), empty=True):
                 print('\n'.join(output_list[2:]).encode('utf-8'))
         else:
             print('\n'.join(output_list).encode('utf-8'))
@@ -417,11 +427,12 @@ def open_bookmark(args, link_arg, link_num = []):
             print(str(i+1) + '. ' + bookmarks[i])
     elif 'del+' in link_arg:
         link_arg = link_arg.replace('del+', '').strip()
-        if not check_input(link_arg, num=True):
+        if not utils.check_input(link_arg, num=True):
             bk_idx = search_bookmark(link_arg)
             if bk_idx > 0:
                 link_arg = bk_idx
-        if check_input(link_arg, num=True):
+
+        if utils.check_input(link_arg, num=True):
             del_bookmark(link_arg)
         else:
             sys.stderr.write('Could not delete bookmark {}.\n'.format(str(link_arg)))
@@ -429,10 +440,11 @@ def open_bookmark(args, link_arg, link_num = []):
         link_arg = link_arg.replace('add+', '').strip()
         if 'http://' not in link_arg or 'https://' not in link_arg:
             link_arg = 'http://' + link_arg
+
         if '.' not in link_arg:
             link_arg = link_arg + '.com'
         add_bookmark(link_arg, link_num)
-    elif check_input(link_arg, num=True):
+    elif utils.check_input(link_arg, num=True):
         try:
             open_url(args, bookmarks[int(link_arg) - 1])
         except IndexError:
@@ -484,7 +496,7 @@ def open_browser(link):
 
 def open_url(args, links):
     if args['describe']:
-        links, is_list = clean_url(links)
+        links, is_list = utils.clean_url(links)
         if is_list:
             for link in links:
                 describe_link(link)
@@ -494,7 +506,7 @@ def open_url(args, links):
         if not links:
             open_browser('')
         else:
-            links, is_list = clean_url(links)
+            links, is_list = utils.clean_url(links)
             if is_list:
                 for link in links:
                     open_browser(link)
@@ -503,7 +515,7 @@ def open_url(args, links):
 
 
 def describe_link(url):
-    html = get_html(url)
+    html = utils.get_html(url)
     body = ''.join(html.xpath('//body//*[not(self::script) and '
          'not(self::style)]/text()')).split('\n')
     if not body:
@@ -539,7 +551,7 @@ def describe_link(url):
             msg_count += len(msg)
             print(msg.encode('utf-8'))
             if msg_count > MAX_MSG:
-                if not check_input(input('See more? [Press Enter] '), empty=True):
+                if not utils.check_input(input('See more? [Press Enter] '), empty=True):
                     break
                 see_more = True
                 msg_count = 0
@@ -555,7 +567,7 @@ def describe_link(url):
     
 
 def search(args):
-    args['query'] = process_args(args)
+    args['query'] = utils.process_args(args)
     html = get_search_html(args)
     url_args = args['query']
     continue_search = False
@@ -625,7 +637,7 @@ def command_line_runner():
         return 
     else:
         search(args)
-        
+
 
 
 if __name__ == '__main__':

@@ -119,10 +119,3 @@ def get_flags(args):
     return {k[0]: k for k, v in args.items() if isinstance(v, bool)}
 
 
-def change_flag(args, new_query, new_arg):
-    for k in args.keys():
-        args[k] = False
-    args['query'] = new_query
-    args[new_arg] = True
-    return args
-
