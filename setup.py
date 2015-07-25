@@ -61,6 +61,7 @@ setup(
         ]
     },
     install_requires=[
-        'lxml'
+        'lxml',
+        'requests'
     ]
 )

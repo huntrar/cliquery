@@ -12,13 +12,13 @@ import argparse
 from collections import OrderedDict
 import os
 import random
-import requests
 from subprocess import call
 import sys
 import time
 import webbrowser
 
 import lxml.html as lh
+import requests
 
 import utils
 from . import __version__
