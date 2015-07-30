@@ -8,7 +8,8 @@ The results? Less clicking, faster results, and *no limitations to regular brows
 ## Installation
 * `pip install cliquery`
 * [Sign up (optional)](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key.
-* Enter your API key and choice of browser in .cliqrc (cygwin users should enter `cygwin` as their browser). An example .rc file is available in cliquery/.cliqrc, or will be created after an initial run. The API key field may be left blank if you did not sign up for a key.
+* Enter your API key and choice of browser in .cliqrc (cygwin users should enter `cygwin` as their browser). An example .cliqrc is available in cliquery/.cliqrc
+* The API key and browser fields may be left blank but limits functionality.
 
 ## Usage
     usage: cliquery.py [-h] [-b] [-c] [-d] [-f] [-o] [-s] [-v] [-w]

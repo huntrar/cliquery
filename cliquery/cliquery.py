@@ -76,18 +76,7 @@ def get_parser():
     return parser
 
 
-def check_config():
-    if not os.path.isfile(CONFIG_FPATH):
-        with open(CONFIG_FPATH, 'w') as f:
-            f.write('api_key:\n')
-            f.write('browser:\n')
-            f.write('bookmarks:\n')
-        sys.stderr.write('Enter your WolframAlpha API Key and browser in {}.\n'.format(CONFIG_FPATH))
-        sys.exit()
-
-
 def read_config(args):
-    check_config()
     with open(CONFIG_FPATH, 'r') as f:
         lines = []
         api_key = ''
@@ -489,9 +478,7 @@ def open_browser(link):
         if CONFIG['br']:
             CONFIG['br'].open(link)
         else:
-            sys.stderr.write('Could not locate runnable browser, make sure '
-                'you entered a valid browser in .cliqrc'
-                ' Cygwin users use "cygwin".\n')
+            sys.stderr.write('Failed to open browser.\n')
 
 
 def open_url(args, links):
@@ -616,7 +603,7 @@ def command_line_runner():
         if browser and browser != 'cygwin':
             CONFIG['br'] = webbrowser.get(browser)
         else:
-            CONFIG['br'] = ''
+            CONFIG['br'] = webbrowser.get()
     except webbrowser.Error as w:
         sys.stderr.write(str(w) + ': ' + browser)
     

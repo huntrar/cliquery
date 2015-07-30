@@ -1,3 +1,11 @@
+0.6.3
+------
+
+ - added package_data field in setup.py to include .cliqrc in the sdist
+ - subsequently removed check_config() as .cliqrc will be included
+ - added LICENSE.txt to MANIFEST.in
+ - now allows empty browser: field in .cliqrc, webbrowser lib can resolve browser itself
+
 0.6.2
 ------
 

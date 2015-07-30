@@ -55,6 +55,7 @@ setup(
     url='https://github.com/huntrar/cliquery',
     license='MIT',
     packages=find_packages(),
+    package_data={'cliquery': ['.cliqrc']}
     entry_points={
         'console_scripts': [
             'cliquery = cliquery.cliquery:command_line_runner',
