@@ -531,6 +531,7 @@ def describe_link(url):
             print_body.append(b)
     if print_body:
         print(url.encode('utf-8') + '\n'.encode('ascii'))
+
         see_more = False
         MAX_MSG = 200
         msg_count = 0
@@ -542,13 +543,15 @@ def describe_link(url):
                     break
                 see_more = True
                 msg_count = 0
-                print('\n' + BORDER)
+                print('')
     else:
         print(url.encode('utf-8') + '\n'.encode('ascii'))
         print('Extended description not found.\n')
         return False
+
     if not see_more: 
         time.sleep(1)
+
     print('')
     return True
     
