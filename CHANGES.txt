@@ -1,3 +1,8 @@
+0.6.5
+------
+
+ - removed check for 'describe' flag in search() as it is checked in subsequent functions anyways
+
 0.6.4
 ------
 

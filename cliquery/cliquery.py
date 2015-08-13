@@ -568,8 +568,6 @@ def search(args):
         open_url(args, url_args)
     elif args['search']:
         bing_search(args, html)
-    elif args['describe']:
-        bing_search(args, html)
     elif args['first']:
         open_first(args, html)   
     elif args['wolfram']:
