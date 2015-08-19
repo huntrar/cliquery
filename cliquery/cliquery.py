@@ -105,7 +105,7 @@ def read_config(args):
                 browser = lines[1].strip() 
                 return api_key, browser, bookmarks
             except IndexError:
-                return '', '', ''
+                return '', '', bookmarks 
         else:
             return api_key, browser, bookmarks
 

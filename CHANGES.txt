@@ -1,3 +1,8 @@
+0.6.7
+------
+
+ - returns bookmarks even if fail to find browser and api key in cliqrc
+
 0.6.6
 ------
 
