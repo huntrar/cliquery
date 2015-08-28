@@ -1,3 +1,8 @@
+0.6.8
+------
+
+ - describe fetches lines with length at least a fifth of avg length, changed from half
+
 0.6.7
 ------
 

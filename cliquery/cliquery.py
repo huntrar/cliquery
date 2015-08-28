@@ -526,8 +526,8 @@ def describe_link(url):
     print_body = []
 
     for b in filtered_body:
-        # Qualifying describe statements are at least half the average statement length
-        if len(b) > (body_avg_sum / 2): 
+        # Qualifying describe statements are at least a fifth of the average statement length
+        if len(b) > (body_avg_sum / 5): 
             print_body.append(b)
     if print_body:
         print(url.encode('utf-8') + '\n'.encode('ascii'))
