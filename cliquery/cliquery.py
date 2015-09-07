@@ -639,7 +639,7 @@ def command_line_runner():
         print(CONFIG_FPATH)
         return
 
-    if args['clear_cache']:
+    if args['CLEAR_CACHE']:
         clear_cache()
         print('Cleared {}.'.format(CACHE_DIR)) 
         return

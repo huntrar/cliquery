@@ -1,3 +1,8 @@
+0.6.12
+------
+
+ - changed occurence of args['clear_cache'] to args['CLEAR_CACHE'] per the previous update
+
 0.6.11
 ------
 
