@@ -63,6 +63,7 @@ setup(
     },
     install_requires=[
         'lxml',
-        'requests'
+        'requests',
+        'requests-cache'
     ]
 )

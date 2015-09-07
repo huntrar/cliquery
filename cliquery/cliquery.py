@@ -10,6 +10,7 @@
 
 import argparse
 from collections import OrderedDict
+import glob
 import os
 import random
 from subprocess import call
@@ -19,6 +20,7 @@ import webbrowser
 
 import lxml.html as lh
 import requests
+import requests_cache
 
 import utils
 from . import __version__
@@ -45,12 +47,16 @@ LINK_HELP = ('Enter one of the following flags abbreviated or not, possibly foll
     '\tv, version   display current version\n')
 
 BORDER_LEN = 28
-
 BORDER = ' '.join(['+' for i in range(BORDER_LEN)])
 
 CONFIG_FPATH = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
-
 CONFIG = {}
+
+XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
+    os.path.join(os.path.expanduser('~'), '.cache'))
+CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'cliquery')
+CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
+    sys.version_info[0] if sys.version_info[0] == 3 else ''))
 
 
 def get_parser():
@@ -60,6 +66,8 @@ def get_parser():
     parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
                         action='store_true')
     parser.add_argument('-c', '--config', help='print location of config file',
+                        action='store_true')
+    parser.add_argument('-C', '--clear-cache', help='clear the cache',
                         action='store_true')
     parser.add_argument('-d', '--describe', help='display page snippet',
                         action='store_true')
@@ -108,6 +116,17 @@ def read_config(args):
                 return '', '', bookmarks 
         else:
             return api_key, browser, bookmarks
+
+
+def enable_cache():
+    if not os.path.exists(CACHE_DIR):
+        os.makedirs(CACHE_DIR)
+    requests_cache.install_cache(CACHE_FILE)
+
+
+def clear_cache():
+    for cache in glob.glob('{0}*'.format(CACHE_FILE)):
+        os.remove(cache)
 
 
 def get_search_html(args):
@@ -615,6 +634,15 @@ def command_line_runner():
     if args['config']:
         print(CONFIG_FPATH)
         return
+
+    if args['clear_cache']:
+        clear_cache()
+        print('Cleared {}.'.format(CACHE_DIR)) 
+        return
+
+    # enable cache unless user sets environ variable CLIQ_DISABLE_CACHE
+    if not os.getenv('CLIQ_DISABLE_CACHE'):
+        enable_cache()
 
     if not api_key:
         args['wolfram'] = False
