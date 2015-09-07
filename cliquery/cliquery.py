@@ -67,7 +67,7 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-c', '--config', help='print location of config file',
                         action='store_true')
-    parser.add_argument('-C', '--clear-cache', help='clear the cache',
+    parser.add_argument('-C', '--CLEAR-CACHE', help='clear the cache',
                         action='store_true')
     parser.add_argument('-d', '--describe', help='display page snippet',
                         action='store_true')
@@ -207,7 +207,11 @@ def bing_search(args, html):
                 print(print_desc) # Print link choices
             print(BORDER)
 
+            ''' Get link prompt input '''
             try:
+                ''' A dictionary containing all boolean arguments
+                    The key is the first letter of the extended arg name
+                '''
                 flag_lookup = utils.get_flags(args)
 
                 link_input = input(': ').strip()
@@ -220,7 +224,7 @@ def bing_search(args, html):
                     link_args = link_input.strip().split(' ')[1:]
                 print('\n')
 
-                utils.check_input(link_input) # In case of quit
+                utils.check_input(link_input) # Checks for quit
                 continue_exec = True
                 link_arg = ''.join(link_args)
                 if not link_arg:

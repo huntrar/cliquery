@@ -1,3 +1,8 @@
+0.6.11
+------
+
+ - changed --clear-cache flag to --CLEAR-CACHE, necessary to avoid a name conflict when resolving link prompt flags (--clear-cache and --config both resolve to 'c')
+
 0.6.10
 ------
 
