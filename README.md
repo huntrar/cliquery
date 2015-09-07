@@ -35,7 +35,7 @@ cliquery offers less clicking, faster results, and *no limitations to regular br
 * Hunter Hammond (huntrar@gmail.com)
 
 ## Notes
-* Supports Python2 and Python3
+* Supports both Python 2.x and Python 3.x.
 * If you receive the following message when trying to add bookmarks:
     ```
     IOError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc'
@@ -45,7 +45,7 @@ Enter the following to fix:
     sudo chmod a+x /usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc
     ```
 * A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
-* Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility.
+* Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility. Entering h or help will list all possible prompt commands.
     ```
     + + + + + + + + + + + + + + + + + + + + + + + + + + + +
     1. A Simple Makefile Tutorial
@@ -68,6 +68,5 @@ Enter the following to fix:
     This easy guide for beginners covers several topics, with short and basic descriptions of the HTML tags you are likely to need when learning how to make your own website.
     See more? [Press Enter] 
     ```
-* Entering h or help will bring up the list of possible commands to pass to the prompt.
 * To choose multiple links at once, a range may be specified by separating the start and end range with a dash. Leaving one end of the range blank will choose all links until the other end of that range. For example, given 10 links, entering 5- would effectively be the same as entering 5-10.
-* Using the bookmarks flag with no arguments will list all current bookmarks in .cliqrc, ordered by time of entry. Adding and deleting bookmarks can be done using add [url] or del [num] or [suburl], where [suburl] is a substring of the url. Opening bookmarks is done through the bookmarks flag and either a [num] or [suburl] argument. Bookmarks may also be added interactively through the link prompt, like all other flags.
+* Using the bookmarks flag with no arguments will list all current bookmarks in .cliqrc, ordered by time of entry. Adding and deleting bookmarks can be done using add [url] or del [num] or [suburl], where [suburl] is a substring of the url. Opening bookmarks is done through the bookmarks flag and either a [num] or [suburl] argument. Bookmarks may also be added interactively through the link prompt by entering b [num].
