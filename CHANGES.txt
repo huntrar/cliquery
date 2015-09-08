@@ -1,3 +1,8 @@
+0.7.0
+------
+
+ - improvements to documentation
+
 0.6.12
 ------
 

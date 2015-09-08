@@ -89,7 +89,7 @@ def read_config(args):
         lines = []
         api_key = ''
         browser = ''
-        # api_key: and browser: must be in first two lines
+        ''' first two lines of cliqrc must contain api_key: and browser: '''
         for i in range(2):
             line = f.readline()
             if 'api_key:' in line:
@@ -158,11 +158,12 @@ def bing_open(args, link):
     if args['describe']:
         describe(args, link)
     else:
-        open_url(args, link)
+        open_link(args, link)
 
 
 def bing_search(args, html):
-    # Parse Bing response and display link results
+    ''' Perform a Bing search and show an interactive prompt '''
+
     try:
         unprocessed_links = html.xpath('//h2/a/@href')
     except AttributeError:
@@ -186,7 +187,7 @@ def bing_search(args, html):
                 link_desc = ''.join(link_desc)
             link_descs.append(link_desc)
         elif '/images/' in link and 'www.bing.com' not in link:
-            # Fix image links that are not prepended with www.bing.com
+            ''' Add missing base url to image links '''
             links.append('http://www.bing.com' + link)
             if "'" in link:
                 ld_xpath = '//h2/a[@href="' + str(link) + '"]//text()'
@@ -249,7 +250,7 @@ def bing_search(args, html):
                             continue_exec = False
                             break
                         elif k == 'o':
-                            # Default behavior, just leave continue_exec True
+                            ''' Default behavior, continue_exec stays True '''
                             break
                         elif k == 'v':
                             print(__version__)
@@ -265,31 +266,31 @@ def bing_search(args, html):
                             search(args)
                             break
 
-                # Open links
+                ''' Open link number(s) ''' 
                 if continue_exec:
                     link_args = []
                     start_num = ''
                     end_num = ''
 
-                    # Check for a number range
+                    ''' Check for a link number range (contains dash) '''
                     if '-' in link_arg and len(link_arg) > 1:
                         start_num = link_arg.split('-')[0].strip()
                         end_num = link_arg.split('-')[1].strip()
 
-                    # Check for multiple numbers
+                    ''' Check for multiple link numbers and validate them '''
                     if ',' in link_arg and len(link_arg) > 2:
                         link_args = link_arg.split(',')
                         for num in link_args:
                             if not utils.check_input(num.strip(), num=True):
                                 print_links = False
 
-                    # Handle the multiple numbers
+                    ''' Open multiple links if validation succeeded '''
                     if link_args and print_links:
                         for num in link_args:
                             if int(num) > 0 and int(num) <= len(links):
                                 bing_open(args, links[int(num)-1]) 
                     else:
-                        # Handle a range or a single number
+                        ''' Open range of link or a single link '''
                         start = utils.check_input(start_num, num=True)
                         end = utils.check_input(end_num, num=True)
 
@@ -306,7 +307,7 @@ def bing_search(args, html):
                                 for i in range(1, int(end_num)+1, 1):
                                     bing_open(args, links[i-1]) 
                         else:
-                            # Handle single number
+                            ''' Open a single link '''
                             if link_arg and int(link_arg) > 0 and int(link_arg) < len(links)+1:
                                 bing_open(args, links[int(link_arg)-1])
             except (ValueError, IndexError):
@@ -315,14 +316,19 @@ def bing_search(args, html):
 
 
 def wolfram_search(html):
+    ''' Searches WolframAlpha using their API, requires API key in cliqrc '''
+
     try:
-        titles = list(OrderedDict.fromkeys(html.xpath("//pod[@title != '' and "
+        ''' Filter unnecessary title fields '''
+        titles = list(OrderedDict.fromkeys(
+            html.xpath("//pod[@title != '' and "
             "@title != 'Number line' and @title != 'Input' and "
             "@title != 'Visual representation' and @title != 'Image' and "
             "@title != 'Manipulatives illustration' and "
             "@title != 'Quotient and remainder']/@title")))
     except AttributeError:
-        sys.exit()
+        raise AttributeError('Expected an lxml.html object!')
+
     entries = []
     if titles:
         for title in titles:
@@ -333,11 +339,14 @@ def wolfram_search(html):
 
         entries = list(OrderedDict.fromkeys(entries))
         output_list = []
+
+        ''' Return False if results were empty '''
         if len(entries) == 1 and entries[0] == '{}':
             return False
 
         for title, entry in zip(titles, entries):
             try:
+                ''' Clean formatting '''
                 if ' |' in entry:
                     entry = '\n\t' + entry.replace(' |', ':').replace('\n', '\n\t')
                 if title == 'Result':
@@ -351,6 +360,7 @@ def wolfram_search(html):
             return False
         elif len(output_list) > 2:
             print('\n'.join(output_list[:2]).encode('utf-8'))
+
             if utils.check_input(input('See more? [Press Enter] '), empty=True):
                 print('\n'.join(output_list[2:]).encode('utf-8'))
         else:
@@ -361,29 +371,24 @@ def wolfram_search(html):
 
 
 def bing_instant(html):
+    ''' Checks for a Bing instant result '''
+
     try:
         inst_result = html.xpath('//span[@id="rcTB"]/text()'
             '|//div[@class="b_focusTextMedium"]/text()'
             '|//p[@class="b_secondaryFocus df_p"]/text()'
             '|//div[@class="b_xlText b_secondaryText"]/text()'
-            '|//input[@id="uc_rv"]/@value')
-        def_result = html.xpath('//ol[@class="b_dList b_indent"]/li/div/text()')
+            '|//input[@id="uc_rv"]/@value'
+            '|//ol[@class="b_dList b_indent"]/li/div/text()') # a definition
     except AttributeError:
-        sys.exit()
+        raise AttributeError('Expected an lxml.html object!')
+
     try:
-        # Check if calculation result is present or age/date
         if inst_result:
             if len(inst_result) == 1:
                 print(inst_result[0].encode('utf-8'))
             else:
                 print('\n'.join(inst_result).encode('utf-8'))
-            return True
-        # Check if definition is present
-        elif def_result:
-            if len(def_result) == 1:
-                print(def_result[0].encode('utf-8'))
-            else:
-                print('\n'.join(def_result).encode('utf-8'))
             return True
     except AttributeError:
         pass
@@ -391,6 +396,7 @@ def bing_instant(html):
 
 
 def describe(args, link):
+    ''' Prints text preview of a page to stdout '''
     try:
         if 'http://' in link or 'https://' in link:
             query = args['query']
@@ -410,13 +416,15 @@ def describe(args, link):
 
 
 def open_first(args, html):
+    ''' Open the first Bing link available, `Feeling Lucky` '''
+
     try:
         link = html.xpath('//h2/a/@href')[0]
         if 'http://' in link or 'https://' in link:
-            open_url(args, link)
+            open_link(args, link)
         elif '/images/' in link:
             link = 'http://www.bing.com' + link
-            open_url(args, link)
+            open_link(args, link)
     except AttributeError:
         sys.stderr.write('Failed to open first link.\n')
 
@@ -431,6 +439,8 @@ def search_bookmark(link_arg):
 
 
 def open_bookmark(args, link_arg, link_num = []):
+    ''' Add, delete, or open bookmarks '''
+
     bookmarks = CONFIG['bookmarks']
     bk_idx = search_bookmark(link_arg)
     if not link_arg:
@@ -458,13 +468,13 @@ def open_bookmark(args, link_arg, link_num = []):
         add_bookmark(link_arg, link_num)
     elif utils.check_input(link_arg, num=True):
         try:
-            open_url(args, bookmarks[int(link_arg) - 1])
+            open_link(args, bookmarks[int(link_arg) - 1])
         except IndexError:
             sys.stderr.write('Bookmark {} not found.\n'.format(link_arg))
     elif bk_idx > 0:
         link_arg = bk_idx
         try:
-            open_url(args, bookmarks[int(link_arg) - 1])
+            open_link(args, bookmarks[int(link_arg) - 1])
         except IndexError:
             sys.stderr.write('Bookmark {} not found.\n'.format(link_arg))
     else:
@@ -504,7 +514,7 @@ def open_browser(link):
             sys.stderr.write('Failed to open browser.\n')
 
 
-def open_url(args, links):
+def open_link(args, links):
     if args['describe']:
         links, is_list = utils.clean_url(links)
         if is_list:
@@ -525,6 +535,11 @@ def open_url(args, links):
 
 
 def describe_link(url):
+    ''' Print the text of a given url
+        Printed lines must be greater than the average length / qualifier
+    '''
+    qualifier = 5
+
     html = utils.get_html(url)
     body = ''.join(html.xpath('//body//*[not(self::script) and '
          'not(self::style)]/text()')).split('\n')
@@ -536,6 +551,7 @@ def describe_link(url):
     stripped_body = []
     for b in body:
         stripped_body.append(b.strip())
+
     filtered_body = list(filter(None, stripped_body))
     if not filtered_body:
         print(url.encode('utf-8') + '\n'.encode('ascii'))
@@ -548,10 +564,11 @@ def describe_link(url):
     body_avg_sum = body_sum / len(filtered_body)+1
     print_body = []
 
+    ''' Print lines greater than the average length / qualifier '''
     for b in filtered_body:
-        # Qualifying describe statements are at least a fifth of the average statement length
-        if len(b) > (body_avg_sum / 5): 
+        if len(b) > (body_avg_sum / qualifier): 
             print_body.append(b)
+
     if print_body:
         print(url.encode('utf-8') + '\n'.encode('ascii'))
 
@@ -586,14 +603,19 @@ def search(args):
     continue_search = False
 
     if args['bookmark']:
+        ''' Add, delete, or open bookmarks '''
         open_bookmark(args, url_args) 
     elif args['open']:
-        open_url(args, url_args)
+        ''' Open a link manually '''
+        open_link(args, url_args)
     elif args['search']:
+        ''' Perform a Bing search and show an interactive prompt '''
         bing_search(args, html)
     elif args['first']:
+        ''' Open the first Bing link available, `Feeling Lucky` '''
         open_first(args, html)   
     elif args['wolfram']:
+        ''' Searches WolframAlpha, if returns empty the search is continued '''
         success = wolfram_search(html)
         if not success:
             continue_search = True
@@ -601,13 +623,18 @@ def search(args):
         continue_search = True
 
     if continue_search:
-        # Default behavior is check Bing for a calculation result, then
-        # check WolframAlpha, then to Bing search results
+        ''' Default program behavior
+            1. Check Bing for an instant result
+            2. Check WolframAlpha for a result
+            3. Check Bing for search results
+        '''
+
         if args['wolfram']:
             bing_html = get_bing_html(url_args) 
             wolf_html = html
         else:
             bing_html = html
+
         if not bing_instant(bing_html):
             if not args['wolfram']:
                 wolf_html = get_wolfram_html(url_args)
@@ -623,6 +650,7 @@ def command_line_runner():
     CONFIG['api_key'] = api_key
     CONFIG['browser'] = browser
     CONFIG['bookmarks'] = bookmarks
+
     try:
         if browser and browser != 'cygwin':
             CONFIG['br'] = webbrowser.get(browser)
@@ -644,7 +672,7 @@ def command_line_runner():
         print('Cleared {}.'.format(CACHE_DIR)) 
         return
 
-    # enable cache unless user sets environ variable CLIQ_DISABLE_CACHE
+    ''' Enable cache unless user sets environment variable CLIQ_DISABLE_CACHE '''
     if not os.getenv('CLIQ_DISABLE_CACHE'):
         enable_cache()
 
