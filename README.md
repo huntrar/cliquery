@@ -23,7 +23,7 @@ cliquery offers less clicking, faster results, and *no limitations to regular br
       -h, --help         show this help message and exit
       -b, --bookmark     view and modify bookmarks
       -c, --config       print location of config file
-      -C, --CLEAR-CACHE  clear the cache
+      -C, --clear-cache  clear the cache
       -d, --describe     display page snippet
       -f, --first        open first link
       -o, --open         open link or browser manually

@@ -1,3 +1,8 @@
+0.7.3
+------
+
+ - changed --CLEAR-CACHE back to --clear-cache, previously thought name conflict is avoided by not allowing to clear cache from link prompt
+
 0.7.2
 ------
 

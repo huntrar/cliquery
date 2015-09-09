@@ -68,7 +68,7 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-c', '--config', help='print location of config file',
                         action='store_true')
-    parser.add_argument('-C', '--CLEAR-CACHE', help='clear the cache',
+    parser.add_argument('-C', '--clear-cache', help='clear the cache',
                         action='store_true')
     parser.add_argument('-d', '--describe', help='display page snippet',
                         action='store_true')
@@ -669,7 +669,7 @@ def command_line_runner():
         print(CONFIG_FPATH)
         return
 
-    if args['CLEAR_CACHE']:
+    if args['clear_cache']:
         clear_cache()
         print('Cleared {}.'.format(CACHE_DIR)) 
         return
