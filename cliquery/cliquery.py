@@ -43,6 +43,7 @@ LINK_HELP = ('Enter one of the following flags abbreviated or not, possibly foll
     '\tw, wolfram   display wolfram results\n'
     '\td, describe  display page snippet\n'
     '\tb, bookmark  view and modify bookmarks\n'
+    '\tp, print     print link to stdout\n'
     '\tc, config    print location of config file\n'
     '\tv, version   display current version\n')
 
@@ -74,6 +75,8 @@ def get_parser():
     parser.add_argument('-f', '--first', help='open first link',
                         action='store_true')
     parser.add_argument('-o', '--open', help='open link or browser manually',
+                        action='store_true')
+    parser.add_argument('-p', '--print', help='print link to stdout and exit',
                         action='store_true')
     parser.add_argument('-s', '--search', help='display search links',
                         action='store_true')
@@ -154,13 +157,6 @@ def get_wolfram_html(url_args):
     return utils.get_html(url)
 
 
-def bing_open(args, link):
-    if args['describe']:
-        describe(args, link)
-    else:
-        open_link(args, link)
-
-
 def bing_search(args, html):
     ''' Perform a Bing search and show an interactive prompt '''
 
@@ -233,24 +229,23 @@ def bing_search(args, html):
 
                 for k, v in flag_lookup.items():
                     if k == link_cmd or v == link_cmd:
+                        ''' Reset all flags and set chosen flag to True '''
                         args = utils.reset_flags(args)
                         args[v] = True
+
+                        ''' Handle the different link prompt flags '''
                         if k == 'b':
                             if utils.check_input(link_arg):
                                 args['query'] = link_args
                                 continue_exec = False
                                 search(args)
                             break
-                        elif k == 'd':
-                            if not utils.check_input(link_arg, num=True):
-                                continue_exec = False
+                        elif k == 'd' or k == 'o' or k == 'p':
+                            ''' continue_exec remains True '''
                             break
                         elif k == 'f':
-                            bing_open(args, links[0])
+                            open_link(args, links[0])
                             continue_exec = False
-                            break
-                        elif k == 'o':
-                            ''' Default behavior, continue_exec stays True '''
                             break
                         elif k == 'v':
                             print(__version__)
@@ -288,7 +283,7 @@ def bing_search(args, html):
                     if link_args and print_links:
                         for num in link_args:
                             if int(num) > 0 and int(num) <= len(links):
-                                bing_open(args, links[int(num)-1]) 
+                                open_link(args, links[int(num)-1]) 
                     else:
                         ''' Open range of link or a single link '''
                         start = utils.check_input(start_num, num=True)
@@ -297,19 +292,19 @@ def bing_search(args, html):
                         if start and end:
                             if int(start_num) > 0 and int(end_num) <= len(links)+1:
                                 for i in range(int(start_num), int(end_num)+1, 1):
-                                    bing_open(args, links[i-1]) 
+                                    open_link(args, links[i-1]) 
                         elif start:
                             if int(start_num) > 0:
                                 for i in range(int(start_num), len(links)+1, 1):
-                                    bing_open(args, links[i-1]) 
+                                    open_link(args, links[i-1]) 
                         elif end:
                             if int(end_num) < len(links)+1:
                                 for i in range(1, int(end_num)+1, 1):
-                                    bing_open(args, links[i-1]) 
+                                    open_link(args, links[i-1]) 
                         else:
                             ''' Open a single link '''
                             if link_arg and int(link_arg) > 0 and int(link_arg) < len(links)+1:
-                                bing_open(args, links[int(link_arg)-1])
+                                open_link(args, links[int(link_arg)-1])
             except (ValueError, IndexError):
                 pass
     return False
@@ -515,7 +510,14 @@ def open_browser(link):
 
 
 def open_link(args, links):
-    if args['describe']:
+    if args['print']:
+        links, is_list = utils.clean_url(links)
+        if is_list:
+            for link in links:
+                print(link)
+        else:
+            print(links)
+    elif args['describe']:
         links, is_list = utils.clean_url(links)
         if is_list:
             for link in links:

@@ -1,3 +1,9 @@
+0.7.2
+------
+
+ - added -p, --print flag for printing links to stdout
+ - removed bing_open function as open_link does its job already
+
 0.7.1
 ------
 

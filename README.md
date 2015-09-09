@@ -23,10 +23,11 @@ cliquery offers less clicking, faster results, and *no limitations to regular br
       -h, --help         show this help message and exit
       -b, --bookmark     view and modify bookmarks
       -c, --config       print location of config file
-      -C, --clear-cache  clear the cache
+      -C, --CLEAR-CACHE  clear the cache
       -d, --describe     display page snippet
       -f, --first        open first link
       -o, --open         open link or browser manually
+      -p, --print        print link to stdout
       -s, --search       display search links
       -v, --version      display current version
       -w, --wolfram      display wolfram results
