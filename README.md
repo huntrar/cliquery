@@ -11,7 +11,7 @@ cliquery offers less clicking, faster results, and *no limitations to regular br
 * (recommended) Enter your API key and choice of browser in .cliqrc (cygwin users *must* enter `cygwin` as their browser).
 
 ## Usage
-    usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-o] [-s] [-v] [-w]
+    usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-o] [-p] [-s] [-v] [-w]
                        [QUERY [QUERY ...]]
     
     a command-line browsing interface
