@@ -50,7 +50,11 @@ LINK_HELP = ('Enter one of the following flags abbreviated or not, possibly foll
 BORDER_LEN = 28
 BORDER = ' '.join(['+' for i in range(BORDER_LEN)])
 
-CONFIG_FPATH = os.path.dirname(os.path.realpath(__file__)) + '/.cliqrc'
+CONFIG_DIR = os.path.dirname(os.path.realpath(__file__))
+if os.path.isfile(CONFIG_DIR + '/.local.cliqrc'):
+    CONFIG_FPATH = CONFIG_DIR + '/.local.cliqrc'
+else:
+    CONFIG_FPATH = CONFIG_DIR + '/.cliqrc'
 CONFIG = {}
 
 XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',

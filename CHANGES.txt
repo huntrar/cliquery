@@ -1,3 +1,8 @@
+0.7.8
+------
+
+ - checks for .local.cliqrc before .cliqrc
+
 0.7.4
 ------
 
