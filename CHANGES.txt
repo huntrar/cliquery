@@ -1,3 +1,8 @@
+0.7.12
+------
+
+ - minor wording changes to installation instructions
+
 0.7.11
 ------
 
