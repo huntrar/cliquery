@@ -1,14 +1,32 @@
 # cliquery
 
 ## a command-line browsing interface
-cliquery is a command-line interface which bundles important features of modern browsers and the quickness of the command-line. It supports searching via Bing, previewing, bookmarking, `Feeling Lucky`, or simply opening the browser or URI's directly. An interactive interface allows users to make successive queries without exiting the program, typing help will list all possible commands. When a user chooses a link to open cliquery will invoke either their browser of choice or the default browser.
+cliquery bundles the more important features of a browser and the quickness of the command-line, supporting web searches, page previewing, bookmarking, and other useful features. An interactive interface allows users to make successive queries, eliminating the need to reinvoke the program each time. Simply typing help within the prompt lists all possibilities available to the user. When a link is finally chosen to be open, cliquery simply invokes the browser listed in its configuration file (or will attempt to find a default browser if none listed).
 
-cliquery offers less clicking, faster results, and *no limitations to regular browsing!*
+cliquery reduces needless clicking thus giving faster results, all without eliminating the use of a conventional browser!
 
 ## Installation
-* `pip install cliquery`
-* [Sign up (optional)](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key.
-* (recommended) Enter your API key and choice of browser in .cliqrc (cygwin users *must* enter `cygwin` as their browser).
+`
+
+pip install cliquery
+
+`
+or
+`
+
+pip install git+https://github.com/huntrar/cliquery.git#egg=cliquery
+
+`
+or
+`
+
+git clone https://github.com/huntrar/cliquery
+cd cliquery
+python setup.py install
+
+`
+
+It is recommended you also [sign up](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key and enter that and your preferred browser in your .cliqrc file (cygwin users *MUST* enter `cygwin` as their browser to avoid cross-platform conflicts).
 
 ## Usage
     usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-o] [-p] [-s] [-v] [-w]
