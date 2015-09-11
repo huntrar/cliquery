@@ -1,3 +1,8 @@
+0.7.10
+------
+
+ - fixed bad formatting with README installation instructions
+
 0.7.9
 ------
 
