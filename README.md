@@ -6,19 +6,24 @@ cliquery bundles the more important features of a browser and the quickness of t
 cliquery reduces needless clicking thus giving faster results, all without eliminating the use of a conventional browser!
 
 ## Installation
-`pip install cliquery`
+    pip install cliquery
 
 or
 
-`pip install git+https://github.com/huntrar/cliquery.git#egg=cliquery`
+    pip install git+https://github.com/huntrar/cliquery.git#egg=cliquery
 
 or
 
-`git clone https://github.com/huntrar/cliquery`
-`cd cliquery`
-`python setup.py install`
+    git clone https://github.com/huntrar/cliquery
+    cd cliquery
+    python setup.py install
 
 It is recommended you also [sign up](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key and enter that and your preferred browser in your .cliqrc file (cygwin users *MUST* enter `cygwin` as their browser to avoid cross-platform conflicts).
+
+It is also recommended you create a .local.cliqrc file instead of .cliqrc as .cliqrc is overwritten when updating the program. Just fill out .cliqrc and then create the local file as follows:
+
+    cd "$(dirname "$(cliquery -c)")"
+    cp .cliqrc .local.cliqrc
 
 ## Usage
     usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-o] [-p] [-s] [-v] [-w]
