@@ -1,3 +1,11 @@
+0.7.9
+------
+
+ - added urllib getproxies for use with requests
+ - replaced url special character encoding (hardcoded symbol_dict) with urllib's quote_plus
+ - replaced occurrences of 'link' with 'url' when referring to a web address specifically
+ - general function cleanup, including use of format instead of concat'ing strings when conveniently possible
+
 0.7.8
 ------
 
