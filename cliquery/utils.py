@@ -47,8 +47,10 @@ def get_html(url):
         return None
 
 
-def clean_query(url_args, open_flag=False):
-    if not open_flag:
+def clean_query(url_args, open_flag, bookmark_flag):
+    if bookmark_flag:
+        return url_args
+    elif not open_flag:
         ''' Replace special characters with hex encoded escapes '''
         return url_quote(url_args)
     else:

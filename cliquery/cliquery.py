@@ -8,6 +8,7 @@
 #############################################################
 
 
+from __future__ import absolute_import
 import argparse
 from collections import OrderedDict
 import glob
@@ -22,7 +23,7 @@ import lxml.html as lh
 import requests
 import requests_cache
 
-import utils
+from cliquery import utils
 from . import __version__
 
 
@@ -402,7 +403,7 @@ def describe(args, url):
             if '.' not in query:
                 describe_url(url)
             else:
-                if 'http://' not in query or 'https://' not in query:
+                if not query.startswith('http://') and not query.startswith('https://'):
                     describe_url('http://{0}'.format(query))
                 else:
                     describe_url(query)
@@ -452,8 +453,8 @@ def bookmarks(args, url_arg, url_num = []):
         for i in range(len(bookmarks)):
             print('{0}. {1}'.format(str(i+1), bookmarks[i]))
         return True
-    elif 'del+' in url_arg:
-        url_arg = url_arg.replace('del+', '').strip()
+    elif 'del' in url_arg:
+        url_arg = url_arg.replace('del', '').strip()
         if not utils.check_input(url_arg, num=True):
             bk_idx = search_bookmark(url_arg)
             if bk_idx > 0:
@@ -464,9 +465,9 @@ def bookmarks(args, url_arg, url_num = []):
         else:
             sys.stderr.write('Could not delete bookmark {0}.\n'.format(str(url_arg)))
             return False
-    elif 'add+' in url_arg:
-        url_arg = url_arg.replace('add+', '').strip()
-        if 'http://' not in url_arg or 'https://' not in url_arg:
+    elif 'add' in url_arg:
+        url_arg = url_arg.replace('add', '').strip()
+        if not url_arg.startswith('http://') and not url_arg.startswith('https://'):
             url_arg = 'http://{0}'.format(url_arg)
 
         if '.' not in url_arg:
@@ -628,12 +629,12 @@ def describe_url(url):
     
 
 def search(args):
-    ''' A query may only be blank if checking bookmarks '''
-    if not args['query'] and not args['bookmark'] and not args['open']:
+    ''' A query may only be blank if opening an empty browser or checking bookmarks '''
+    if not args['query'] and not args['open'] and not args['bookmark']:
         sys.stderr.write('No search terms entered.\n')
         return False
 
-    args['query'] = utils.clean_query(' '.join(args['query']), args['open'])
+    args['query'] = utils.clean_query(' '.join(args['query']), args['open'], args['bookmark'])
     url_args = args['query']
     html = get_search_html(args)
 
