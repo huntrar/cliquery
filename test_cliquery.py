@@ -4,7 +4,7 @@
 import os
 import unittest
 
-from cliquery import cliquery, utils
+from cliquery import cliquery
 
 
 
