@@ -1,3 +1,8 @@
+0.8.5
+------
+
+ - removed incompatible version 2.6 (due to collections.OrderedDict) from .travis.yml and setup.py
+
 0.8.4
 ------
 
@@ -5,7 +10,6 @@
  - more replacements of 'http://' in with startswith('http://')
  - url_quote (aka urllib.quote_plus) no longer called with bookmark flag
  - fixed bookmarks add/remove after quote_plus change
- - removed incompatible version 2.6 (due to collections.OrderedDict) from .travis.yml and setup.py
  - added from __future__ import absolute_import for explicit relative imports
  - added more keywords to setup.py
 
