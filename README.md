@@ -52,13 +52,13 @@ It is also recommended to create a .local.cliqrc file to use in place of .cliqrc
 
 ## Notes
 * Supports both Python 2.x and Python 3.x.
-* If you receive the following message when trying to add bookmarks:
+* If you receive the following message when trying to add or delete bookmarks:
     ```
     IOError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc'
     ```
-Enter the following to fix:
+Try the following to fix:
     ```
-    sudo chmod a+x /usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc
+    sudo chmod a+x /usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc && sudo chown $USER /usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc
     ```
 * A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility. Entering h or help will list all possible prompt commands.
