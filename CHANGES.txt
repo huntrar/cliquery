@@ -1,3 +1,8 @@
+0.8.7
+------
+
+ - added error handling for attempting to describe a video link (unsupported, as are images)
+
 0.8.6
 ------
 

@@ -407,8 +407,8 @@ def describe(args, url):
                     describe_url('http://{0}'.format(query))
                 else:
                     describe_url(query)
-        elif '/images/' in url:
-            sys.stderr.write('Link was an image, could not describe.\n')
+        elif url.startswith('/images/') or url.startswith('/videos/'):
+            sys.stderr.write('Link was an image/video, could not describe.\n')
             if not args['first']:
                 print(LINK_HELP)
     except AttributeError:
