@@ -1,3 +1,10 @@
+0.8.0
+------
+
+ - added return statements to all functions in search()
+ - added test_cliquery.py unit tests
+ - switched 'http://' in url to url.startswith('http://'), same for https
+
 0.7.12
 ------
 

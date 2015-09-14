@@ -165,7 +165,8 @@ def bing_search(args, html):
     try:
         unprocessed_urls = html.xpath('//h2/a/@href')
     except AttributeError:
-        sys.exit()
+        raise AttributeError('Failed to retrieve links from Bing lxml.html object!')
+
     if not unprocessed_urls:
         sys.stderr.write('Failed to retrieve links from Bing.\n')
         return False
@@ -173,7 +174,7 @@ def bing_search(args, html):
     urls = []
     url_descs = []
     for url in unprocessed_urls:
-        if 'http://' in url or 'https://' in url: 
+        if url.startswith('http://') or url.startswith('https://'): 
             urls.append(url)
             if "'" in url:
                 ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
@@ -240,13 +241,13 @@ def bing_search(args, html):
                             if utils.check_input(url_arg):
                                 args['query'] = url_args
                                 continue_exec = False
-                                search(args)
+                                return search(args)
                             break
                         elif k == 'd' or k == 'o' or k == 'p':
                             ''' continue_exec remains True '''
                             break
                         elif k == 'f':
-                            open_url(args, urls[0])
+                            return open_url(args, urls[0])
                             continue_exec = False
                             break
                         elif k == 'v':
@@ -260,7 +261,7 @@ def bing_search(args, html):
                         else:
                             args['query'] = url_args
                             continue_exec = False
-                            search(args)
+                            return search(args)
                             break
 
                 ''' Open link number(s) ''' 
@@ -285,7 +286,7 @@ def bing_search(args, html):
                     if url_args and print_links:
                         for num in url_args:
                             if int(num) > 0 and int(num) <= len(urls):
-                                open_url(args, urls[int(num)-1]) 
+                                return open_url(args, urls[int(num)-1]) 
                     else:
                         ''' Open range of link or a single link '''
                         start = utils.check_input(start_num, num=True)
@@ -294,19 +295,19 @@ def bing_search(args, html):
                         if start and end:
                             if int(start_num) > 0 and int(end_num) <= len(urls)+1:
                                 for i in range(int(start_num), int(end_num)+1, 1):
-                                    open_url(args, urls[i-1]) 
+                                    return open_url(args, urls[i-1]) 
                         elif start:
                             if int(start_num) > 0:
                                 for i in range(int(start_num), len(urls)+1, 1):
-                                    open_url(args, urls[i-1]) 
+                                    return open_url(args, urls[i-1]) 
                         elif end:
                             if int(end_num) < len(urls)+1:
                                 for i in range(1, int(end_num)+1, 1):
-                                    open_url(args, urls[i-1]) 
+                                    return open_url(args, urls[i-1]) 
                         else:
                             ''' Open a single link '''
                             if url_arg and int(url_arg) > 0 and int(url_arg) < len(urls)+1:
-                                open_url(args, urls[int(url_arg)-1])
+                                return open_url(args, urls[int(url_arg)-1])
             except (ValueError, IndexError):
                 pass
     return False
@@ -396,7 +397,7 @@ def describe(args, url):
     ''' Prints text preview of a page to stdout '''
 
     try:
-        if 'http://' in url or 'https://' in url:
+        if url.startswith('http://') or url.startswith('https://'):
             query = args['query']
             if '.' not in query:
                 describe_url(url)
@@ -418,13 +419,18 @@ def open_first(args, html):
 
     try:
         url = html.xpath('//h2/a/@href')[0]
-        if 'http://' in url or 'https://' in url:
-            open_url(args, url)
-        elif '/images/' in url:
+        if url.startswith('http://') or url.startswith('https://'):
+            return open_url(args, url)
+        elif url.startswith('/images/'):
             url = 'http://www.bing.com{0}'.format(url)
-            open_url(args, url)
+            return open_url(args, url)
+        elif url.startswith('/videos/'):
+            url = 'http://www.bing.com{0}'.format(url)
+            return open_url(args, url)
+        return False
     except AttributeError:
         sys.stderr.write('Failed to open first link.\n')
+        return False
 
 
 def search_bookmark(url_arg):
@@ -436,7 +442,7 @@ def search_bookmark(url_arg):
     return -1
 
 
-def open_bookmark(args, url_arg, url_num = []):
+def bookmarks(args, url_arg, url_num = []):
     ''' Add, delete, or open bookmarks '''
 
     bookmarks = CONFIG['bookmarks']
@@ -445,6 +451,7 @@ def open_bookmark(args, url_arg, url_num = []):
         print('Bookmarks:')
         for i in range(len(bookmarks)):
             print('{0}. {1}'.format(str(i+1), bookmarks[i]))
+        return True
     elif 'del+' in url_arg:
         url_arg = url_arg.replace('del+', '').strip()
         if not utils.check_input(url_arg, num=True):
@@ -453,9 +460,10 @@ def open_bookmark(args, url_arg, url_num = []):
                 url_arg = bk_idx
 
         if utils.check_input(url_arg, num=True):
-            del_bookmark(url_arg)
+            return del_bookmark(url_arg)
         else:
             sys.stderr.write('Could not delete bookmark {0}.\n'.format(str(url_arg)))
+            return False
     elif 'add+' in url_arg:
         url_arg = url_arg.replace('add+', '').strip()
         if 'http://' not in url_arg or 'https://' not in url_arg:
@@ -463,43 +471,58 @@ def open_bookmark(args, url_arg, url_num = []):
 
         if '.' not in url_arg:
             url_arg = '{0}.com'.format(url_arg)
-        add_bookmark(url_arg, url_num)
+        return add_bookmark(url_arg, url_num)
     elif utils.check_input(url_arg, num=True):
         try:
             open_url(args, bookmarks[int(url_arg) - 1])
+            return True
         except IndexError:
             sys.stderr.write('Bookmark {0} not found.\n'.format(url_arg))
+            return False
     elif bk_idx > 0:
         url_arg = bk_idx
         try:
             open_url(args, bookmarks[int(url_arg) - 1])
+            return True
         except IndexError:
             sys.stderr.write('Bookmark {0} not found.\n'.format(url_arg))
+            return False
     else:
         sys.stderr.write('Usage: '
                         '\nopen: [num] or [suburl]'
                         '\nadd: add [url]'
                         '\ndelete: del [num] or [suburl]'
                         '\n')
+        return True
 
 
 def add_bookmark(urls, url_arg):
-    with open(CONFIG_FPATH, 'a') as f:
-        if isinstance(urls, list) and url_arg:
-            f.write('{0}\n'.format(urls[int(url_arg)]))
-        elif isinstance(urls, str):
-            f.write('{0}\n'.format(urls))
+    try:
+        with open(CONFIG_FPATH, 'a') as f:
+            if isinstance(urls, list) and url_arg:
+                f.write('{0}\n'.format(urls[int(url_arg)]))
+            elif isinstance(urls, str):
+                f.write('{0}\n'.format(urls))
+        return True
+    except Exception as e:
+        sys.stderr.write('Error adding bookmark: {0}\n'.format(str(e)))
+        return False
 
 
 def del_bookmark(url_arg):
-    bookmarks = CONFIG['bookmarks']
-    with open(CONFIG_FPATH, 'w') as f:
-        f.write('api_key: {0}'.format(CONFIG['api_key']))
-        f.write('\nbrowser: {0}'.format(CONFIG['browser']))
-        f.write('\nbookmarks: ')
-        for i in range(len(bookmarks)):
-            if i != int(url_arg)-1:
-                f.write('{0}\n'.format(bookmarks[i]))
+    try:
+        bookmarks = CONFIG['bookmarks']
+        with open(CONFIG_FPATH, 'w') as f:
+            f.write('api_key: {0}'.format(CONFIG['api_key']))
+            f.write('\nbrowser: {0}'.format(CONFIG['browser']))
+            f.write('\nbookmarks: ')
+            for i in range(len(bookmarks)):
+                if i != int(url_arg)-1:
+                    f.write('{0}\n'.format(bookmarks[i]))
+        return True
+    except Exception as e:
+        sys.stderr.write('Error deleting bookmark: {0}\n'.format(str(e)))
+        return False
 
 
 def open_browser(url):
@@ -520,6 +543,7 @@ def open_url(args, urls):
                 print(url)
         else:
             print(urls)
+        return urls
     elif args['describe']:
         urls = utils.clean_url(urls)
         if isinstance(urls, list):
@@ -527,6 +551,7 @@ def open_url(args, urls):
                 describe_url(url)
         else:
             describe_url(urls)
+        return urls
     else:
         if not urls:
             open_browser('')
@@ -537,6 +562,7 @@ def open_url(args, urls):
                     open_browser(url)
             else:
                 open_browser(urls)
+        return True
 
 
 def describe_url(url):
@@ -605,39 +631,44 @@ def search(args):
     ''' A query may only be blank if checking bookmarks '''
     if not args['query'] and not args['bookmark']:
         sys.stderr.write('No search terms entered.\n')
-        sys.exit()
+        return False
 
     args['query'] = utils.clean_query(' '.join(args['query']), args['open'])
     url_args = args['query']
     html = get_search_html(args)
-    continue_search = False
+
+    ''' Default search if no flags provided or Wolfram search fails '''
+    default_search = False
 
     if args['open']:
         ''' Open a link manually '''
-        open_url(args, url_args)
+        return open_url(args, url_args)
     elif args['bookmark']:
         ''' Add, delete, or open bookmarks '''
-        open_bookmark(args, url_args) 
+        return bookmarks(args, url_args) 
     elif args['search']:
         ''' Perform a Bing search and show an interactive prompt '''
-        bing_search(args, html)
+        return bing_search(args, html)
     elif args['first']:
         ''' Open the first Bing link available, `Feeling Lucky` '''
-        open_first(args, html)   
+        return open_first(args, html)   
     elif args['wolfram']:
         ''' Searches WolframAlpha and continues search if failed '''
         success = wolfram_search(html)
         if not success:
-            continue_search = True
+            default_search = True
+        else:
+            return success
     else:
-        continue_search = True
+        default_search = True
 
-    if continue_search:
+    if default_search:
         ''' Default program behavior
             1. Check Bing for an instant result
             2. Check WolframAlpha for a result
             3. Check Bing for search results
         '''
+        result = None
 
         if args['wolfram']:
             bing_html = get_bing_html(url_args) 
@@ -645,11 +676,14 @@ def search(args):
         else:
             bing_html = html
 
-        if not bing_instant(bing_html):
+        result = bing_instant(bing_html)
+        if not result:
             if not args['wolfram']:
                 wolf_html = get_wolfram_html(url_args)
-            if not wolfram_search(wolf_html):
-                bing_search(args, bing_html)
+            result = wolfram_search(wolf_html)
+            if not result:
+                return bing_search(args, bing_html)
+        return result
 
 
 def command_line_runner():
