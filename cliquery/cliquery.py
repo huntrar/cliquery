@@ -629,7 +629,7 @@ def describe_url(url):
 
 def search(args):
     ''' A query may only be blank if checking bookmarks '''
-    if not args['query'] and not args['bookmark']:
+    if not args['query'] and not args['bookmark'] and not args['open']:
         sys.stderr.write('No search terms entered.\n')
         return False
 

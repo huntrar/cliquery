@@ -1,3 +1,8 @@
+0.8.1
+------
+
+ - no longer triggers no search terms error if flag is 'open' to allow for plain browser open
+
 0.8.0
 ------
 
