@@ -1,3 +1,10 @@
+0.8.8
+------
+
+ - added more startswith('http://') replacements in utils
+ - added linebreak after travis-ci status image
+ - more function documentation
+
 0.8.7
 ------
 

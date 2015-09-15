@@ -2,6 +2,7 @@
 
 ## a command-line browsing interface
 [![Build Status](https://travis-ci.org/huntrar/cliquery.svg?branch=master)](https://travis-ci.org/huntrar/cliquery)
+
 cliquery bundles the more important features of a browser and the quickness of the command-line, supporting web searches, page previewing, bookmarking, and other useful features. An interactive interface allows users to make successive queries, eliminating the need to reinvoke the program each time. Simply typing help within the prompt lists all possibilities available to the user. When a link is finally chosen to be open, cliquery simply invokes the browser listed in its configuration file (or will attempt to find a default browser if none listed).
 
 cliquery reduces needless clicking thus giving faster results, all without eliminating the use of a conventional browser!

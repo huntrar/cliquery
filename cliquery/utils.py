@@ -37,7 +37,7 @@ def get_proxies():
 
 def get_html(url):
     try:
-        ''' Get HTML response as an lxml.html object '''
+        ''' Get HTML response as an lxml.html.HtmlElement object '''
         headers={'User-Agent' : random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
         return lh.fromstring(request.text.encode('utf-8'))
@@ -73,6 +73,7 @@ def check_input(u_input, num = False, empty=False):
     except AttributeError:
         pass
 
+    ''' Check for exit signal '''
     if u_inp == 'q' or u_inp == 'quit' or u_inp == 'exit':
         sys.exit()
 
@@ -95,26 +96,29 @@ def check_num(num):
 
 
 def clean_url(urls):
+    ''' Append scheme to urls if not present '''
     clean_urls = []
     if isinstance(urls, list):
         for url in urls:
-            if 'http://' not in url and 'https://' not in url:
+            if not url.startswith('http://') and not url.startswith('https://'):
                 clean_urls.append('http://{0}'.format(url))
             else:
                 clean_urls.append(url)
         return clean_urls
     else:
-        if 'http://' in urls or 'https://' in urls:
+        if urls.startswith('http://') or urls.startswith('https://'):
             return urls
         else:
             return 'http://{0}'.format(urls)
 
 
 def reset_flags(args):
+    ''' Set all boolean flags to False '''
     return {k: False if isinstance(v, bool) else v for k, v in args.items()}
 
 
 def get_flags(args):
+    ''' Returns dictionary containing flags with their first letter as the key '''
     return {k[0]: k for k, v in args.items() if isinstance(v, bool)}
 
 

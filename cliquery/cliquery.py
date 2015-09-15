@@ -166,7 +166,7 @@ def bing_search(args, html):
     try:
         unprocessed_urls = html.xpath('//h2/a/@href')
     except AttributeError:
-        raise AttributeError('Failed to retrieve links from Bing lxml.html object!')
+        raise AttributeError('Failed to retrieve links from Bing lxml.html.HtmlElement object!')
 
     if not unprocessed_urls:
         sys.stderr.write('Failed to retrieve links from Bing.\n')
@@ -326,7 +326,7 @@ def wolfram_search(html):
             "@title != 'Manipulatives illustration' and "
             "@title != 'Quotient and remainder']/@title")))
     except AttributeError:
-        raise AttributeError('Expected an lxml.html object!')
+        raise AttributeError('Expected an lxml.html.HtmlElement object!')
 
     entries = []
     if titles:
@@ -380,7 +380,7 @@ def bing_instant(html):
             '|//input[@id="uc_rv"]/@value'
             '|//ol[@class="b_dList b_indent"]/li/div/text()') # a definition
     except AttributeError:
-        raise AttributeError('Expected an lxml.html object!')
+        raise AttributeError('Expected an lxml.html.HtmlElement object!')
 
     try:
         if inst_result:
