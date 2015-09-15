@@ -22,10 +22,12 @@ or
 
 It is recommended to [sign up](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key and enter that and your preferred browser in .cliqrc (cygwin users *MUST* enter `cygwin` as their browser to avoid cross-platform conflicts).
 
-It is also recommended to create a .local.cliqrc file to use in place of .cliqrc, as .cliqrc is overwritten when updating the program. Do the following to copy .cliqrc to .local.cliqrc:
+It is also recommended to create a .local.cliqrc file to use in place of .cliqrc, as .cliqrc is overwritten when updating the program.
+
+Do the following to copy .cliqrc to .local.cliqrc:
 
     cd "$(dirname "$(cliquery -c)")"
-    cp .cliqrc .local.cliqrc
+    sudo cp .cliqrc .local.cliqrc
 
 ## Usage
     usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-o] [-p] [-s] [-v] [-w]
@@ -54,14 +56,13 @@ It is also recommended to create a .local.cliqrc file to use in place of .cliqrc
 
 ## Notes
 * Supports both Python 2.x and Python 3.x.
-* If you receive the following message when trying to add or delete bookmarks:
-    ```
+* If you receive the following message (or similar) when trying to add or delete bookmarks:
+
     IOError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc'
-    ```
-Try the following to fix:
-    ```
-    sudo chmod a+x /usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc && sudo chown $USER /usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc
-    ```
+
+Try entering the following to fix:
+
+    sudo chmod a+x "$(cliquery -c)" && sudo chown $USER "$(cliquery -c)" 
 * A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility. Entering h or help will list all possible prompt commands.
     ```

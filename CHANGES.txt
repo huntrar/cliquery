@@ -1,3 +1,8 @@
+0.8.9
+------
+
+ - improved troubleshooting instructions in readme
+
 0.8.8
 ------
 
