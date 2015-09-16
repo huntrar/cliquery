@@ -1,3 +1,8 @@
+0.9.0
+------
+
+ - open_first now filters /images/ and /videos/ if using describe flag as well
+
 0.8.11
 ------
 

@@ -399,7 +399,11 @@ def open_first(args, html):
 
     try:
         try:
-            url = html.xpath('//h2/a/@href')[0]
+            urls = html.xpath('//h2/a/@href')
+            if args['describe']:
+                url = filter(lambda x: not x.startswith('/images/') and not x.startswith('/videos/'), urls)[0]
+            else:
+                url = urls[0]
         except (AttributeError, IndexError):
             raise AttributeError('Failed to retrieve first link from Bing lxml.html.HtmlElement object!')
         if url.startswith('http://') or url.startswith('https://'):
