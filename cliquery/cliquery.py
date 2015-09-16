@@ -186,7 +186,7 @@ def bing_search(args, html):
             if isinstance(url_desc, list):
                 url_desc = ''.join(url_desc)
             url_descs.append(url_desc)
-        elif '/images/' in url and 'www.bing.com' not in url:
+        elif (url.startswith('/images/') or url.startswith('/videos/')) and 'www.bing.com' not in url:
             ''' Add missing base url to image links '''
             urls.append('http://www.bing.com{0}'.format(url))
             if "'" in url:
@@ -398,26 +398,26 @@ def open_first(args, html):
     ''' Open the first Bing link available, `Feeling Lucky` '''
 
     try:
-        try:
-            urls = html.xpath('//h2/a/@href')
-            if args['describe']:
-                url = filter(lambda x: not x.startswith('/images/') and not x.startswith('/videos/'), urls)[0]
-            else:
-                url = urls[0]
-        except (AttributeError, IndexError):
-            raise AttributeError('Failed to retrieve first link from Bing lxml.html.HtmlElement object!')
-        if url.startswith('http://') or url.startswith('https://'):
-            return open_url(args, url)
-        elif url.startswith('/images/'):
-            url = 'http://www.bing.com{0}'.format(url)
-            return open_url(args, url)
-        elif url.startswith('/videos/'):
-            url = 'http://www.bing.com{0}'.format(url)
-            return open_url(args, url)
-        return False
-    except AttributeError:
-        sys.stderr.write('Failed to open first link.\n')
-        return False
+        unprocessed_urls = html.xpath('//h2/a/@href')
+
+        if not unprocessed_urls:
+            sys.stderr.write('Failed to retrieve links from Bing.\n')
+            return False
+
+        if args['describe']:
+            url = filter(lambda x: not x.startswith('/images/') and not x.startswith('/videos/'), unprocessed_urls)[0]
+        else:
+            url = unprocessed_urls[0]
+    except (AttributeError, IndexError):
+        raise AttributeError('Failed to retrieve first link from Bing lxml.html.HtmlElement object!')
+
+    if url.startswith('/images/') or url.startswith('/videos/'):
+        url = 'http://www.bing.com{0}'.format(url)
+
+    if url.startswith('http://') or url.startswith('https://'):
+        return open_url(args, url)
+    else:
+        return open_url(args, 'http://{0}'.format(url))
 
 
 def search_bookmark(url_arg):
@@ -565,11 +565,9 @@ def describe_url(url):
             desc_url = 'http://{0}'.format(url)
         else:
             desc_url = url
-
     except AttributeError:
         sys.stderr.write('Failed to describe link {0}\n.'.format(url))
         return False 
-        
 
     qualifier = 5
 
