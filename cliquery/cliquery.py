@@ -2,7 +2,7 @@
 
 #############################################################
 #                                                           #
-# cliquery - a command-line browsing interface              #
+# cliquery - a command-line browsing utility              #
 # written by Hunter Hammond (huntrar@gmail.com)             #
 #                                                           #
 #############################################################
@@ -66,7 +66,7 @@ CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='a command-line browsing interface')
+    parser = argparse.ArgumentParser(description='a command-line browsing utility')
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*', 
                         help='keywords to search')
     parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
