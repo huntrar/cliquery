@@ -1,3 +1,8 @@
+0.8.11
+------
+
+ - placed describe() functionality within describe_url() and removed describe()
+
 0.8.10
 ------
 

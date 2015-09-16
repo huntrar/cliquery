@@ -394,27 +394,6 @@ def bing_instant(html):
     return False
 
 
-def describe(args, url):
-    ''' Prints text preview of a page to stdout '''
-
-    try:
-        if url.startswith('http://') or url.startswith('https://'):
-            query = args['query']
-            if '.' not in query:
-                describe_url(url)
-            else:
-                if not query.startswith('http://') and not query.startswith('https://'):
-                    describe_url('http://{0}'.format(query))
-                else:
-                    describe_url(query)
-        elif url.startswith('/images/') or url.startswith('/videos/'):
-            sys.stderr.write('Link was an image/video, could not describe.\n')
-            if not args['first']:
-                print(LINK_HELP)
-    except AttributeError:
-        sys.stderr.write('Failed to describe link {0}\n.'.format(url))
-
-
 def open_first(args, html):
     ''' Open the first Bing link available, `Feeling Lucky` '''
 
@@ -573,13 +552,28 @@ def describe_url(url):
     ''' Print the text of a given url
         Printed lines must be greater than the average length / qualifier
     '''
+
+    try:
+        if url.startswith('/images/') or url.startswith('/videos/'):
+            sys.stderr.write('Link was an image/video, could not describe.\n')
+            return False
+        elif not url.startswith('http://') and not url.startswith('https://'):
+            desc_url = 'http://{0}'.format(url)
+        else:
+            desc_url = url
+
+    except AttributeError:
+        sys.stderr.write('Failed to describe link {0}\n.'.format(url))
+        return False 
+        
+
     qualifier = 5
 
-    html = utils.get_html(url)
+    html = utils.get_html(desc_url)
     body = ''.join(html.xpath('//body//*[not(self::script) and '
          'not(self::style)]/text()')).split('\n')
     if not body:
-        print(('{0}\n'.format(url)).encode('utf-8'))
+        print(('{0}\n'.format(desc_url)).encode('utf-8'))
         print('Extended description not found.\n')
         return False
 
@@ -589,7 +583,7 @@ def describe_url(url):
 
     filtered_body = list(filter(None, stripped_body))
     if not filtered_body:
-        print(('{0}\n'.format(url)).encode('utf-8'))
+        print(('{0}\n'.format(desc_url)).encode('utf-8'))
         print('Extended description not found.\n')
         return False
 
@@ -605,7 +599,7 @@ def describe_url(url):
             print_body.append(b)
 
     if print_body:
-        print(('{0}\n'.format(url)).encode('utf-8'))
+        print(('{0}\n'.format(desc_url)).encode('utf-8'))
 
         see_more = False
         MAX_MSG = 200
@@ -620,7 +614,7 @@ def describe_url(url):
                 msg_count = 0
                 print('')
     else:
-        print(('{0}\n'.format(url)).encode('utf-8'))
+        print(('{0}\n'.format(desc_url)).encode('utf-8'))
         print('Extended description not found.\n')
         return False
 
