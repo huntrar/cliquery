@@ -326,7 +326,7 @@ def wolfram_search(html):
             "@title != 'Manipulatives illustration' and "
             "@title != 'Quotient and remainder']/@title")))
     except AttributeError:
-        raise AttributeError('Expected an lxml.html.HtmlElement object!')
+        raise AttributeError('Failed to retrieve titles from Wolfram lxml.html.HtmlElement object!')
 
     entries = []
     if titles:
@@ -380,7 +380,7 @@ def bing_instant(html):
             '|//input[@id="uc_rv"]/@value'
             '|//ol[@class="b_dList b_indent"]/li/div/text()') # a definition
     except AttributeError:
-        raise AttributeError('Expected an lxml.html.HtmlElement object!')
+        raise AttributeError('Failed to retrieve instant results from Bing lxml.html.HtmlElement object!')
 
     try:
         if inst_result:
@@ -419,7 +419,10 @@ def open_first(args, html):
     ''' Open the first Bing link available, `Feeling Lucky` '''
 
     try:
-        url = html.xpath('//h2/a/@href')[0]
+        try:
+            url = html.xpath('//h2/a/@href')[0]
+        except (AttributeError, IndexError):
+            raise AttributeError('Failed to retrieve first link from Bing lxml.html.HtmlElement object!')
         if url.startswith('http://') or url.startswith('https://'):
             return open_url(args, url)
         elif url.startswith('/images/'):
