@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-from setuptools import setup, find_packages
-import cliquery
 import os
+from setuptools import setup, find_packages
+
+import cliquery
+
 
 def read(*names):
     values = dict()
@@ -17,6 +19,7 @@ def read(*names):
         values[name] = value
     return values
 
+
 long_description = """
 %(README)s
 
@@ -30,7 +33,7 @@ News
 setup(
     name='cliquery',
     version=cliquery.__version__,
-    description='a command-line browsing interface',
+    description='a command-line browsing utility',
     long_description=long_description,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -46,7 +49,7 @@ setup(
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
     ],
-    keywords='cliquery command line search engine browser bookmark console answer quick fast calculator',
+    keywords='cliquery command line search internet utily browser bookmark console preview answer',
     author='Hunter Hammond',
     author_email='huntrar@gmail.com',
     maintainer='Hunter Hammond',
