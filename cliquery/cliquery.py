@@ -170,7 +170,7 @@ def bing_search(args, html):
 
     if not unprocessed_urls:
         sys.stderr.write('Failed to retrieve links from Bing.\n')
-        return False
+        return None
 
     urls = []
     url_descs = []
@@ -402,7 +402,7 @@ def open_first(args, html):
 
         if not unprocessed_urls:
             sys.stderr.write('Failed to retrieve links from Bing.\n')
-            return False
+            return None
 
         if args['describe']:
             url = filter(lambda x: not x.startswith('/images/') and not x.startswith('/videos/'), unprocessed_urls)[0]

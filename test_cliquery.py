@@ -30,8 +30,9 @@ class CliqueryTestCase(unittest.TestCase):
             if isinstance(links, list):
                 for link in links:
                     self.assertTrue(link.startswith('http://') or link.startswith('https://'))
-            elif isinstance(links, bool):
-                self.assertTrue(links)
+            elif links is None:
+                ''' None is returned if there is an internet connection error '''
+                pass
             else:
                 self.assertTrue(links.startswith('http://') or links.startswith('https://'))
 

@@ -1,3 +1,9 @@
+0.9.2
+------
+
+ - returns None in bing_search and open_first if internet connection problem causes no html to be found
+ - this way unit tests will not show a false positive due to a non programming issue
+
 0.9.1
 ------
 
