@@ -1,3 +1,8 @@
+0.9.5
+------
+
+ - massive code cleanup using pylint as reference
+
 0.9.4
 ------
 

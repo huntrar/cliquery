@@ -1,8 +1,8 @@
 import random
-import requests
 import sys
 
 import lxml.html as lh
+import requests
 
 
 try:
@@ -16,34 +16,41 @@ except ImportError:
     from urllib.request import getproxies
 
 
-USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
-                'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0',
-                'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0',
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5',
-                'Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5')
+USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) '
+               'Gecko/20100101 Firefox/11.0',
+               'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) '
+               'Gecko/20100 101 Firefox/22.0',
+               'Mozilla/5.0 (Windows NT 6.1; rv:11.0) '
+               'Gecko/20100101 Firefox/11.0',
+               'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) '
+               'AppleWebKit/536.5 (KHTML, like Gecko) '
+               'Chrome/19.0.1084.46 Safari/536.5',
+               'Mozilla/5.0 (Windows; Windows NT 6.1) '
+               'AppleWebKit/536.5 (KHTML, like Gecko) '
+               'Chrome/19.0.1084.46 Safari/536.5')
 
 
 def get_proxies():
     proxies = getproxies()
     filtered_proxies = {}
-    for k, v in proxies.items():
-        if k.startswith('http://'):
-            if not v.startswith('http://'):
-                filtered_proxies[k] = 'http://{0}'.format(v)
+    for key, value in proxies.items():
+        if key.startswith('http://'):
+            if not value.startswith('http://'):
+                filtered_proxies[key] = 'http://{0}'.format(value)
             else:
-                filtered_proxies[k] = v
+                filtered_proxies[key] = value
     return filtered_proxies
 
 
 def get_html(url):
     try:
         ''' Get HTML response as an lxml.html.HtmlElement object '''
-        headers={'User-Agent' : random.choice(USER_AGENTS)}
+        headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
         return lh.fromstring(request.text.encode('utf-8'))
-    except Exception as e:
+    except Exception as err:
         sys.stderr.write('Failed to retrieve {0}.\n'.format(url))
-        sys.stderr.write('{0}\n'.format(str(e)))
+        sys.stderr.write('{0}\n'.format(str(err)))
         return None
 
 
@@ -64,7 +71,7 @@ def clean_query(url_args, open_flag, bookmark_flag):
         return urls
 
 
-def check_input(u_input, num = False, empty=False):
+def check_input(u_input, num=False, empty=False):
     if isinstance(u_input, list):
         u_input = ''.join(u_input)
 
@@ -89,7 +96,7 @@ def check_input(u_input, num = False, empty=False):
 
 def check_num(num):
     try:
-        n = int(num)
+        new = int(num)
         return True
     except ValueError:
         return False
@@ -118,7 +125,7 @@ def reset_flags(args):
 
 
 def get_flags(args):
-    ''' Returns dictionary containing flags with their first letter as the key '''
+    ''' Return dictionary containing flags with their first letter as key '''
     return {k[0]: k for k, v in args.items() if isinstance(v, bool)}
 
 
