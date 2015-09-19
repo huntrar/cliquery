@@ -597,8 +597,8 @@ def describe_url(url):
         return False
 
     body_sum = 0
-    for line in filtered_body:
-        body_sum += len(b)
+    for bo in filtered_body:
+        body_sum += len(bo)
     body_avg_sum = body_sum / len(filtered_body)+1
     print_body = []
 
