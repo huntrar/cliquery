@@ -448,7 +448,6 @@ def add_bookmark(urls):
         with open(CONFIG_FPATH, 'a') as cfg:
             if isinstance(urls, list):
                 for url in urls:
-                    print 'url is %s' % url
                     cfg.write('\n{0}'.format(url))
             elif isinstance(urls, str):
                 cfg.write('\n{0}'.format(urls))

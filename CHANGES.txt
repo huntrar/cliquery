@@ -1,3 +1,8 @@
+0.9.8
+------
+
+ - removed an unnecessary print statement
+
 0.9.7
 ------
 
