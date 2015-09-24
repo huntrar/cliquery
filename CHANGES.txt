@@ -1,3 +1,9 @@
+0.9.7
+------
+
+ - added tag/untag command for bookmarks to add aliases
+ - can now add/delete/tag multiple bookmarks at once
+
 0.9.6
 ------
 

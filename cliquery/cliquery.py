@@ -13,6 +13,7 @@ import argparse as argp
 from collections import OrderedDict
 import glob
 import os
+import re
 from subprocess import call
 import sys
 import time
@@ -47,9 +48,11 @@ LINK_HELP = ('Enter one of the following flags abbreviated or not,'
              '\tv, version   display current version\n')
 
 BOOKMARK_HELP = ('Usage: '
-                 '\nopen: [num] or [suburl]'
+                 '\nopen: [num or suburl or tag]'
                  '\nadd: add [url]'
-                 '\ndelete: del [num] or [suburl]'
+                 '\ntag: tag [num or suburl] [tag]'
+                 '\nuntag: untag [num or suburl or tag]'
+                 '\ndelete: del [num or suburl or tag]'
                  '\n')
 
 SEE_MORE = 'See more? [Press Enter] '
@@ -121,7 +124,7 @@ def read_config():
         cfg_bkmarks = cfg.read()
         if 'bookmarks:' in cfg_bkmarks:
             cfg_bkmarks = cfg_bkmarks.replace('bookmarks:', '').split('\n')
-            bkmarks = [b.strip() for b in cfg_bkmarks if b]
+            bkmarks = [b.strip() for b in cfg_bkmarks if b.strip()]
 
         if not api_key and not browser:
             try:
@@ -431,93 +434,224 @@ def open_first(args, html):
         return open_url(args, 'http://{0}'.format(url))
 
 
-def search_bookmark(url_arg):
+def get_bookmark_idx(url_arg):
     bkmarks = CONFIG['bookmarks']
     url_arg = url_arg.strip()
-    for i in range(len(bkmarks)):
-        if url_arg in bkmarks[i]:
+    for i, bkmark in enumerate(bkmarks):
+        if url_arg in bkmark:
             return i+1
     return -1
 
 
-def bookmarks(args, url_arg, url_num=None):
-    ''' Add, delete, or open bookmarks '''
-    bkmarks = CONFIG['bookmarks']
-    bk_idx = search_bookmark(url_arg)
-    if not url_arg:
-        print('Bookmarks:')
-        for i in range(len(bkmarks)):
-            print('{0}. {1}'.format(str(i+1), bkmarks[i]))
-        return True
-    elif 'del' in url_arg:
-        url_arg = url_arg.replace('del', '').strip()
-        if not utils.check_input(url_arg, num=True):
-            bk_idx = search_bookmark(url_arg)
-            if bk_idx > 0:
-                url_arg = bk_idx
-
-        if utils.check_input(url_arg, num=True):
-            return del_bookmark(url_arg)
-        else:
-            sys.stderr.write('Could not delete \
-                             bookmark {0}.\n'.format(str(url_arg)))
-            return False
-    elif 'add' in url_arg:
-        url_arg = url_arg.replace('add', '').strip()
-        if not url_arg.startswith('http://') and\
-               not url_arg.startswith('https://'):
-            url_arg = 'http://{0}'.format(url_arg)
-
-        if '.' not in url_arg:
-            url_arg = '{0}.com'.format(url_arg)
-        return add_bookmark(url_arg, url_num)
-    elif utils.check_input(url_arg, num=True):
-        try:
-            open_url(args, bkmarks[int(url_arg) - 1])
-            return True
-        except IndexError:
-            sys.stderr.write('Bookmark {0} not found.\n'.format(url_arg))
-            return False
-    elif bk_idx > 0:
-        url_arg = bk_idx
-        try:
-            open_url(args, bkmarks[int(url_arg) - 1])
-            return True
-        except IndexError:
-            sys.stderr.write('Bookmark {0} not found.\n'.format(url_arg))
-            return False
-    else:
-        sys.stderr.write(BOOKMARK_HELP)
-        return True
-
-
-def add_bookmark(urls, url_arg):
+def add_bookmark(urls):
     try:
         with open(CONFIG_FPATH, 'a') as cfg:
-            if isinstance(urls, list) and url_arg:
-                cfg.write('{0}\n'.format(urls[int(url_arg)]))
+            if isinstance(urls, list):
+                for url in urls:
+                    print 'url is %s' % url
+                    cfg.write('\n{0}'.format(url))
             elif isinstance(urls, str):
-                cfg.write('{0}\n'.format(urls))
+                cfg.write('\n{0}'.format(urls))
         return True
     except Exception as err:
         sys.stderr.write('Error adding bookmark: {0}\n'.format(str(err)))
         return False
 
 
-def del_bookmark(url_arg):
+def untag_bookmark(bk_idx):
     try:
         bkmarks = CONFIG['bookmarks']
         with open(CONFIG_FPATH, 'w') as cfg:
             cfg.write('api_key: {0}'.format(CONFIG['api_key']))
             cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
             cfg.write('\nbookmarks: ')
-            for i in range(len(bkmarks)):
-                if i != int(url_arg)-1:
-                    cfg.write('{0}\n'.format(bkmarks[i]))
+
+            if isinstance(bk_idx, list):
+                bk_idx = [int(x)-1 for x in bk_idx]
+                for i, bkmark in enumerate(bkmarks):
+                    if i in bk_idx and '(' in bkmark:
+                        ''' Remove tags '''
+                        cfg.write('\n{0}'.format(bkmark.split('(')[0].strip()))
+                    else:
+                        cfg.write('\n{0}'.format(bkmark))
+            else:
+                for i, bkmark in enumerate(bkmarks):
+                    if i == int(bk_idx)-1 and '(' in bkmark:
+                        ''' Remove tags '''
+                        cfg.write('\n{0}'.format(bkmark.split('(')[0].strip()))
+                    else:
+                        cfg.write('\n{0}'.format(bkmark))
+        return True
+    except Exception as err:
+        sys.stderr.write('Error untagging bookmark: {0}\n'.format(str(err)))
+        return False
+
+
+def tag_bookmark(bk_idx, tags):
+    try:
+        bkmarks = CONFIG['bookmarks']
+
+        if isinstance(tags, list):
+            tags = ' '.join(tags)
+
+        with open(CONFIG_FPATH, 'w') as cfg:
+            cfg.write('api_key: {0}'.format(CONFIG['api_key']))
+            cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+            cfg.write('\nbookmarks: ')
+
+            for i, bkmark in enumerate(bkmarks):
+                if i == int(bk_idx)-1:
+                    ''' Save previous tags if any, enclosed in parentheses '''
+                    prev_tags = re.search('(?<=\().*(?=\))', bkmark)
+                    if prev_tags:
+                        tags = '{0} {1}'.format(prev_tags.group(), tags)
+
+                    cfg.write('\n{0} ({1})\
+                              '.format(bkmark.split('(')[0].strip(), tags))
+                else:
+                    cfg.write('\n{0}'.format(bkmark))
+        return True
+    except Exception as err:
+        sys.stderr.write('Error tagging bookmark: {0}\n'.format(str(err)))
+        return False
+
+
+def del_bookmark(bk_idx):
+    try:
+        bkmarks = CONFIG['bookmarks']
+        with open(CONFIG_FPATH, 'w') as cfg:
+            cfg.write('api_key: {0}'.format(CONFIG['api_key']))
+            cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+            cfg.write('\nbookmarks: ')
+
+            if isinstance(bk_idx, list):
+                bk_idx = [int(x)-1 for x in bk_idx]
+                for i, bkmark in enumerate(bkmarks):
+                    if i not in bk_idx:
+                        cfg.write('\n{0}'.format(bkmark))
+            else:
+                for i, bkmark in enumerate(bkmarks):
+                    if i != int(bk_idx)-1:
+                        cfg.write('\n{0}'.format(bkmark))
         return True
     except Exception as err:
         sys.stderr.write('Error deleting bookmark: {0}\n'.format(str(err)))
         return False
+
+
+def bookmarks(args, url_arg):
+    ''' Add, tag, untag, delete, or open bookmarks '''
+    bkmarks = CONFIG['bookmarks']
+
+    if not url_arg:
+        ''' Print bookmarks if no arguments provided '''
+
+        print('Bookmarks:')
+        for i, bkmark in enumerate(bkmarks):
+            print('{0}. {1}'.format(str(i+1), bkmark))
+        return True
+    elif 'add' in url_arg:
+        ''' add: add [url] '''
+        url_arg = url_arg.replace('add', '').strip()
+        url_args = url_arg.split()
+
+        clean_bkmarks = []
+        for u_arg in url_args:
+            u_arg = utils.append_scheme(u_arg)
+
+            if '.' not in u_arg:
+                u_arg = '{0}.com'.format(u_arg)
+
+            clean_bkmarks.append(u_arg)
+
+        return add_bookmark(clean_bkmarks)
+    elif 'untag' in url_arg:
+        ''' untag: untag [num or suburl or tag] '''
+        split_args = url_arg.replace('untag', '').strip().split()
+
+        bkmark_idxs = []
+        for u_arg in split_args:
+            if not utils.check_input(u_arg, num=True):
+                ''' If input is not a number then find the correct number '''
+
+                bk_idx = get_bookmark_idx(u_arg)
+                if bk_idx > 0:
+                    bkmark_idxs.append(bk_idx)
+            else:
+                bkmark_idxs.append(u_arg)
+
+        return untag_bookmark(bkmark_idxs)
+    elif 'tag' in url_arg:
+        ''' tag: tag [num or suburl] [tag]'''
+        split_args = url_arg.replace('tag', '').strip().split()
+        url_arg = split_args[0]
+        tags = split_args[1:]
+
+        if not utils.check_input(url_arg, num=True):
+            ''' If input is not a number then find the correct number '''
+
+            bk_idx = get_bookmark_idx(url_arg)
+            if bk_idx > 0:
+                url_arg = bk_idx
+
+        if utils.check_input(url_arg, num=True):
+            return tag_bookmark(url_arg, tags)
+        else:
+            sys.stderr.write('Failed to tag \
+                             bookmark {0}.\n'.format(str(url_arg)))
+    elif 'del' in url_arg:
+        ''' delete: del [num or suburl or tag] '''
+        split_args = url_arg.replace('del', '').strip().split()
+
+        bkmark_idxs = []
+        for u_arg in split_args:
+            if not utils.check_input(u_arg, num=True):
+                ''' If input is not a number then find the correct number '''
+
+                bk_idx = get_bookmark_idx(u_arg)
+                if bk_idx > 0:
+                    bkmark_idxs.append(bk_idx)
+            else:
+                bkmark_idxs.append(u_arg)
+
+        return del_bookmark(bkmark_idxs)
+    else:
+        ''' open: [num or suburl or tag] '''
+        split_args = url_arg.replace('open', '').strip().split()
+
+        for u_arg in split_args:
+            if utils.check_input(u_arg, num=True):
+                ''' open: [num] '''
+                try:
+                    bkmark = bkmarks[int(u_arg) - 1]
+                    if '(' in bkmark and ')' in bkmark:
+                        open_url(args, bkmark.split('(')[0].strip())
+                    else:
+                        open_url(args, bkmark)
+                    return True
+                except IndexError:
+                    sys.stderr.write('Bookmark {0} not found.\n\
+                                     '.format(u_arg))
+                    return False
+            else:
+                ''' open: [suburl or tag] '''
+                bk_idx = get_bookmark_idx(u_arg)
+                if bk_idx > 0:
+                    u_arg = bk_idx
+                    try:
+                        bkmark = bkmarks[int(u_arg) - 1]
+                        if '(' in bkmark and ')' in bkmark:
+                            open_url(args, bkmark.split('(')[0].strip())
+                        else:
+                            open_url(args, bkmark)
+                        return True
+                    except IndexError:
+                        sys.stderr.write('Bookmark {0} not found.\n\
+                                         '.format(u_arg))
+                        return False
+                else:
+                    sys.stderr.write(BOOKMARK_HELP)
+                    return True
 
 
 def open_browser(url):
@@ -532,7 +666,7 @@ def open_browser(url):
 
 def open_url(args, urls):
     if args['print']:
-        urls = utils.clean_url(urls)
+        urls = utils.append_scheme(urls)
         if isinstance(urls, list):
             for url in urls:
                 print(url)
@@ -540,7 +674,7 @@ def open_url(args, urls):
             print(urls)
         return urls
     elif args['describe']:
-        urls = utils.clean_url(urls)
+        urls = utils.append_scheme(urls)
         if isinstance(urls, list):
             for url in urls:
                 describe_url(url)
@@ -551,7 +685,7 @@ def open_url(args, urls):
         if not urls:
             open_browser('')
         else:
-            urls = utils.clean_url(urls)
+            urls = utils.append_scheme(urls)
             if isinstance(urls, list):
                 for url in urls:
                     open_browser(url)

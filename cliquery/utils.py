@@ -78,7 +78,7 @@ def check_input(u_input, num=False, empty=False):
     try:
         u_inp = u_input.lower().strip()
     except AttributeError:
-        pass
+        u_inp = u_input
 
     ''' Check for exit signal '''
     if u_inp == 'q' or u_inp == 'quit' or u_inp == 'exit':
@@ -102,16 +102,17 @@ def check_num(num):
         return False
 
 
-def clean_url(urls):
+def append_scheme(urls):
     ''' Append scheme to urls if not present '''
-    clean_urls = []
     if isinstance(urls, list):
+        scheme_urls = []
+
         for url in urls:
             if not url.startswith('http://') and not url.startswith('https://'):
-                clean_urls.append('http://{0}'.format(url))
+                scheme_urls.append('http://{0}'.format(url))
             else:
-                clean_urls.append(url)
-        return clean_urls
+                scheme_urls.append(url)
+        return scheme_urls
     else:
         if urls.startswith('http://') or urls.startswith('https://'):
             return urls
