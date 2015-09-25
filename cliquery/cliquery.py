@@ -246,7 +246,7 @@ def bing_search(args, html):
                             if utils.check_input(url_arg):
                                 args['query'] = url_args
                                 continue_exec = False
-                                return search(args)
+                                search(args)
                         elif key == 'd' or key == 'o' or key == 'p':
                             ''' continue_exec remains True '''
                         elif key == 'f':
@@ -261,7 +261,7 @@ def bing_search(args, html):
                         elif key == 's':
                             args['query'] = url_args
                             continue_exec = False
-                            return search(args)
+                            search(args)
 
                 ''' Open link number(s) '''
                 if continue_exec:
@@ -285,7 +285,7 @@ def bing_search(args, html):
                     if url_args and print_links:
                         for num in url_args:
                             if int(num) > 0 and int(num) <= len(urls):
-                                return open_url(args, urls[int(num)-1])
+                                open_url(args, urls[int(num)-1])
                     else:
                         ''' Open range of link or a single link '''
                         start_is_num = utils.check_input(start, num=True)
@@ -294,21 +294,21 @@ def bing_search(args, html):
                         if start_is_num and end_is_num:
                             if int(start) > 0 and int(end) <= len(urls)+1:
                                 for i in range(int(start), int(end)+1, 1):
-                                    return open_url(args, urls[i-1])
+                                    open_url(args, urls[i-1])
                         elif start_is_num:
                             if int(start) > 0:
                                 for i in range(int(start), len(urls)+1, 1):
-                                    return open_url(args, urls[i-1])
+                                    open_url(args, urls[i-1])
                         elif end_is_num:
                             if int(end) < len(urls)+1:
                                 for i in range(1, int(end)+1, 1):
-                                    return open_url(args, urls[i-1])
+                                    open_url(args, urls[i-1])
                         else:
                             ''' Open a single link '''
                             if url_arg:
-                                if int(url_arg) > 0\
-                                   and int(url_arg) < len(urls)+1:
-                                    return open_url(args, urls[int(url_arg)-1])
+                                if int(url_arg) > 0 \
+                                and int(url_arg) < len(urls)+1:
+                                    open_url(args, urls[int(url_arg)-1])
             except (ValueError, IndexError):
                 pass
     return False

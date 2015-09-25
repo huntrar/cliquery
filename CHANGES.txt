@@ -1,3 +1,8 @@
+0.9.9
+------
+
+ - fixed link prompt exiting after one command, still fixing interactive use of bookmarks
+
 0.9.8
 ------
 
