@@ -113,17 +113,17 @@ def read_config():
         ''' first two lines of .cliqrc must contain api_key: and browser: '''
         for i in range(2):
             line = cfg.readline()
-            if 'api_key:' in line:
-                api_key = line.replace('api_key:', '').strip()
-            elif 'browser:' in line:
-                browser = line.replace('browser:', '').strip()
+            if line.startswith('api_key:'):
+                api_key = line[8:].strip()
+            if line.startswith('browser:'):
+                browser = line[8:].strip()
             else:
                 lines.append(line)
 
         bkmarks = []
         cfg_bkmarks = cfg.read()
-        if 'bookmarks:' in cfg_bkmarks:
-            cfg_bkmarks = cfg_bkmarks.replace('bookmarks:', '').split('\n')
+        if cfg_bkmarks.startswith('bookmarks:')
+            cfg_bkmarks = cfg_bkmarks[10:].split('\n')
             bkmarks = [b.strip() for b in cfg_bkmarks if b.strip()]
 
         if not api_key and not browser:
@@ -237,7 +237,6 @@ def bing_search(args, html):
 
                 ''' Check input in case of quit '''
                 utils.check_input(link_input)
-                continue_exec = True
 
                 for key, value in flag_lookup.items():
                     if key == input_cmd or value == input_cmd:

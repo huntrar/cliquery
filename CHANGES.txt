@@ -1,3 +1,8 @@
+1.0.1
+------
+
+ - improvements to read_config()
+
 1.0.0
 ------
 
