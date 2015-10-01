@@ -122,7 +122,7 @@ def read_config():
 
         bkmarks = []
         cfg_bkmarks = cfg.read()
-        if cfg_bkmarks.startswith('bookmarks:')
+        if cfg_bkmarks.startswith('bookmarks:'):
             cfg_bkmarks = cfg_bkmarks[10:].split('\n')
             bkmarks = [b.strip() for b in cfg_bkmarks if b.strip()]
 
