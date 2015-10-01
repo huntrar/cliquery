@@ -203,112 +203,126 @@ def bing_search(args, html):
                     ld_xpath = "//h2/a[@href='{0}']//text()".format(url)
 
                 url_descs.append(''.join(html.xpath(ld_xpath)))
+
     if urls and url_descs:
-        print_links = True
-        while print_links:
+        ''' Print the URL descriptions and display a prompt '''
+        display_prompt = True
+        while display_prompt:
             print('\n{0}'.format(BORDER))
             for i in range(len(urls)):
                 print_desc = (str(i+1) + '. ' + url_descs[i]).encode('utf-8')
                 print(print_desc) # Print url choices
             print(BORDER)
 
-            ''' Get link prompt input '''
+            ''' Handle the prompt input
+                Acceptable input is are urls indices within range
+                as well as several flag commands
+                Possible flag inputs are listed in LINK_HELP at top of the file
+            '''
             try:
-                ''' A dictionary containing all boolean arguments
-                    The key is the first letter of the extended arg name
+                ''' A dictionary containing possible flag inputs with abbrevs.
+                    Keys are the first letter of the flag name
                 '''
                 flag_lookup = utils.get_flags(args)
 
-                link_input_num = input(': ').strip()
-                link_input_cmd = link_input_num.split(' ')[0]
-                url_args = link_input_num.strip().split(' ')[1:]
-                while link_input_cmd == 'h' or link_input_cmd == 'help':
+                link_input = [inp.strip() for inp in input(': ').split()]
+                input_cmd = link_input[0]
+                url_args = link_input[1:]
+                while input_cmd == 'h' or input_cmd == 'help':
                     print(LINK_HELP)
-                    link_input_num = input(': ').strip()
-                    link_input_cmd = link_input_num.split(' ')[0]
-                    url_args = link_input_num.strip().split(' ')[1:]
+                    link_input = [inp.strip() for inp in input(': ').split()]
+                    input_cmd = link_input[0]
+                    url_args = link_input[1:]
                 print('\n')
 
-                utils.check_input(link_input_num) # Checks for quit
+                ''' Check input in case of quit '''
+                utils.check_input(link_input)
                 continue_exec = True
-                url_arg = ''.join(url_args)
-                if not url_arg:
-                    url_arg = link_input_num
 
                 for key, value in flag_lookup.items():
-                    if key == link_input_cmd or value == link_input_cmd:
+                    if key == input_cmd or value == input_cmd:
                         ''' Reset all flags and set chosen flag to True '''
                         args = utils.reset_flags(args)
                         args[value] = True
 
                         ''' Handle the different link prompt flags '''
                         if key == 'b':
-                            if utils.check_input(url_arg):
+                            ''' If adding a bookmark resolve URL '''
+                            if 'add' in url_args:
+                                temp_args = []
+                                for i, arg in enumerate(url_args):
+                                    if utils.check_input(arg, num=True):
+                                        temp_args.append(urls[i-1])
+                                    else:
+                                        temp_args.append(arg)
+                                url_args = temp_args
+
+                            if utils.check_input(url_args):
                                 args['query'] = url_args
-                                continue_exec = False
                                 search(args)
                         elif key == 'd' or key == 'o' or key == 'p':
-                            ''' continue_exec remains True '''
+                            ''' Open/Print/Describe link(s) '''
+                            start = ''
+                            end = ''
+
+                            ''' Check for a link number range
+                                Ranges must include a dash
+                            '''
+                            if any(['-' in arg for arg in url_args]):
+                                split_args = ''.join(url_args).split('-')
+                                start = split_args[0].strip()
+                                end = split_args[1].strip()
+
+                            ''' Remove commas '''
+                            if any([',' in arg for arg in url_args]):
+                                url_args = ''.join(url_args).split(',')
+
+                            ''' Check that all arguments are numbers '''
+                            for num in url_args:
+                                if not utils.check_input(num.strip(), num=True):
+                                    return False
+
+                            ''' Open multiple links '''
+                            if url_args and display_prompt:
+                                if int(num) > 0 and int(num) <= len(urls):
+                                    open_url(args, urls[int(num)-1])
+                            else:
+                                start_is_num = utils.check_input(start, num=True)
+                                end_is_num = utils.check_input(end, num=True)
+
+                                if start_is_num and end_is_num:
+                                    ''' Open range of urls '''
+                                    if int(start) > 0 and int(end) <= len(urls)+1:
+                                        for i in range(int(start), int(end)+1, 1):
+                                            open_url(args, urls[i-1])
+                                elif start_is_num:
+                                    ''' Open open-ended range of urls '''
+                                    if int(start) > 0:
+                                        for i in range(int(start), len(urls)+1, 1):
+                                            open_url(args, urls[i-1])
+                                elif end_is_num:
+                                    ''' Open open-ended range of urls '''
+                                    if int(end) < len(urls)+1:
+                                        for i in range(1, int(end)+1, 1):
+                                            open_url(args, urls[i-1])
+                                else:
+                                    ''' Open a single url '''
+                                    if url_args:
+                                        url_args = ''.join(url_args)
+                                        if int(url_arg) > 0 \
+                                        and int(url_arg) < len(urls)+1:
+                                            open_url(args, urls[int(url_arg)-1])
                         elif key == 'f':
-                            continue_exec = False
-                            return open_url(args, urls[0])
+                            args['query'] = urls[0]
+                            search(args)
                         elif key == 'v':
                             print(__version__)
-                            continue_exec = False
                         elif key == 'c':
                             print(CONFIG_FPATH)
-                            continue_exec = False
                         elif key == 's':
                             args['query'] = url_args
-                            continue_exec = False
                             search(args)
 
-                ''' Open link number(s) '''
-                if continue_exec:
-                    url_args = []
-                    start = ''
-                    end = ''
-
-                    ''' Check for a link number range (contains dash) '''
-                    if '-' in url_arg and len(url_arg) > 1:
-                        start = url_arg.split('-')[0].strip()
-                        end = url_arg.split('-')[1].strip()
-
-                    ''' Check for multiple link numbers and validate them '''
-                    if ',' in url_arg and len(url_arg) > 2:
-                        url_args = url_arg.split(',')
-                        for num in url_args:
-                            if not utils.check_input(num.strip(), num=True):
-                                print_links = False
-
-                    ''' Open multiple links if validation succeeded '''
-                    if url_args and print_links:
-                        for num in url_args:
-                            if int(num) > 0 and int(num) <= len(urls):
-                                open_url(args, urls[int(num)-1])
-                    else:
-                        ''' Open range of link or a single link '''
-                        start_is_num = utils.check_input(start, num=True)
-                        end_is_num = utils.check_input(end, num=True)
-
-                        if start_is_num and end_is_num:
-                            if int(start) > 0 and int(end) <= len(urls)+1:
-                                for i in range(int(start), int(end)+1, 1):
-                                    open_url(args, urls[i-1])
-                        elif start_is_num:
-                            if int(start) > 0:
-                                for i in range(int(start), len(urls)+1, 1):
-                                    open_url(args, urls[i-1])
-                        elif end_is_num:
-                            if int(end) < len(urls)+1:
-                                for i in range(1, int(end)+1, 1):
-                                    open_url(args, urls[i-1])
-                        else:
-                            ''' Open a single link '''
-                            if url_arg:
-                                if int(url_arg) > 0 \
-                                and int(url_arg) < len(urls)+1:
-                                    open_url(args, urls[int(url_arg)-1])
             except (ValueError, IndexError):
                 pass
     return False
@@ -434,8 +448,13 @@ def open_first(args, html):
         return open_url(args, 'http://{0}'.format(url))
 
 
+def reload_bookmarks():
+    CONFIG['bookmarks'] = read_config()[2]
+
+
 def get_bookmark_idx(url_arg):
     bkmarks = CONFIG['bookmarks']
+
     url_arg = url_arg.strip()
     for i, bkmark in enumerate(bkmarks):
         if url_arg in bkmark:
@@ -451,6 +470,7 @@ def add_bookmark(urls):
                     cfg.write('\n{0}'.format(url))
             elif isinstance(urls, str):
                 cfg.write('\n{0}'.format(urls))
+        reload_bookmarks()
         return True
     except Exception as err:
         sys.stderr.write('Error adding bookmark: {0}\n'.format(str(err)))
@@ -460,6 +480,7 @@ def add_bookmark(urls):
 def untag_bookmark(bk_idx):
     try:
         bkmarks = CONFIG['bookmarks']
+
         with open(CONFIG_FPATH, 'w') as cfg:
             cfg.write('api_key: {0}'.format(CONFIG['api_key']))
             cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
@@ -480,6 +501,7 @@ def untag_bookmark(bk_idx):
                         cfg.write('\n{0}'.format(bkmark.split('(')[0].strip()))
                     else:
                         cfg.write('\n{0}'.format(bkmark))
+        reload_bookmarks()
         return True
     except Exception as err:
         sys.stderr.write('Error untagging bookmark: {0}\n'.format(str(err)))
@@ -509,6 +531,7 @@ def tag_bookmark(bk_idx, tags):
                               '.format(bkmark.split('(')[0].strip(), tags))
                 else:
                     cfg.write('\n{0}'.format(bkmark))
+        reload_bookmarks()
         return True
     except Exception as err:
         sys.stderr.write('Error tagging bookmark: {0}\n'.format(str(err)))
@@ -518,6 +541,7 @@ def tag_bookmark(bk_idx, tags):
 def del_bookmark(bk_idx):
     try:
         bkmarks = CONFIG['bookmarks']
+
         with open(CONFIG_FPATH, 'w') as cfg:
             cfg.write('api_key: {0}'.format(CONFIG['api_key']))
             cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
@@ -532,6 +556,7 @@ def del_bookmark(bk_idx):
                 for i, bkmark in enumerate(bkmarks):
                     if i != int(bk_idx)-1:
                         cfg.write('\n{0}'.format(bkmark))
+        reload_bookmarks()
         return True
     except Exception as err:
         sys.stderr.write('Error deleting bookmark: {0}\n'.format(str(err)))
@@ -542,6 +567,9 @@ def bookmarks(args, url_arg):
     ''' Add, tag, untag, delete, or open bookmarks '''
     bkmarks = CONFIG['bookmarks']
 
+    if isinstance(url_arg, list):
+        url_arg = ' '.join(url_arg)
+
     if not url_arg:
         ''' Print bookmarks if no arguments provided '''
 
@@ -549,9 +577,10 @@ def bookmarks(args, url_arg):
         for i, bkmark in enumerate(bkmarks):
             print('{0}. {1}'.format(str(i+1), bkmark))
         return True
-    elif 'add' in url_arg:
+
+    if url_arg.startswith('add'):
         ''' add: add [url] '''
-        url_arg = url_arg.replace('add', '').strip()
+        url_arg = url_arg[3:].strip()
         url_args = url_arg.split()
 
         clean_bkmarks = []
@@ -564,9 +593,9 @@ def bookmarks(args, url_arg):
             clean_bkmarks.append(u_arg)
 
         return add_bookmark(clean_bkmarks)
-    elif 'untag' in url_arg:
+    elif url_arg.startswith('untag'):
         ''' untag: untag [num or suburl or tag] '''
-        split_args = url_arg.replace('untag', '').strip().split()
+        split_args = url_arg[5:].strip().split()
 
         bkmark_idxs = []
         for u_arg in split_args:
@@ -580,9 +609,9 @@ def bookmarks(args, url_arg):
                 bkmark_idxs.append(u_arg)
 
         return untag_bookmark(bkmark_idxs)
-    elif 'tag' in url_arg:
+    elif url_arg.startswith('tag'):
         ''' tag: tag [num or suburl] [tag]'''
-        split_args = url_arg.replace('tag', '').strip().split()
+        split_args = url_arg[3:].strip().split()
         url_arg = split_args[0]
         tags = split_args[1:]
 
@@ -598,9 +627,9 @@ def bookmarks(args, url_arg):
         else:
             sys.stderr.write('Failed to tag \
                              bookmark {0}.\n'.format(str(url_arg)))
-    elif 'del' in url_arg:
+    elif url_arg.startswith('del'):
         ''' delete: del [num or suburl or tag] '''
-        split_args = url_arg.replace('del', '').strip().split()
+        split_args = url_arg[3:].strip().split()
 
         bkmark_idxs = []
         for u_arg in split_args:
@@ -616,7 +645,7 @@ def bookmarks(args, url_arg):
         return del_bookmark(bkmark_idxs)
     else:
         ''' open: [num or suburl or tag] '''
-        split_args = url_arg.replace('open', '').strip().split()
+        split_args = url_arg.strip().split()
 
         for u_arg in split_args:
             if utils.check_input(u_arg, num=True):
