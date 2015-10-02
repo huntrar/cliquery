@@ -1,3 +1,8 @@
+1.0.3
+------
+
+ - added move bookmark command for repositioning bookmarks
+
 1.0.2
 ------
 

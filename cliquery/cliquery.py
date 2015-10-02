@@ -52,6 +52,7 @@ BOOKMARK_HELP = ('Usage: '
                  '\nadd: add [url]'
                  '\ntag: tag [num or suburl] [tag]'
                  '\nuntag: untag [num or suburl or tag]'
+                 '\nmove: move [num or suburl or tag] [num or suburl or tag]'
                  '\ndelete: del [num or suburl or tag]'
                  '\n')
 
@@ -215,8 +216,6 @@ def bing_search(args, html):
             print(BORDER)
 
             ''' Handle the prompt input
-                Acceptable input is are urls indices within range
-                as well as several flag commands
                 Possible flag inputs are listed in LINK_HELP at top of the file
             '''
             try:
@@ -451,7 +450,7 @@ def reload_bookmarks():
     CONFIG['bookmarks'] = read_config()[2]
 
 
-def get_bookmark_idx(url_arg):
+def find_bookmark_idx(url_arg):
     bkmarks = CONFIG['bookmarks']
 
     url_arg = url_arg.strip()
@@ -473,6 +472,36 @@ def add_bookmark(urls):
         return True
     except Exception as err:
         sys.stderr.write('Error adding bookmark: {0}\n'.format(str(err)))
+        return False
+
+
+def tag_bookmark(bk_idx, tags):
+    try:
+        bkmarks = CONFIG['bookmarks']
+
+        if isinstance(tags, list):
+            tags = ' '.join(tags)
+
+        with open(CONFIG_FPATH, 'w') as cfg:
+            cfg.write('api_key: {0}'.format(CONFIG['api_key']))
+            cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+            cfg.write('\nbookmarks: ')
+
+            for i, bkmark in enumerate(bkmarks):
+                if i == int(bk_idx)-1:
+                    ''' Save previous tags if any, enclosed in parentheses '''
+                    prev_tags = re.search('(?<=\().*(?=\))', bkmark)
+                    if prev_tags:
+                        tags = '{0} {1}'.format(prev_tags.group(), tags)
+
+                    cfg.write('\n{0} ({1})\
+                              '.format(bkmark.split('(')[0].strip(), tags))
+                else:
+                    cfg.write('\n{0}'.format(bkmark))
+        reload_bookmarks()
+        return True
+    except Exception as err:
+        sys.stderr.write('Error tagging bookmark: {0}\n'.format(str(err)))
         return False
 
 
@@ -507,33 +536,46 @@ def untag_bookmark(bk_idx):
         return False
 
 
-def tag_bookmark(bk_idx, tags):
+def mv_bookmarks(bk1, bk2):
     try:
         bkmarks = CONFIG['bookmarks']
-
-        if isinstance(tags, list):
-            tags = ' '.join(tags)
+        b_len = len(bkmarks)
 
         with open(CONFIG_FPATH, 'w') as cfg:
             cfg.write('api_key: {0}'.format(CONFIG['api_key']))
             cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
             cfg.write('\nbookmarks: ')
+            
+            idx1 = int(bk1)-1
+            idx2 = int(bk2)-1
 
-            for i, bkmark in enumerate(bkmarks):
-                if i == int(bk_idx)-1:
-                    ''' Save previous tags if any, enclosed in parentheses '''
-                    prev_tags = re.search('(?<=\().*(?=\))', bkmark)
-                    if prev_tags:
-                        tags = '{0} {1}'.format(prev_tags.group(), tags)
+            ''' Pairs that are both out of range are incorrect '''
+            if (idx1 < 0 or idx1 >= b_len) and (idx2 < 0 or idx2 >= b_len):
+                sys.stderr.write('Both bookmark indices out of range.\n')
+                return True
 
-                    cfg.write('\n{0} ({1})\
-                              '.format(bkmark.split('(')[0].strip(), tags))
-                else:
+            ''' Move a bookmark to the start or end, or swap two '''
+            if idx1 < 0:
+                if idx2 >= 0 and idx2 < b_len:
+                    bkmarks.insert(0, bkmarks.pop(idx2))
+            elif idx1 >= len(bkmarks):
+                if idx2 >= 0 and idx2 < b_len:
+                    bkmarks.append(bkmarks.pop(idx2))
+            elif idx2 < 0:
+                if idx1 >= 0 and idx1 < b_len:
+                    bkmarks.insert(0, bkmarks.pop(idx1))
+            elif idx2 >= len(bkmarks):
+                if idx1 >= 0 and idx1 < b_len:
+                    bkmarks.append(bkmarks.pop(idx1))
+            else:
+                bkmarks[idx1], bkmarks[idx2] = bkmarks[idx2], bkmarks[idx1]
+
+            for bkmark in bkmarks:
                     cfg.write('\n{0}'.format(bkmark))
         reload_bookmarks()
         return True
     except Exception as err:
-        sys.stderr.write('Error tagging bookmark: {0}\n'.format(str(err)))
+        sys.stderr.write('Error moving bookmarks: {0}\n'.format(str(err)))
         return False
 
 
@@ -563,7 +605,7 @@ def del_bookmark(bk_idx):
 
 
 def bookmarks(args, url_arg):
-    ''' Add, tag, untag, delete, or open bookmarks '''
+    ''' Open, add, tag, untag, move, or delete bookmarks '''
     bkmarks = CONFIG['bookmarks']
 
     if isinstance(url_arg, list):
@@ -592,22 +634,6 @@ def bookmarks(args, url_arg):
             clean_bkmarks.append(u_arg)
 
         return add_bookmark(clean_bkmarks)
-    elif url_arg.startswith('untag'):
-        ''' untag: untag [num or suburl or tag] '''
-        split_args = url_arg[5:].strip().split()
-
-        bkmark_idxs = []
-        for u_arg in split_args:
-            if not utils.check_input(u_arg, num=True):
-                ''' If input is not a number then find the correct number '''
-
-                bk_idx = get_bookmark_idx(u_arg)
-                if bk_idx > 0:
-                    bkmark_idxs.append(bk_idx)
-            else:
-                bkmark_idxs.append(u_arg)
-
-        return untag_bookmark(bkmark_idxs)
     elif url_arg.startswith('tag'):
         ''' tag: tag [num or suburl] [tag]'''
         split_args = url_arg[3:].strip().split()
@@ -617,7 +643,7 @@ def bookmarks(args, url_arg):
         if not utils.check_input(url_arg, num=True):
             ''' If input is not a number then find the correct number '''
 
-            bk_idx = get_bookmark_idx(url_arg)
+            bk_idx = find_bookmark_idx(url_arg)
             if bk_idx > 0:
                 url_arg = bk_idx
 
@@ -626,6 +652,44 @@ def bookmarks(args, url_arg):
         else:
             sys.stderr.write('Failed to tag \
                              bookmark {0}.\n'.format(str(url_arg)))
+    elif url_arg.startswith('untag'):
+        ''' untag: untag [num or suburl or tag] '''
+        split_args = url_arg[5:].strip().split()
+
+        bkmark_idxs = []
+        for u_arg in split_args:
+            if not utils.check_input(u_arg, num=True):
+                ''' If input is not a number then find the correct number '''
+
+                bk_idx = find_bookmark_idx(u_arg)
+                if bk_idx > 0:
+                    bkmark_idxs.append(bk_idx)
+            else:
+                bkmark_idxs.append(u_arg)
+
+        return untag_bookmark(bkmark_idxs)
+    elif url_arg.startswith('move'):
+        split_args = url_arg[4:].strip().split()
+        bk1 = bk1_idx = split_args[0]
+        bk2 = bk2_idx = split_args[1]
+
+        if len(split_args) != 2:
+            sys.stderr.write(BOOKMARK_HELP)
+            return True
+
+        if not utils.check_input(bk1, num=True):
+            bk1_idx = find_bookmark_idx(bk1)
+        if not utils.check_input(bk2, num=True):
+            bk2_idx = find_bookmark_idx(bk2)
+
+        if bk1_idx < 0:
+            sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk1))
+            return False
+        if bk2_idx < 0:
+            sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk2))
+            return False
+
+        return mv_bookmarks(bk1_idx, bk2_idx)
     elif url_arg.startswith('del'):
         ''' delete: del [num or suburl or tag] '''
         split_args = url_arg[3:].strip().split()
@@ -635,7 +699,7 @@ def bookmarks(args, url_arg):
             if not utils.check_input(u_arg, num=True):
                 ''' If input is not a number then find the correct number '''
 
-                bk_idx = get_bookmark_idx(u_arg)
+                bk_idx = find_bookmark_idx(u_arg)
                 if bk_idx > 0:
                     bkmark_idxs.append(bk_idx)
             else:
@@ -662,11 +726,10 @@ def bookmarks(args, url_arg):
                     return False
             else:
                 ''' open: [suburl or tag] '''
-                bk_idx = get_bookmark_idx(u_arg)
+                bk_idx = find_bookmark_idx(u_arg)
                 if bk_idx > 0:
-                    u_arg = bk_idx
                     try:
-                        bkmark = bkmarks[int(u_arg) - 1]
+                        bkmark = bkmarks[int(bk_idx)-1]
                         if '(' in bkmark and ')' in bkmark:
                             open_url(args, bkmark.split('(')[0].strip())
                         else:
@@ -674,7 +737,7 @@ def bookmarks(args, url_arg):
                         return True
                     except IndexError:
                         sys.stderr.write('Bookmark {0} not found.\n\
-                                         '.format(u_arg))
+                                         '.format(bk_idx))
                         return False
                 else:
                     sys.stderr.write(BOOKMARK_HELP)
