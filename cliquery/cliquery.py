@@ -163,7 +163,8 @@ def get_search_html(args):
 
 
 def get_bing_html(url_args):
-    return utils.get_html('http://www.bing.com/search?q={0}'.format(url_args))
+    base_url = 'www.bing.com'
+    return utils.get_html('http://{0}/search?q={1}'.format(base_url, url_args))
 
 
 def get_wolfram_html(url_args):
@@ -174,6 +175,10 @@ def get_wolfram_html(url_args):
 
 def bing_search(args, html):
     ''' Perform a Bing search and show an interactive prompt '''
+    base_url = 'www.bing.com'
+    if html is None:
+        return open_url(args, utils.append_scheme(base_url))
+
     try:
         unprocessed_urls = html.xpath('//h2/a/@href')
     except AttributeError:
@@ -195,9 +200,9 @@ def bing_search(args, html):
 
             url_descs.append(''.join(html.xpath(ld_xpath)))
         elif url.startswith('/images/') or url.startswith('/videos/'):
-            if 'www.bing.com' not in url:
+            if base_url not in url:
                 ''' Add missing base url to image links '''
-                urls.append('http://www.bing.com{0}'.format(url))
+                urls.append('http://{0}{1}'.format(base_url, url))
                 if "'" in url:
                     ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
                 else:
@@ -326,8 +331,11 @@ def bing_search(args, html):
     return False
 
 
-def wolfram_search(html):
+def wolfram_search(args, html):
     ''' Search WolframAlpha using their API, requires API key in .cliqrc '''
+    if html is None:
+        return open_url(args, utils.append_scheme('www.wolframalpha.com'))
+
     try:
         ''' Filter unnecessary title fields '''
         titles = list(OrderedDict.fromkeys(
@@ -414,6 +422,8 @@ def bing_instant(html):
 
 def open_first(args, html):
     ''' Open the first Bing link available, `Feeling Lucky` '''
+    base_url = 'www.bing.com'
+
     try:
         bing_urls = html.xpath('//h2/a/@href')
 
@@ -438,7 +448,7 @@ def open_first(args, html):
         raise AttributeError('Failed to retrieve data from lxml object!')
 
     if url.startswith('/images/') or url.startswith('/videos/'):
-        url = 'http://www.bing.com{0}'.format(url)
+        url = 'http://{0}{1}'.format(base_url, url)
 
     if url.startswith('http://') or url.startswith('https://'):
         return open_url(args, url)
@@ -858,15 +868,21 @@ def describe_url(url):
 
 
 def search(args):
-    ''' A query may only be blank if opening browser or checking bookmarks '''
-    if not args['query'] and not args['open'] and not args['bookmark']:
+    opn, bkm = args['open'], args['bookmark']
+    src, wolf = args['search'], args['wolfram']
+
+    ''' A query may be blank for only these flags above '''
+    if not args['query'] and not opn and not bkm and not src and not wolf:
         sys.stderr.write('No search terms entered.\n')
         return False
 
-    args['query'] = utils.clean_query(' '.join(args['query']),\
-                                      args['open'], args['bookmark'])
+    if args['query']:
+        args['query'] = utils.clean_query(' '.join(args['query']),\
+                                          args['open'], args['bookmark'])
+        html = get_search_html(args)
+    else:
+        html = None
     url_args = args['query']
-    html = get_search_html(args)
 
     ''' Default search if no flags provided or Wolfram search fails '''
     default_search = False
@@ -885,7 +901,7 @@ def search(args):
         return open_first(args, html)
     elif args['wolfram']:
         ''' Search WolframAlpha and continues search if failed '''
-        success = wolfram_search(html)
+        success = wolfram_search(args, html)
         if not success:
             default_search = True
         else:
@@ -911,7 +927,7 @@ def search(args):
         if not result:
             if not args['wolfram']:
                 wolf_html = get_wolfram_html(url_args)
-            result = wolfram_search(wolf_html)
+            result = wolfram_search(args, wolf_html)
             if not result:
                 return bing_search(args, bing_html)
         return result
@@ -955,7 +971,11 @@ def command_line_runner():
         args['wolfram'] = False
         sys.stderr.write('Missing WolframAlpha API key in .cliqrc!\n')
 
-    if not args['query'] and not args['bookmark'] and not args['open']:
+    opn, bkm = args['open'], args['bookmark']
+    src, wolf = args['search'], args['wolfram']
+
+    ''' A query may be blank for only these flags above '''
+    if not args['query'] and not opn and not bkm and not src and not wolf:
         parser = get_parser()
         parser.print_help()
         return
