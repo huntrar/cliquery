@@ -7,7 +7,6 @@ import unittest
 from cliquery import cliquery
 
 
-
 class CliqueryTestCase(unittest.TestCase):
 
     def call_search(self, query):
@@ -29,15 +28,14 @@ class CliqueryTestCase(unittest.TestCase):
             links = self.call_search(query + ' -fp')
             if isinstance(links, list):
                 for link in links:
-                    self.assertTrue(link.startswith('http://') or \
+                    self.assertTrue(link.startswith('http://') or
                                     link.startswith('https://'))
             elif links is None:
                 ''' Return None if there is an internet connection error '''
                 pass
             elif not isinstance(links, bool):
-                self.assertTrue(links.startswith('http://') or \
+                self.assertTrue(links.startswith('http://') or
                                 links.startswith('https://'))
-
 
 
 if __name__ == '__main__':
