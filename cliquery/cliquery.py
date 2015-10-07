@@ -217,7 +217,7 @@ def bing_search(args, html):
             print('\n{0}'.format(BORDER))
             for i in range(len(urls)):
                 print_desc = (str(i+1) + '. ' + url_descs[i]).encode('utf-8')
-                print(print_desc) # Print url choices
+                print(print_desc)  # Print url choices
             print(BORDER)
 
             ''' Handle the prompt input
@@ -282,7 +282,8 @@ def bing_search(args, html):
 
                             ''' Check that all arguments are numbers '''
                             for num in url_args:
-                                if not utils.check_input(num.strip(), num=True):
+                                if not utils.check_input(num.strip(),
+                                                         num=True):
                                     return False
 
                             ''' Open multiple links '''
@@ -290,18 +291,22 @@ def bing_search(args, html):
                                 if int(num) > 0 and int(num) <= len(urls):
                                     open_url(args, urls[int(num)-1])
                             else:
-                                start_is_num = utils.check_input(start, num=True)
+                                start_is_num = utils.check_input(start,
+                                                                 num=True)
                                 end_is_num = utils.check_input(end, num=True)
 
                                 if start_is_num and end_is_num:
                                     ''' Open range of urls '''
-                                    if int(start) > 0 and int(end) <= len(urls)+1:
-                                        for i in range(int(start), int(end)+1, 1):
+                                    if int(start) > 0 \
+                                            and int(end) <= len(urls)+1:
+                                        for i in range(int(start),
+                                                       int(end)+1, 1):
                                             open_url(args, urls[i-1])
                                 elif start_is_num:
                                     ''' Open open-ended range of urls '''
                                     if int(start) > 0:
-                                        for i in range(int(start), len(urls)+1, 1):
+                                        for i in range(int(start),
+                                                       len(urls)+1, 1):
                                             open_url(args, urls[i-1])
                                 elif end_is_num:
                                     ''' Open open-ended range of urls '''
@@ -313,8 +318,9 @@ def bing_search(args, html):
                                     if url_args:
                                         url_args = ''.join(url_args)
                                         if int(url_arg) > 0 \
-                                        and int(url_arg) < len(urls)+1:
-                                            open_url(args, urls[int(url_arg)-1])
+                                                and int(url_arg) < len(urls)+1:
+                                            open_url(args,
+                                                     urls[int(url_arg)-1])
                         elif key == 'f':
                             args['query'] = urls[0]
                             search(args)
@@ -403,7 +409,7 @@ def bing_instant(html):
                                  '|//div[@class="b_xlText b_secondaryText"]'
                                  '/text()'
                                  '|//input[@id="uc_rv"]/@value'
-                                 '|//ol[@class="b_dList b_indent"]' # define
+                                 '|//ol[@class="b_dList b_indent"]'  # define
                                  '/li/div/text()')
     except AttributeError:
         raise AttributeError('Failed to retrieve data from lxml object!')
@@ -555,7 +561,7 @@ def mv_bookmarks(bk1, bk2):
             cfg.write('api_key: {0}'.format(CONFIG['api_key']))
             cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
             cfg.write('\nbookmarks: ')
-            
+
             idx1 = int(bk1)-1
             idx2 = int(bk2)-1
 
@@ -877,7 +883,7 @@ def search(args):
         return False
 
     if args['query']:
-        args['query'] = utils.clean_query(' '.join(args['query']),\
+        args['query'] = utils.clean_query(' '.join(args['query']),
                                           args['open'], args['bookmark'])
         html = get_search_html(args)
     else:
@@ -983,8 +989,5 @@ def command_line_runner():
         search(args)
 
 
-
 if __name__ == '__main__':
     command_line_runner()
-
-

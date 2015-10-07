@@ -108,7 +108,8 @@ def append_scheme(urls):
         scheme_urls = []
 
         for url in urls:
-            if not url.startswith('http://') and not url.startswith('https://'):
+            if not url.startswith('http://')\
+                    and not url.startswith('https://'):
                 scheme_urls.append('http://{0}'.format(url))
             else:
                 scheme_urls.append(url)
@@ -128,5 +129,3 @@ def reset_flags(args):
 def get_flags(args):
     ''' Return dictionary containing flags with their first letter as key '''
     return {k[0]: k for k, v in args.items() if isinstance(v, bool)}
-
-
