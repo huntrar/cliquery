@@ -15,6 +15,7 @@ import glob
 import os
 import re
 from subprocess import call
+from string import ascii_letters
 import sys
 import time
 import webbrowser
@@ -220,15 +221,8 @@ def bing_search(args, html):
                 print(print_desc)  # Print url choices
             print(BORDER)
 
-            ''' Handle the prompt input
-                Possible flag inputs are listed in LINK_HELP at top of the file
-            '''
+            ''' Handle link prompt input '''
             try:
-                ''' A dictionary containing possible flag inputs with abbrevs.
-                    Keys are the first letter of the flag name
-                '''
-                flag_lookup = utils.get_flags(args)
-
                 link_input = [inp.strip() for inp in input(': ').split()]
                 input_cmd = link_input[0]
                 url_args = link_input[1:]
@@ -241,6 +235,17 @@ def bing_search(args, html):
 
                 ''' Check input in case of quit '''
                 utils.check_input(link_input)
+
+                ''' A dictionary containing possible flag inputs with abbrevs.
+                    Keys are the first letter of the flag name
+                    Possible flag inputs are listed in LINK_HELP
+                '''
+                flag_lookup = utils.get_flags(args)
+
+                ''' If input_cmd is not a letter assume cmd is open '''
+                if input_cmd[0] not in ascii_letters:
+                    url_args = [input_cmd] + url_args
+                    input_cmd = 'o'
 
                 for key, value in flag_lookup.items():
                     if key == input_cmd or value == input_cmd:
