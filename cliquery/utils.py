@@ -87,10 +87,7 @@ def check_input(u_input, num=False, empty=False):
     if num:
         return check_num(u_input)
     elif empty:
-        if not u_input and not num:
-            return True
-        else:
-            return False
+        return not u_input
     return True
 
 
