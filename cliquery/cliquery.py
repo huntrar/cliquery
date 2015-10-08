@@ -225,12 +225,12 @@ def bing_search(args, html):
             try:
                 link_input = [inp.strip() for inp in input(': ').split()]
                 input_cmd = link_input[0]
-                url_args = link_input[1:]
+                input_args = link_input[1:]
                 while input_cmd == 'h' or input_cmd == 'help':
                     print(LINK_HELP)
                     link_input = [inp.strip() for inp in input(': ').split()]
                     input_cmd = link_input[0]
-                    url_args = link_input[1:]
+                    input_args = link_input[1:]
                 print('\n')
 
                 ''' Check input in case of quit '''
@@ -244,7 +244,7 @@ def bing_search(args, html):
 
                 ''' If input_cmd is not a letter assume cmd is open '''
                 if input_cmd[0] not in ascii_letters:
-                    url_args = [input_cmd] + url_args
+                    input_args = [input_cmd] + input_args
                     input_cmd = 'o'
 
                 for key, value in flag_lookup.items():
@@ -253,53 +253,37 @@ def bing_search(args, html):
                         args = utils.reset_flags(args)
                         args[value] = True
 
-                        ''' Handle the different link prompt flags '''
                         if key == 'b':
                             ''' If adding a bookmark resolve URL '''
-                            if 'add' in url_args:
+                            if 'add' in input_args:
                                 temp_args = []
-                                for i, arg in enumerate(url_args):
+                                for i, arg in enumerate(input_args):
                                     if utils.check_input(arg, num=True):
                                         temp_args.append(urls[i-1])
                                     else:
                                         temp_args.append(arg)
-                                url_args = temp_args
+                                input_args = temp_args
 
-                            if utils.check_input(url_args):
-                                args['query'] = url_args
+                            if utils.check_input(input_args):
+                                args['query'] = input_args
                                 search(args)
                         elif key == 'd' or key == 'o' or key == 'p':
                             ''' Open/Print/Describe link(s) '''
-                            start = ''
-                            end = ''
 
-                            ''' Check for a link number range
-                                Ranges must include a dash
-                            '''
-                            if any(['-' in arg for arg in url_args]):
-                                split_args = ''.join(url_args).split('-')
+                            ''' Remove commas '''
+                            if any([',' in arg for arg in input_args]):
+                                input_args = ''.join(input_args).split(',')
+                                input_args = filter(None, input_args)
+
+                            ''' Check for a link number range '''
+                            if any(['-' in arg for arg in input_args]):
+                                split_args = ''.join(input_args).split('-')
                                 start = split_args[0].strip()
                                 end = split_args[1].strip()
 
-                            ''' Remove commas '''
-                            if any([',' in arg for arg in url_args]):
-                                url_args = ''.join(url_args).split(',')
-
-                            ''' Check that all arguments are numbers '''
-                            for num in url_args:
-                                if not utils.check_input(num.strip(),
-                                                         num=True):
-                                    return False
-
-                            ''' Open multiple links '''
-                            if url_args and display_prompt:
-                                if int(num) > 0 and int(num) <= len(urls):
-                                    open_url(args, urls[int(num)-1])
-                            else:
                                 start_is_num = utils.check_input(start,
                                                                  num=True)
                                 end_is_num = utils.check_input(end, num=True)
-
                                 if start_is_num and end_is_num:
                                     ''' Open range of urls '''
                                     if int(start) > 0 \
@@ -318,14 +302,21 @@ def bing_search(args, html):
                                     if int(end) < len(urls)+1:
                                         for i in range(1, int(end)+1, 1):
                                             open_url(args, urls[i-1])
-                                else:
-                                    ''' Open a single url '''
-                                    if url_args:
-                                        url_args = ''.join(url_args)
-                                        if int(url_arg) > 0 \
-                                                and int(url_arg) < len(urls)+1:
-                                            open_url(args,
-                                                     urls[int(url_arg)-1])
+                            elif input_args and display_prompt:
+                                ''' Open one or more links '''
+                                if not isinstance(input_args, list):
+                                    input_args = [input_args]
+
+                                for num in input_args:
+                                    if not utils.check_input(num.strip(),
+                                                             num=True):
+                                        return False
+
+                                links = []
+                                for num in input_args:
+                                    if int(num) > 0 and int(num) <= len(urls):
+                                        links.append(urls[int(num)-1])
+                                open_url(args, links)
                         elif key == 'f':
                             args['query'] = urls[0]
                             search(args)
@@ -334,7 +325,7 @@ def bing_search(args, html):
                         elif key == 'c':
                             print(CONFIG_FPATH)
                         elif key == 's':
-                            args['query'] = url_args
+                            args['query'] = input_args
                             search(args)
 
             except (ValueError, IndexError):

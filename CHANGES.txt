@@ -1,3 +1,8 @@
+1.0.7
+------
+
+ - fixed number ranges and handling multiple links in link prompt
+
 1.0.6
 ------
 
