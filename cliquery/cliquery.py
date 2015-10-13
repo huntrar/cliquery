@@ -113,7 +113,7 @@ def read_config():
         browser = ''
 
         ''' first two lines of .cliqrc must contain api_key: and browser: '''
-        for i in range(2):
+        for _ in range(2):
             line = cfg.readline()
             if line.startswith('api_key:'):
                 api_key = line[8:].strip()
@@ -242,16 +242,21 @@ def bing_search(args, html):
                 '''
                 flag_lookup = utils.get_flags(args)
 
-                ''' If input_cmd is not a letter assume cmd is open '''
+                ''' If input_cmd is not a letter assume cmd is open
+                    Behavior is determined by the last flag entered
+                '''
+                reset_flags = True
                 if input_cmd[0] not in ascii_letters:
                     input_args = [input_cmd] + input_args
                     input_cmd = 'o'
+                    reset_flags = False
 
                 for key, value in flag_lookup.items():
                     if key == input_cmd or value == input_cmd:
                         ''' Reset all flags and set chosen flag to True '''
-                        args = utils.reset_flags(args)
-                        args[value] = True
+                        if reset_flags:
+                            args = utils.reset_flags(args)
+                            args[value] = True
 
                         if key == 'b':
                             ''' If adding a bookmark resolve URL '''
@@ -273,7 +278,7 @@ def bing_search(args, html):
                             ''' Remove commas '''
                             if any([',' in arg for arg in input_args]):
                                 input_args = ''.join(input_args).split(',')
-                                input_args = filter(None, input_args)
+                                input_args = [arg for arg in input_args if arg]
 
                             ''' Check for a link number range '''
                             if any(['-' in arg for arg in input_args]):
@@ -336,7 +341,7 @@ def bing_search(args, html):
 def wolfram_search(args, html):
     ''' Search WolframAlpha using their API, requires API key in .cliqrc '''
     if html is None:
-        return open_url(args, utils.append_scheme('www.wolframalpha.com'))
+        return open_url(args, 'http://www.wolframalpha.com')
 
     try:
         ''' Filter unnecessary title fields '''
@@ -583,7 +588,7 @@ def mv_bookmarks(bk1, bk2):
                 bkmarks[idx1], bkmarks[idx2] = bkmarks[idx2], bkmarks[idx1]
 
             for bkmark in bkmarks:
-                    cfg.write('\n{0}'.format(bkmark))
+                cfg.write('\n{0}'.format(bkmark))
         reload_bookmarks()
         return True
     except Exception as err:
