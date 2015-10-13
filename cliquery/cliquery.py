@@ -361,7 +361,7 @@ def wolfram_search(args, html):
     if titles:
         for title in titles:
             entry_xpath = "//pod[@title='{0}']/subpod/plaintext\
-                           /text()".format(title)
+                           /text()".format(title.encode('ascii', 'ignore'))
             entry = html.xpath(entry_xpath)
             if entry:
                 entries.append(entry[0])
