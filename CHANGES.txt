@@ -1,3 +1,8 @@
+1.1.1
+------
+
+ - print tag names in place of bookmark urls if any found
+
 1.1.0
 ------
 

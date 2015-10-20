@@ -621,6 +621,14 @@ def del_bookmark(bk_idx):
         return False
 
 
+def print_bookmarks(bkmarks):
+    print('Bookmarks:')
+    for i, bkmark in enumerate(bkmarks):
+        if '(' in bkmark and ')' in bkmark:
+            bkmark = bkmark.split('(')[1].rstrip(')')
+        print('{0}. {1}'.format(str(i+1), bkmark))
+
+
 def bookmarks(args, url_arg):
     ''' Open, add, tag, untag, move, or delete bookmarks '''
     bkmarks = CONFIG['bookmarks']
@@ -630,10 +638,7 @@ def bookmarks(args, url_arg):
 
     if not url_arg:
         ''' Print bookmarks if no arguments provided '''
-
-        print('Bookmarks:')
-        for i, bkmark in enumerate(bkmarks):
-            print('{0}. {1}'.format(str(i+1), bkmark))
+        print_bookmarks(bkmarks)
         return True
 
     if url_arg.startswith('add'):
