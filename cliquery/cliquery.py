@@ -26,7 +26,8 @@ from cliquery import utils
 from . import __version__
 
 
-if sys.version < '3':
+SYS_VERSION = sys.version_info[0]
+if SYS_VERSION == 2:
     try:
         input = raw_input
     except NameError:
@@ -35,6 +36,27 @@ if sys.version < '3':
         range = xrange
     except NameError:
         pass
+
+XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
+                               os.path.join(os.path.expanduser('~'), '.cache'))
+CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'cliquery')
+CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
+    SYS_VERSION if SYS_VERSION == 3 else ''))
+
+''' The maximum length of a preview message before having to see more '''
+PREVIEW_MSG_MAX = 200
+
+''' The length of the link prompt border '''
+BORDER_LEN = 28
+BORDER = ' '.join(['+']*BORDER_LEN)
+
+CONFIG_DIR = os.path.dirname(os.path.realpath(__file__))
+if os.path.isfile('{0}/.local.cliqrc'.format(CONFIG_DIR)):
+    CONFIG_FPATH = '{0}/.local.cliqrc'.format(CONFIG_DIR)
+else:
+    CONFIG_FPATH = '{0}/.cliqrc'.format(CONFIG_DIR)
+
+CONFIG = {}
 
 LINK_HELP = ('Enter one of the following flags abbreviated or not,'
              'possibly followed by a link number:\n'
@@ -58,25 +80,6 @@ BOOKMARK_HELP = ('Usage: '
                  '\n')
 
 SEE_MORE = 'See more? [Press Enter] '
-
-''' The maximum length of a preview message before having to see more '''
-MSG_MAX = 200
-
-BORDER_LEN = 28
-BORDER = ' '.join(['+']*BORDER_LEN)
-
-CONFIG_DIR = os.path.dirname(os.path.realpath(__file__))
-if os.path.isfile('{0}/.local.cliqrc'.format(CONFIG_DIR)):
-    CONFIG_FPATH = '{0}/.local.cliqrc'.format(CONFIG_DIR)
-else:
-    CONFIG_FPATH = '{0}/.cliqrc'.format(CONFIG_DIR)
-CONFIG = {}
-
-XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
-                               os.path.join(os.path.expanduser('~'), '.cache'))
-CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'cliquery')
-CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
-    sys.version_info[0] if sys.version_info[0] == 3 else ''))
 
 
 def get_parser():
@@ -861,7 +864,7 @@ def describe_url(url):
         for msg in print_body:
             msg_count += len(msg)
             print(msg.encode('utf-8'))
-            if msg_count > MSG_MAX:
+            if msg_count > PREVIEW_MSG_MAX:
                 if not utils.check_input(input(SEE_MORE), empty=True):
                     break
                 see_more = True
