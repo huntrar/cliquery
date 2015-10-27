@@ -71,12 +71,12 @@ LINK_HELP = ('Enter one of the following flags abbreviated or not,'
              '\tv, version   display current version\n')
 
 BOOKMARK_HELP = ('Usage: '
-                 '\nopen: [num or suburl or tag]'
-                 '\nadd: add [url]'
-                 '\ntag: tag [num or suburl] [tag]'
-                 '\nuntag: untag [num or suburl or tag]'
+                 '\nopen: [num or suburl or tag..]'
+                 '\nadd: add [url..]'
+                 '\ntag: tag [num or suburl] [tag..]'
+                 '\nuntag: untag [num or suburl or tag] [subtag..]'
                  '\nmove: move [num or suburl or tag] [num or suburl or tag]'
-                 '\ndelete: del [num or suburl or tag]'
+                 '\ndelete: del [num or suburl or tag..]'
                  '\n')
 
 SEE_MORE = 'See more? [Press Enter] '
@@ -525,7 +525,7 @@ def tag_bookmark(bk_idx, tags):
         return False
 
 
-def untag_bookmark(bk_idx):
+def untag_bookmark(bk_idx, tags_to_rm):
     try:
         bkmarks = CONFIG['bookmarks']
 
@@ -534,21 +534,30 @@ def untag_bookmark(bk_idx):
             cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
             cfg.write('\nbookmarks: ')
 
-            if isinstance(bk_idx, list):
-                bk_idx = [int(x)-1 for x in bk_idx]
-                for i, bkmark in enumerate(bkmarks):
-                    if i in bk_idx and '(' in bkmark:
-                        ''' Remove tags '''
-                        cfg.write('\n{0}'.format(bkmark.split('(')[0].strip()))
+            for i, bkmark in enumerate(bkmarks):
+                if i == int(bk_idx)-1 and '(' in bkmark and ')' in bkmark:
+                    ''' Remove tags '''
+                    split_bkmark = bkmark.split('(')
+
+                    if tags_to_rm:
+                        curr_tags = split_bkmark[1].rstrip(')').split()
+                        new_tags = list(curr_tags)
+
+                        ''' Match current tags by substrings of tags to rm '''
+                        for tag in curr_tags:
+                            for rm_tag in tags_to_rm:
+                                if rm_tag in tag:
+                                    new_tags.remove(tag)
+
+                        if new_tags:
+                            cfg.write('\n{0} ({1})'.format(split_bkmark[0],
+                                                           ' '.join(new_tags)))
+                        else:
+                            cfg.write('\n{0}'.format(split_bkmark[0]))
                     else:
-                        cfg.write('\n{0}'.format(bkmark))
-            else:
-                for i, bkmark in enumerate(bkmarks):
-                    if i == int(bk_idx)-1 and '(' in bkmark:
-                        ''' Remove tags '''
-                        cfg.write('\n{0}'.format(bkmark.split('(')[0].strip()))
-                    else:
-                        cfg.write('\n{0}'.format(bkmark))
+                        cfg.write('\n{0}'.format(split_bkmark[0]))
+                else:
+                    cfg.write('\n{0}'.format(bkmark))
         reload_bookmarks()
         return True
     except Exception as err:
@@ -680,19 +689,20 @@ def bookmarks(args, url_arg):
     elif url_arg.startswith('untag'):
         ''' untag: untag [num or suburl or tag] '''
         split_args = url_arg[5:].strip().split()
+        tags_to_rm = split_args[1:]
 
-        bkmark_idxs = []
-        for u_arg in split_args:
-            if not utils.check_input(u_arg, num=True):
-                ''' If input is not a number then find the correct number '''
+        ''' Find the bookmark index '''
+        bkmark_idx = 0
+        if not utils.check_input(split_args[0], num=True):
+            ''' If input is not a number then find the correct number '''
 
-                bk_idx = find_bookmark_idx(u_arg)
-                if bk_idx > 0:
-                    bkmark_idxs.append(bk_idx)
-            else:
-                bkmark_idxs.append(u_arg)
+            bk_idx = find_bookmark_idx(split_args[0])
+            if bk_idx > 0:
+                bkmark_idx = bk_idx
+        else:
+            bkmark_idx = split_args[0]
 
-        return untag_bookmark(bkmark_idxs)
+        return untag_bookmark(bkmark_idx, tags_to_rm)
     elif url_arg.startswith('move'):
         split_args = url_arg[4:].strip().split()
         bk1 = bk1_idx = split_args[0]
