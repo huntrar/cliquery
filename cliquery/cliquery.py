@@ -336,8 +336,8 @@ def bing_search(args, html):
                             args['query'] = input_args
                             search(args)
 
-            except (ValueError, IndexError):
-                pass
+            except (KeyboardInterrupt, ValueError, IndexError):
+                break
     return False
 
 

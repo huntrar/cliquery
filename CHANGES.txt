@@ -3,6 +3,8 @@
 
  - can now untag individual tags in bookmarks by tag substrings
  - can no longer untag multiple bookmarks at once
+ - added KeyboardInterrupt to list of exceptions to handle in link prompt
+ - an exception during link prompt now causes prompt to exit
 
 1.1.2
 ------
