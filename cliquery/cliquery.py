@@ -325,6 +325,8 @@ def bing_search(args, html):
     if html is None:
         return open_url(args, 'https://www.google.com')
 
+    base_url = 'www.bing.com'
+
     try:
         unprocessed_urls = html.xpath('//h2/a/@href')
     except AttributeError:

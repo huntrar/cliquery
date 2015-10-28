@@ -1,3 +1,8 @@
+1.1.6
+------
+
+ - added base_url back to bing_search()
+
 1.1.5
 ------
 
