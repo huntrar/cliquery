@@ -1,3 +1,9 @@
+1.1.4
+------
+
+ - prompt no longer exits when no input given
+ - modularized some functions
+
 1.1.3
 ------
 

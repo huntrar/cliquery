@@ -177,6 +177,149 @@ def get_wolfram_html(url_args):
     return utils.get_html('{0}{1}&appid={2}'.format(base_url, url_args, api))
 
 
+def open_link_range(args, urls, input_args):
+    ''' Open a link number range '''
+
+    split_args = ''.join(input_args).split('-')
+    start = split_args[0].strip()
+    end = split_args[1].strip()
+
+    start_is_num = utils.check_input(start, num=True)
+    end_is_num = utils.check_input(end, num=True)
+    if start_is_num and end_is_num:
+        ''' Open close-ended range of urls '''
+        if int(start) > 0 and int(end) <= len(urls)+1:
+            for i in range(int(start), int(end)+1, 1):
+                open_url(args, urls[i-1])
+    elif start_is_num:
+        ''' Open open-ended range of urls '''
+        if int(start) > 0:
+            for i in range(int(start), len(urls)+1, 1):
+                open_url(args, urls[i-1])
+    elif end_is_num:
+        ''' Open open-ended range of urls '''
+        if int(end) < len(urls)+1:
+            for i in range(1, int(end)+1, 1):
+                open_url(args, urls[i-1])
+
+
+def open_links(args, urls, input_args):
+    ''' Open one or more links '''
+
+    if not isinstance(input_args, list):
+        input_args = [input_args]
+
+    for num in input_args:
+        if not utils.check_input(num.strip(), num=True):
+            return
+
+    links = []
+    for num in input_args:
+        if int(num) > 0 and int(num) <= len(urls):
+            links.append(urls[int(num)-1])
+    open_url(args, links)
+
+
+def exec_bkmark(args, urls, input_args):
+    ''' If adding a bookmark resolve URL '''
+    if 'add' in input_args:
+        temp_args = []
+        for i, arg in enumerate(input_args):
+            if utils.check_input(arg, num=True):
+                temp_args.append(urls[i-1])
+            else:
+                temp_args.append(arg)
+        input_args = temp_args
+
+    if utils.check_input(input_args):
+        args['query'] = input_args
+        search(args)
+
+
+def exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt):
+    ''' Execute a command in the link prompt '''
+
+    ''' If input_cmd is not a letter assume cmd is open
+        Behavior is determined by the last flag entered
+    '''
+    reset_flags = True
+    if input_cmd[0] not in ascii_letters:
+        input_args = [input_cmd] + input_args
+        input_cmd = 'o'
+        reset_flags = False
+
+    ''' A dictionary containing possible flag inputs with abbrevs.
+        Keys are the first letter of the flag name
+        Possible flag inputs are listed in LINK_HELP
+    '''
+    for key, value in utils.get_flags(args).items():
+        if key == input_cmd or value == input_cmd:
+            ''' Reset all flags and set chosen flag to True '''
+            if reset_flags:
+                args = utils.reset_flags(args)
+                args[value] = True
+
+            if key == 'b':
+                exec_bkmark(args, urls, input_args)
+            elif key == 'd' or key == 'o' or key == 'p':
+                ''' Open/Print/Describe link(s) '''
+
+                ''' Remove commas '''
+                if any([',' in arg for arg in input_args]):
+                    input_args = ''.join(input_args).split(',')
+                    input_args = [arg for arg in input_args if arg]
+
+                if any(['-' in arg for arg in input_args]):
+                    ''' Open a link number range '''
+                    open_link_range(args, urls, input_args)
+                elif input_args and display_prompt:
+                    ''' Open one or more links '''
+                    open_links(args, urls, input_args)
+            elif key == 'f':
+                args['query'] = urls[0]
+                search(args)
+            elif key == 'v':
+                print(__version__)
+            elif key == 'c':
+                print(CONFIG_FPATH)
+            elif key == 's':
+                args['query'] = input_args
+                search(args)
+
+
+def show_link_prompt(args, urls, url_descs):
+    ''' Print the URL descriptions and display a prompt '''
+
+    display_prompt = True
+    while display_prompt:
+        print('\n{0}'.format(BORDER))
+        for i in range(len(urls)):
+            print_desc = (str(i+1) + '. ' + url_descs[i]).encode('utf-8')
+            print(print_desc)  # Print url choices
+        print(BORDER)
+
+        ''' Handle link prompt input '''
+        try:
+            link_input = [inp.strip() for inp in input(': ').split()]
+            if not link_input:
+                continue
+
+            input_cmd = link_input[0]
+            input_args = link_input[1:]
+            while input_cmd == 'h' or input_cmd == 'help':
+                print(LINK_HELP)
+                link_input = [inp.strip() for inp in input(': ').split()]
+                input_cmd = link_input[0]
+                input_args = link_input[1:]
+            print('\n')
+
+            ''' Check input in case of quit '''
+            utils.check_input(link_input)
+            exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt)
+        except (KeyboardInterrupt, ValueError, IndexError):
+            return False
+
+
 def bing_search(args, html):
     ''' Perform a Bing search and show an interactive prompt '''
     base_url = 'www.bing.com'
@@ -215,130 +358,27 @@ def bing_search(args, html):
                 url_descs.append(''.join(html.xpath(ld_xpath)))
 
     if urls and url_descs:
-        ''' Print the URL descriptions and display a prompt '''
-        display_prompt = True
-        while display_prompt:
-            print('\n{0}'.format(BORDER))
-            for i in range(len(urls)):
-                print_desc = (str(i+1) + '. ' + url_descs[i]).encode('utf-8')
-                print(print_desc)  # Print url choices
-            print(BORDER)
+        return show_link_prompt(args, urls, url_descs)
 
-            ''' Handle link prompt input '''
-            try:
-                link_input = [inp.strip() for inp in input(': ').split()]
-                input_cmd = link_input[0]
-                input_args = link_input[1:]
-                while input_cmd == 'h' or input_cmd == 'help':
-                    print(LINK_HELP)
-                    link_input = [inp.strip() for inp in input(': ').split()]
-                    input_cmd = link_input[0]
-                    input_args = link_input[1:]
-                print('\n')
-
-                ''' Check input in case of quit '''
-                utils.check_input(link_input)
-
-                ''' A dictionary containing possible flag inputs with abbrevs.
-                    Keys are the first letter of the flag name
-                    Possible flag inputs are listed in LINK_HELP
-                '''
-                flag_lookup = utils.get_flags(args)
-
-                ''' If input_cmd is not a letter assume cmd is open
-                    Behavior is determined by the last flag entered
-                '''
-                reset_flags = True
-                if input_cmd[0] not in ascii_letters:
-                    input_args = [input_cmd] + input_args
-                    input_cmd = 'o'
-                    reset_flags = False
-
-                for key, value in flag_lookup.items():
-                    if key == input_cmd or value == input_cmd:
-                        ''' Reset all flags and set chosen flag to True '''
-                        if reset_flags:
-                            args = utils.reset_flags(args)
-                            args[value] = True
-
-                        if key == 'b':
-                            ''' If adding a bookmark resolve URL '''
-                            if 'add' in input_args:
-                                temp_args = []
-                                for i, arg in enumerate(input_args):
-                                    if utils.check_input(arg, num=True):
-                                        temp_args.append(urls[i-1])
-                                    else:
-                                        temp_args.append(arg)
-                                input_args = temp_args
-
-                            if utils.check_input(input_args):
-                                args['query'] = input_args
-                                search(args)
-                        elif key == 'd' or key == 'o' or key == 'p':
-                            ''' Open/Print/Describe link(s) '''
-
-                            ''' Remove commas '''
-                            if any([',' in arg for arg in input_args]):
-                                input_args = ''.join(input_args).split(',')
-                                input_args = [arg for arg in input_args if arg]
-
-                            ''' Check for a link number range '''
-                            if any(['-' in arg for arg in input_args]):
-                                split_args = ''.join(input_args).split('-')
-                                start = split_args[0].strip()
-                                end = split_args[1].strip()
-
-                                start_is_num = utils.check_input(start,
-                                                                 num=True)
-                                end_is_num = utils.check_input(end, num=True)
-                                if start_is_num and end_is_num:
-                                    ''' Open range of urls '''
-                                    if int(start) > 0 \
-                                            and int(end) <= len(urls)+1:
-                                        for i in range(int(start),
-                                                       int(end)+1, 1):
-                                            open_url(args, urls[i-1])
-                                elif start_is_num:
-                                    ''' Open open-ended range of urls '''
-                                    if int(start) > 0:
-                                        for i in range(int(start),
-                                                       len(urls)+1, 1):
-                                            open_url(args, urls[i-1])
-                                elif end_is_num:
-                                    ''' Open open-ended range of urls '''
-                                    if int(end) < len(urls)+1:
-                                        for i in range(1, int(end)+1, 1):
-                                            open_url(args, urls[i-1])
-                            elif input_args and display_prompt:
-                                ''' Open one or more links '''
-                                if not isinstance(input_args, list):
-                                    input_args = [input_args]
-
-                                for num in input_args:
-                                    if not utils.check_input(num.strip(),
-                                                             num=True):
-                                        return False
-
-                                links = []
-                                for num in input_args:
-                                    if int(num) > 0 and int(num) <= len(urls):
-                                        links.append(urls[int(num)-1])
-                                open_url(args, links)
-                        elif key == 'f':
-                            args['query'] = urls[0]
-                            search(args)
-                        elif key == 'v':
-                            print(__version__)
-                        elif key == 'c':
-                            print(CONFIG_FPATH)
-                        elif key == 's':
-                            args['query'] = input_args
-                            search(args)
-
-            except (KeyboardInterrupt, ValueError, IndexError):
-                break
     return False
+
+
+def clean_wolfram_entries(titles, entries):
+    ''' Clean formatting '''
+
+    output_list = []
+    for title, entry in zip(titles, entries):
+        try:
+            if ' |' in entry:
+                entry = '\n\t{0}'.format(entry.replace(' |', ':')
+                                         .replace('\n', '\n\t'))
+            if title == 'Result':
+                output_list.append(entry.encode('utf-8'))
+            else:
+                output_list.append(title + ': ' + entry).encode('utf-8')
+        except (AttributeError, UnicodeEncodeError):
+            pass
+    return output_list
 
 
 def wolfram_search(args, html):
@@ -363,32 +403,19 @@ def wolfram_search(args, html):
     entries = []
     if titles:
         for title in titles:
-            entry_xpath = "//pod[@title='{0}']/subpod/plaintext\
-                           /text()".format(title.encode('ascii', 'ignore'))
+            entry_xpath = ("//pod[@title='{0}']/subpod/plaintext/text()"
+                           .format(title.encode('ascii', 'ignore')))
             entry = html.xpath(entry_xpath)
             if entry:
                 entries.append(entry[0])
 
         entries = list(OrderedDict.fromkeys(entries))
-        output_list = []
 
         ''' Return False if results were empty '''
         if len(entries) == 1 and entries[0] == '{}':
             return False
 
-        for title, entry in zip(titles, entries):
-            try:
-                ''' Clean formatting '''
-                if ' |' in entry:
-                    entry = '\n\t{0}'.format(entry.replace(' |', ':')
-                                             .replace('\n', '\n\t'))
-                if title == 'Result':
-                    output_list.append(entry.encode('utf-8'))
-                else:
-                    output_list.append(title + ': ' + entry).encode('utf-8')
-            except (AttributeError, UnicodeEncodeError):
-                pass
-
+        output_list = clean_wolfram_entries(titles, entries)
         if not output_list:
             return False
         elif len(output_list) > 2:
@@ -444,13 +471,12 @@ def open_first(args, html):
         if args['describe']:
             url = ''
             for bing_url in bing_urls:
-                if not bing_url.startswith('/images/') and not \
-                       bing_url.startswith('/videos/'):
+                if (not bing_url.startswith('/images/') and
+                        not bing_url.startswith('/videos/')):
                     url = bing_url
                     break
             if not url:
-                sys.stderr.write('Failed to retrieve a non image/video\
-                                  link to describe.\n')
+                sys.stderr.write('Failed to find a link to describe.\n')
                 return None
         else:
             url = bing_urls[0]
@@ -514,8 +540,8 @@ def tag_bookmark(bk_idx, tags):
                     if prev_tags:
                         tags = '{0} {1}'.format(prev_tags.group(), tags)
 
-                    cfg.write('\n{0} ({1})\
-                              '.format(bkmark.split('(')[0].strip(), tags))
+                    cfg.write('\n{0} ({1})'
+                              .format(bkmark.split('(')[0].strip(), tags))
                 else:
                     cfg.write('\n{0}'.format(bkmark))
         reload_bookmarks()
@@ -639,6 +665,144 @@ def print_bookmarks(bkmarks):
         if '(' in bkmark and ')' in bkmark:
             bkmark = bkmark.split('(')[1].rstrip(')')
         print('{0}. {1}'.format(str(i+1), bkmark))
+    return True
+
+
+def bkmark_add_cmd(url_arg):
+    ''' add: add [url] '''
+
+    url_arg = url_arg[3:].strip()
+    url_args = url_arg.split()
+
+    clean_bkmarks = []
+    for u_arg in url_args:
+        u_arg = utils.append_scheme(u_arg)
+
+        if '.' not in u_arg:
+            u_arg = '{0}.com'.format(u_arg)
+
+        clean_bkmarks.append(u_arg)
+
+    return add_bookmark(clean_bkmarks)
+
+
+def bkmark_tag_cmd(url_arg):
+    ''' tag: tag [num or suburl] [tag]'''
+    split_args = url_arg[3:].strip().split()
+    url_arg = split_args[0]
+    tags = split_args[1:]
+
+    if not utils.check_input(url_arg, num=True):
+        ''' If input is not a number then find the correct number '''
+
+        bk_idx = find_bookmark_idx(url_arg)
+        if bk_idx > 0:
+            url_arg = bk_idx
+
+    if utils.check_input(url_arg, num=True):
+        return tag_bookmark(url_arg, tags)
+    else:
+        sys.stderr.write('Failed to tag bookmark {0}.\n'
+                         .format(str(url_arg)))
+
+
+def bkmark_untag_cmd(url_arg):
+    ''' untag: untag [num or suburl or tag] '''
+    split_args = url_arg[5:].strip().split()
+    tags_to_rm = split_args[1:]
+
+    ''' Find the bookmark index '''
+    bkmark_idx = 0
+    if not utils.check_input(split_args[0], num=True):
+        ''' If input is not a number then find the correct number '''
+
+        bk_idx = find_bookmark_idx(split_args[0])
+        if bk_idx > 0:
+            bkmark_idx = bk_idx
+    else:
+        bkmark_idx = split_args[0]
+
+    return untag_bookmark(bkmark_idx, tags_to_rm)
+
+
+def bkmark_move_cmd(url_arg):
+    split_args = url_arg[4:].strip().split()
+    bk1 = bk1_idx = split_args[0]
+    bk2 = bk2_idx = split_args[1]
+
+    if len(split_args) != 2:
+        sys.stderr.write(BOOKMARK_HELP)
+        return True
+
+    if not utils.check_input(bk1, num=True):
+        bk1_idx = find_bookmark_idx(bk1)
+    if not utils.check_input(bk2, num=True):
+        bk2_idx = find_bookmark_idx(bk2)
+
+    if bk1_idx < 0:
+        sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk1))
+        return False
+    if bk2_idx < 0:
+        sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk2))
+        return False
+
+    return mv_bookmarks(bk1_idx, bk2_idx)
+
+
+def bkmark_del_cmd(url_arg):
+    ''' delete: del [num or suburl or tag] '''
+    split_args = url_arg[3:].strip().split()
+
+    bkmark_idxs = []
+    for u_arg in split_args:
+        if not utils.check_input(u_arg, num=True):
+            ''' If input is not a number then find the correct number '''
+
+            bk_idx = find_bookmark_idx(u_arg)
+            if bk_idx > 0:
+                bkmark_idxs.append(bk_idx)
+        else:
+            bkmark_idxs.append(u_arg)
+
+    return del_bookmark(bkmark_idxs)
+
+
+def bkmark_open_cmd(args, url_arg, bkmarks):
+    ''' open: [num or suburl or tag] '''
+    split_args = url_arg.strip().split()
+
+    for u_arg in split_args:
+        if utils.check_input(u_arg, num=True):
+            ''' open: [num] '''
+            try:
+                bkmark = bkmarks[int(u_arg) - 1]
+                if '(' in bkmark and ')' in bkmark:
+                    open_url(args, bkmark.split('(')[0].strip())
+                else:
+                    open_url(args, bkmark)
+                return True
+            except IndexError:
+                sys.stderr.write('Bookmark {0} not found.\n'
+                                 .format(u_arg))
+                return False
+        else:
+            ''' open: [suburl or tag] '''
+            bk_idx = find_bookmark_idx(u_arg)
+            if bk_idx > 0:
+                try:
+                    bkmark = bkmarks[int(bk_idx)-1]
+                    if '(' in bkmark and ')' in bkmark:
+                        open_url(args, bkmark.split('(')[0].strip())
+                    else:
+                        open_url(args, bkmark)
+                    return True
+                except IndexError:
+                    sys.stderr.write('Bookmark {0} not found.\n'
+                                     .format(bk_idx))
+                    return False
+            else:
+                sys.stderr.write(BOOKMARK_HELP)
+                return True
 
 
 def bookmarks(args, url_arg):
@@ -650,133 +814,20 @@ def bookmarks(args, url_arg):
 
     if not url_arg:
         ''' Print bookmarks if no arguments provided '''
-        print_bookmarks(bkmarks)
-        return True
+        return print_bookmarks(bkmarks)
 
     if url_arg.startswith('add'):
-        ''' add: add [url] '''
-        url_arg = url_arg[3:].strip()
-        url_args = url_arg.split()
-
-        clean_bkmarks = []
-        for u_arg in url_args:
-            u_arg = utils.append_scheme(u_arg)
-
-            if '.' not in u_arg:
-                u_arg = '{0}.com'.format(u_arg)
-
-            clean_bkmarks.append(u_arg)
-
-        return add_bookmark(clean_bkmarks)
+        return bkmark_add_cmd(url_arg)
     elif url_arg.startswith('tag'):
-        ''' tag: tag [num or suburl] [tag]'''
-        split_args = url_arg[3:].strip().split()
-        url_arg = split_args[0]
-        tags = split_args[1:]
-
-        if not utils.check_input(url_arg, num=True):
-            ''' If input is not a number then find the correct number '''
-
-            bk_idx = find_bookmark_idx(url_arg)
-            if bk_idx > 0:
-                url_arg = bk_idx
-
-        if utils.check_input(url_arg, num=True):
-            return tag_bookmark(url_arg, tags)
-        else:
-            sys.stderr.write('Failed to tag \
-                             bookmark {0}.\n'.format(str(url_arg)))
+        return bkmark_tag_cmd(url_arg)
     elif url_arg.startswith('untag'):
-        ''' untag: untag [num or suburl or tag] '''
-        split_args = url_arg[5:].strip().split()
-        tags_to_rm = split_args[1:]
-
-        ''' Find the bookmark index '''
-        bkmark_idx = 0
-        if not utils.check_input(split_args[0], num=True):
-            ''' If input is not a number then find the correct number '''
-
-            bk_idx = find_bookmark_idx(split_args[0])
-            if bk_idx > 0:
-                bkmark_idx = bk_idx
-        else:
-            bkmark_idx = split_args[0]
-
-        return untag_bookmark(bkmark_idx, tags_to_rm)
+        return bkmark_untag_cmd(url_arg)
     elif url_arg.startswith('move'):
-        split_args = url_arg[4:].strip().split()
-        bk1 = bk1_idx = split_args[0]
-        bk2 = bk2_idx = split_args[1]
-
-        if len(split_args) != 2:
-            sys.stderr.write(BOOKMARK_HELP)
-            return True
-
-        if not utils.check_input(bk1, num=True):
-            bk1_idx = find_bookmark_idx(bk1)
-        if not utils.check_input(bk2, num=True):
-            bk2_idx = find_bookmark_idx(bk2)
-
-        if bk1_idx < 0:
-            sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk1))
-            return False
-        if bk2_idx < 0:
-            sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk2))
-            return False
-
-        return mv_bookmarks(bk1_idx, bk2_idx)
+        return bkmark_move_cmd(url_arg)
     elif url_arg.startswith('del'):
-        ''' delete: del [num or suburl or tag] '''
-        split_args = url_arg[3:].strip().split()
-
-        bkmark_idxs = []
-        for u_arg in split_args:
-            if not utils.check_input(u_arg, num=True):
-                ''' If input is not a number then find the correct number '''
-
-                bk_idx = find_bookmark_idx(u_arg)
-                if bk_idx > 0:
-                    bkmark_idxs.append(bk_idx)
-            else:
-                bkmark_idxs.append(u_arg)
-
-        return del_bookmark(bkmark_idxs)
+        return bkmark_del_cmd(url_arg)
     else:
-        ''' open: [num or suburl or tag] '''
-        split_args = url_arg.strip().split()
-
-        for u_arg in split_args:
-            if utils.check_input(u_arg, num=True):
-                ''' open: [num] '''
-                try:
-                    bkmark = bkmarks[int(u_arg) - 1]
-                    if '(' in bkmark and ')' in bkmark:
-                        open_url(args, bkmark.split('(')[0].strip())
-                    else:
-                        open_url(args, bkmark)
-                    return True
-                except IndexError:
-                    sys.stderr.write('Bookmark {0} not found.\n\
-                                     '.format(u_arg))
-                    return False
-            else:
-                ''' open: [suburl or tag] '''
-                bk_idx = find_bookmark_idx(u_arg)
-                if bk_idx > 0:
-                    try:
-                        bkmark = bkmarks[int(bk_idx)-1]
-                        if '(' in bkmark and ')' in bkmark:
-                            open_url(args, bkmark.split('(')[0].strip())
-                        else:
-                            open_url(args, bkmark)
-                        return True
-                    except IndexError:
-                        sys.stderr.write('Bookmark {0} not found.\n\
-                                         '.format(bk_idx))
-                        return False
-                else:
-                    sys.stderr.write(BOOKMARK_HELP)
-                    return True
+        return bkmark_open_cmd(args, url_arg, bkmarks)
 
 
 def open_browser(url):
@@ -846,8 +897,8 @@ def describe_url(url):
         return False
 
     stripped_body = []
-    for bo in body:
-        stripped_body.append(bo.strip())
+    for line in body:
+        stripped_body.append(line.strip())
 
     filtered_body = list(filter(None, stripped_body))
     if not filtered_body:
@@ -856,15 +907,15 @@ def describe_url(url):
         return False
 
     body_sum = 0
-    for bo in filtered_body:
-        body_sum += len(bo)
+    for line in filtered_body:
+        body_sum += len(line)
     body_avg_sum = body_sum / len(filtered_body)+1
     print_body = []
 
     ''' Print lines greater than the average length / qualifier '''
-    for fb in filtered_body:
-        if len(fb) > (body_avg_sum / qualifier):
-            print_body.append(fb)
+    for line in filtered_body:
+        if len(line) > (body_avg_sum / qualifier):
+            print_body.append(line)
 
     if print_body:
         print(('{0}\n'.format(desc_url)).encode('utf-8'))
