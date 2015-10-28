@@ -1,3 +1,8 @@
+1.1.5
+------
+
+ - opens google instead of bing when running cliquery -s with no arguments
+
 1.1.4
 ------
 

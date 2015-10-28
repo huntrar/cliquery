@@ -322,9 +322,8 @@ def show_link_prompt(args, urls, url_descs):
 
 def bing_search(args, html):
     ''' Perform a Bing search and show an interactive prompt '''
-    base_url = 'www.bing.com'
     if html is None:
-        return open_url(args, utils.append_scheme(base_url))
+        return open_url(args, 'https://www.google.com')
 
     try:
         unprocessed_urls = html.xpath('//h2/a/@href')
