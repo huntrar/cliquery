@@ -1,3 +1,9 @@
+1.1.8
+------
+
+ - added docstrings to all functions
+ - added dictionary iter helper functions for python 2 to 3 compatibility
+
 1.1.7
 ------
 

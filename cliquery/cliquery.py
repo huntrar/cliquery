@@ -32,10 +32,27 @@ if SYS_VERSION == 2:
         input = raw_input
     except NameError:
         pass
+
     try:
         range = xrange
     except NameError:
         pass
+
+    def itervalues(dct):
+        ''' Python 2 dictionary itervalues() '''
+        return dct.itervalues()
+
+    def iteritems(dct):
+        ''' Python 2 dictionary iteritems() '''
+        return dct.iteritems()
+else:
+    def itervalues(dct):
+        ''' Python 3 dictionary itervalues() '''
+        return iter(dct.values())
+
+    def iteritems(dct):
+        ''' Python 3 dictionary iteritems() '''
+        return iter(dct.items())
 
 XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
                                os.path.join(os.path.expanduser('~'), '.cache'))
@@ -83,6 +100,7 @@ SEE_MORE = 'See more? [Press Enter] '
 
 
 def get_parser():
+    ''' Parse command-line arguments using argparse library '''
     parser = argp.ArgumentParser(description='a command-line browsing utility')
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*',
                         help='keywords to search')
@@ -110,6 +128,7 @@ def get_parser():
 
 
 def read_config():
+    ''' Read in .cliqrc or .local.cliqrc file '''
     with open(CONFIG_FPATH, 'r') as cfg:
         lines = []
         api_key = ''
@@ -143,17 +162,20 @@ def read_config():
 
 
 def enable_cache():
+    ''' Enable requests library cache '''
     if not os.path.exists(CACHE_DIR):
         os.makedirs(CACHE_DIR)
     requests_cache.install_cache(CACHE_FILE)
 
 
 def clear_cache():
+    ''' Remove requests library cache '''
     for cache in glob.glob('{0}*'.format(CACHE_FILE)):
         os.remove(cache)
 
 
 def get_search_html(args):
+    ''' Get Bing or Wolfram HTML if necessary '''
     url_args = args['query']
     if args['bookmark']:
         return ''
@@ -167,11 +189,13 @@ def get_search_html(args):
 
 
 def get_bing_html(url_args):
+    ''' Get HTML from Bing query '''
     base_url = 'www.bing.com'
     return utils.get_html('http://{0}/search?q={1}'.format(base_url, url_args))
 
 
 def get_wolfram_html(url_args):
+    ''' Get HTML from Wolfram API query '''
     base_url = 'http://api.wolframalpha.com/v2/query?input='
     api = CONFIG['api_key']
     return utils.get_html('{0}{1}&appid={2}'.format(base_url, url_args, api))
@@ -179,7 +203,6 @@ def get_wolfram_html(url_args):
 
 def open_link_range(args, urls, input_args):
     ''' Open a link number range '''
-
     split_args = ''.join(input_args).split('-')
     start = split_args[0].strip()
     end = split_args[1].strip()
@@ -205,7 +228,6 @@ def open_link_range(args, urls, input_args):
 
 def open_links(args, urls, input_args):
     ''' Open one or more links '''
-
     if not isinstance(input_args, list):
         input_args = [input_args]
 
@@ -221,8 +243,9 @@ def open_links(args, urls, input_args):
 
 
 def exec_bkmark(args, urls, input_args):
-    ''' If adding a bookmark resolve URL '''
+    ''' Execute a bookmark command '''
     if 'add' in input_args:
+        ''' If adding a bookmark, must resolve URL first '''
         temp_args = []
         for i, arg in enumerate(input_args):
             if utils.check_input(arg, num=True):
@@ -238,12 +261,9 @@ def exec_bkmark(args, urls, input_args):
 
 def exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt):
     ''' Execute a command in the link prompt '''
-
-    ''' If input_cmd is not a letter assume cmd is open
-        Behavior is determined by the last flag entered
-    '''
     reset_flags = True
     if input_cmd[0] not in ascii_letters:
+        ''' Default command is open '''
         input_args = [input_cmd] + input_args
         input_cmd = 'o'
         reset_flags = False
@@ -252,7 +272,7 @@ def exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt):
         Keys are the first letter of the flag name
         Possible flag inputs are listed in LINK_HELP
     '''
-    for key, value in utils.get_flags(args).items():
+    for key, value in iteritems(utils.get_lookup_flags(args)):
         if key == input_cmd or value == input_cmd:
             ''' Reset all flags and set chosen flag to True '''
             if reset_flags:
@@ -288,8 +308,7 @@ def exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt):
 
 
 def show_link_prompt(args, urls, url_descs):
-    ''' Print the URL descriptions and display a prompt '''
-
+    ''' Print URL's and their descriptions alongside a prompt '''
     display_prompt = True
     while display_prompt:
         print('\n{0}'.format(BORDER))
@@ -321,7 +340,7 @@ def show_link_prompt(args, urls, url_descs):
 
 
 def bing_search(args, html):
-    ''' Perform a Bing search and show an interactive prompt '''
+    ''' Perform a Bing search '''
     if html is None:
         return open_url(args, 'https://www.google.com')
 
@@ -365,8 +384,7 @@ def bing_search(args, html):
 
 
 def clean_wolfram_entries(titles, entries):
-    ''' Clean formatting '''
-
+    ''' Clean formatting of Wolfram entries '''
     output_list = []
     for title, entry in zip(titles, entries):
         try:
@@ -494,10 +512,12 @@ def open_first(args, html):
 
 
 def reload_bookmarks():
+    ''' Read in bookmarks again from .cliqrc '''
     CONFIG['bookmarks'] = read_config()[2]
 
 
 def find_bookmark_idx(url_arg):
+    ''' Find the index of a bookmark given a substring '''
     bkmarks = CONFIG['bookmarks']
 
     url_arg = url_arg.strip()
@@ -508,6 +528,7 @@ def find_bookmark_idx(url_arg):
 
 
 def add_bookmark(urls):
+    ''' Add a bookmark to the list of saved bookmarks '''
     try:
         with open(CONFIG_FPATH, 'a') as cfg:
             if isinstance(urls, list):
@@ -523,6 +544,7 @@ def add_bookmark(urls):
 
 
 def tag_bookmark(bk_idx, tags):
+    ''' Tag an existing bookmark with an alias '''
     try:
         bkmarks = CONFIG['bookmarks']
 
@@ -553,6 +575,7 @@ def tag_bookmark(bk_idx, tags):
 
 
 def untag_bookmark(bk_idx, tags_to_rm):
+    ''' Remove a tag from a bookmark '''
     try:
         bkmarks = CONFIG['bookmarks']
 
@@ -593,6 +616,7 @@ def untag_bookmark(bk_idx, tags_to_rm):
 
 
 def mv_bookmarks(bk1, bk2):
+    ''' Swap the positions of two bookmarks '''
     try:
         bkmarks = CONFIG['bookmarks']
         b_len = len(bkmarks)
@@ -636,6 +660,7 @@ def mv_bookmarks(bk1, bk2):
 
 
 def del_bookmark(bk_idx):
+    ''' Remove an existing bookmark from the list of saved bookmarks '''
     try:
         bkmarks = CONFIG['bookmarks']
 
@@ -661,6 +686,7 @@ def del_bookmark(bk_idx):
 
 
 def print_bookmarks(bkmarks):
+    ''' Print all saved bookmarks '''
     print('Bookmarks:')
     for i, bkmark in enumerate(bkmarks):
         if '(' in bkmark and ')' in bkmark:
@@ -670,8 +696,7 @@ def print_bookmarks(bkmarks):
 
 
 def bkmark_add_cmd(url_arg):
-    ''' add: add [url] '''
-
+    ''' add: add [url..] '''
     url_arg = url_arg[3:].strip()
     url_args = url_arg.split()
 
@@ -688,7 +713,7 @@ def bkmark_add_cmd(url_arg):
 
 
 def bkmark_tag_cmd(url_arg):
-    ''' tag: tag [num or suburl] [tag]'''
+    ''' tag: tag [num or suburl] [tag..] '''
     split_args = url_arg[3:].strip().split()
     url_arg = split_args[0]
     tags = split_args[1:]
@@ -708,7 +733,7 @@ def bkmark_tag_cmd(url_arg):
 
 
 def bkmark_untag_cmd(url_arg):
-    ''' untag: untag [num or suburl or tag] '''
+    ''' untag: untag [num or suburl or tag] [subtag..] '''
     split_args = url_arg[5:].strip().split()
     tags_to_rm = split_args[1:]
 
@@ -727,6 +752,7 @@ def bkmark_untag_cmd(url_arg):
 
 
 def bkmark_move_cmd(url_arg):
+    ''' move: move [num or suburl or tag] [num or suburl or tag] '''
     split_args = url_arg[4:].strip().split()
     bk1 = bk1_idx = split_args[0]
     bk2 = bk2_idx = split_args[1]
@@ -751,7 +777,7 @@ def bkmark_move_cmd(url_arg):
 
 
 def bkmark_del_cmd(url_arg):
-    ''' delete: del [num or suburl or tag] '''
+    ''' delete: del [num or suburl or tag..] '''
     split_args = url_arg[3:].strip().split()
 
     bkmark_idxs = []
@@ -769,7 +795,7 @@ def bkmark_del_cmd(url_arg):
 
 
 def bkmark_open_cmd(args, url_arg, bkmarks):
-    ''' open: [num or suburl or tag] '''
+    ''' open: [num or suburl or tag..] '''
     split_args = url_arg.strip().split()
 
     for u_arg in split_args:
@@ -832,6 +858,7 @@ def bookmarks(args, url_arg):
 
 
 def open_browser(url):
+    ''' Open a browser using webbrowser (or for cygwin use a system call) '''
     if CONFIG['browser'] == 'cygwin':
         call(['cygstart', url])
     else:
@@ -842,6 +869,7 @@ def open_browser(url):
 
 
 def open_url(args, urls):
+    ''' Print, describe, or open a URL in the browser '''
     if args['print']:
         urls = utils.append_scheme(urls)
         if isinstance(urls, list):
@@ -872,9 +900,7 @@ def open_url(args, urls):
 
 
 def describe_url(url):
-    ''' Print the text of a given url
-        Printed lines must be greater than the average length / qualifier
-    '''
+    ''' Print a text preview of a given URL '''
     try:
         if url.startswith('/images/') or url.startswith('/videos/'):
             sys.stderr.write('Link was an image/video, could not describe.\n')
@@ -887,8 +913,6 @@ def describe_url(url):
         sys.stderr.write('Failed to describe link {0}\n.'.format(url))
         return False
 
-    qualifier = 5
-
     html = utils.get_html(desc_url)
     body = ''.join(html.xpath('//body//*[not(self::script) and '
                               'not(self::style)]/text()')).split('\n')
@@ -897,26 +921,17 @@ def describe_url(url):
         print('Extended description not found.\n')
         return False
 
-    stripped_body = []
-    for line in body:
-        stripped_body.append(line.strip())
-
-    filtered_body = list(filter(None, stripped_body))
+    stripped_body = [x.strip() for x in body]
+    filtered_body = [x for x in stripped_body if x]
     if not filtered_body:
         print(('{0}\n'.format(desc_url)).encode('utf-8'))
         print('Extended description not found.\n')
         return False
 
-    body_sum = 0
-    for line in filtered_body:
-        body_sum += len(line)
-    body_avg_sum = body_sum / len(filtered_body)+1
-    print_body = []
-
-    ''' Print lines greater than the average length / qualifier '''
-    for line in filtered_body:
-        if len(line) > (body_avg_sum / qualifier):
-            print_body.append(line)
+    ''' Only print lines greater than a fifth of the average line length '''
+    body_avg_sum = len(''.join(filtered_body)) / len(filtered_body)+1
+    qual_len = body_avg_sum / 5
+    print_body = [x for x in filtered_body if len(x) > qual_len]
 
     if print_body:
         print(('{0}\n'.format(desc_url)).encode('utf-8'))
@@ -945,11 +960,9 @@ def describe_url(url):
 
 
 def search(args):
-    opn, bkm = args['open'], args['bookmark']
-    src, wolf = args['search'], args['wolfram']
-
-    ''' A query may be blank for only these flags above '''
-    if not args['query'] and not opn and not bkm and not src and not wolf:
+    ''' Handle web searching, page previewing, and bookmarks '''
+    if not any([args['query'], args['open'], args['bookmark'],
+                args['search'], args['wolfram']]):
         sys.stderr.write('No search terms entered.\n')
         return False
 
@@ -1011,6 +1024,7 @@ def search(args):
 
 
 def command_line_runner():
+    ''' Handle command-line interaction '''
     parser = get_parser()
     args = vars(parser.parse_args())
 
@@ -1048,14 +1062,10 @@ def command_line_runner():
         args['wolfram'] = False
         sys.stderr.write('Missing WolframAlpha API key in .cliqrc!\n')
 
-    opn, bkm = args['open'], args['bookmark']
-    src, wolf = args['search'], args['wolfram']
-
-    ''' A query may be blank for only these flags above '''
-    if not args['query'] and not opn and not bkm and not src and not wolf:
+    if not any([args['query'], args['open'], args['bookmark'],
+                args['search'], args['wolfram']]):
         parser = get_parser()
         parser.print_help()
-        return
     else:
         search(args)
 

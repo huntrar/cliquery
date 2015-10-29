@@ -15,6 +15,25 @@ try:
 except ImportError:
     from urllib.request import getproxies
 
+try:
+    dict.iteritems
+except AttributeError:
+    def itervalues(dct):
+        ''' Python 3 dictionary itervalues() '''
+        return iter(dct.values())
+
+    def iteritems(dct):
+        ''' Python 3 dictionary iteritems() '''
+        return iter(dct.items())
+else:
+    def itervalues(dct):
+        ''' Python 2 dictionary itervalues() '''
+        return dct.itervalues()
+
+    def iteritems(dct):
+        ''' Python 2 dictionary iteritems() '''
+        return dct.iteritems()
+
 
 USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) '
                'Gecko/20100101 Firefox/11.0',
@@ -31,9 +50,10 @@ USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) '
 
 
 def get_proxies():
+    ''' Get available proxies to use with requests library '''
     proxies = getproxies()
     filtered_proxies = {}
-    for key, value in proxies.items():
+    for key, value in iteritems(proxies):
         if key.startswith('http://'):
             if not value.startswith('http://'):
                 filtered_proxies[key] = 'http://{0}'.format(value)
@@ -43,8 +63,8 @@ def get_proxies():
 
 
 def get_html(url):
+    ''' Get HTML response as an lxml.html.HtmlElement object '''
     try:
-        ''' Get HTML response as an lxml.html.HtmlElement object '''
         headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
         return lh.fromstring(request.text.encode('utf-8'))
@@ -55,6 +75,7 @@ def get_html(url):
 
 
 def clean_query(url_args, open_flag, bookmark_flag):
+    ''' Replace special characters/append URL extensions if necessary '''
     if bookmark_flag:
         return url_args
     elif not open_flag:
@@ -72,6 +93,7 @@ def clean_query(url_args, open_flag, bookmark_flag):
 
 
 def check_input(u_input, num=False, empty=False):
+    ''' Check user input for empty, a number, or for an exit signal '''
     if isinstance(u_input, list):
         u_input = ''.join(u_input)
 
@@ -92,15 +114,16 @@ def check_input(u_input, num=False, empty=False):
 
 
 def check_num(num):
+    ''' Check if input can be an int '''
     try:
-        new = int(num)
+        num = int(num)
         return True
     except ValueError:
         return False
 
 
 def append_scheme(urls):
-    ''' Append scheme to urls if not present '''
+    ''' Append scheme to URL's if not present '''
     if isinstance(urls, list):
         scheme_urls = []
 
@@ -119,10 +142,10 @@ def append_scheme(urls):
 
 
 def reset_flags(args):
-    ''' Set all boolean flags to False '''
-    return {k: False if isinstance(v, bool) else v for k, v in args.items()}
+    ''' Return a dictionary with all bool flags set to False '''
+    return {k: False if isinstance(v, bool) else v for k, v in iteritems(args)}
 
 
-def get_flags(args):
-    ''' Return dictionary containing flags with their first letter as key '''
-    return {k[0]: k for k, v in args.items() if isinstance(v, bool)}
+def get_lookup_flags(args):
+    ''' Return a dictionary with keys equal to first letter of their values '''
+    return {k[0]: k for k, v in iteritems(args) if isinstance(v, bool)}
