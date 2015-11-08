@@ -1,4 +1,4 @@
-# cliquery [![Build Status](https://travis-ci.org/huntrar/cliquery.svg?branch=master)](https://travis-ci.org/huntrar/cliquery) [![PyPI](https://img.shields.io/pypi/dm/cliquery.svg?style=flat)]()
+# cliquery [![PyPI Version](https://img.shields.io/pypi/v/cliquery.svg)](https://pypi.python.org/pypi/cliquery) [![Build Status](https://travis-ci.org/huntrar/cliquery.svg?branch=master)](https://travis-ci.org/huntrar/cliquery) [![PyPI Monthly downloads](https://img.shields.io/pypi/dm/cliquery.svg?style=flat)](https://pypi.python.org/pypi/cliquery)
 
 
 ## a command-line browsing utility
