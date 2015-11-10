@@ -1,3 +1,9 @@
+1.1.9
+------
+
+ - bookmark commands move and del changed to mv and rm
+ - bookmark move now inserts at an index and shifts entries rather than swapping
+
 1.1.8
 ------
 

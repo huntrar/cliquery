@@ -92,8 +92,8 @@ BOOKMARK_HELP = ('Usage: '
                  '\nadd: add [url..]'
                  '\ntag: tag [num or suburl] [tag..]'
                  '\nuntag: untag [num or suburl or tag] [subtag..]'
-                 '\nmove: move [num or suburl or tag] [num or suburl or tag]'
-                 '\ndelete: del [num or suburl or tag..]'
+                 '\nmove: mv [num or suburl or tag] [num or suburl or tag]'
+                 '\ndelete: rm [num or suburl or tag..]'
                  '\n')
 
 SEE_MORE = 'See more? [Press Enter] '
@@ -116,7 +116,7 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-o', '--open', help='open link or browser manually',
                         action='store_true')
-    parser.add_argument('-p', '--print', help='print link to stdout and exit',
+    parser.add_argument('-p', '--print', help='print link to stdout',
                         action='store_true')
     parser.add_argument('-s', '--search', help='display search links',
                         action='store_true')
@@ -212,17 +212,17 @@ def open_link_range(args, urls, input_args):
     if start_is_num and end_is_num:
         ''' Open close-ended range of urls '''
         if int(start) > 0 and int(end) <= len(urls)+1:
-            for i in range(int(start), int(end)+1, 1):
+            for i in range(int(start), int(end)+1):
                 open_url(args, urls[i-1])
     elif start_is_num:
         ''' Open open-ended range of urls '''
         if int(start) > 0:
-            for i in range(int(start), len(urls)+1, 1):
+            for i in range(int(start), len(urls)+1):
                 open_url(args, urls[i-1])
     elif end_is_num:
         ''' Open open-ended range of urls '''
         if int(end) < len(urls)+1:
-            for i in range(1, int(end)+1, 1):
+            for i in range(1, int(end)+1):
                 open_url(args, urls[i-1])
 
 
@@ -615,40 +615,64 @@ def untag_bookmark(bk_idx, tags_to_rm):
         return False
 
 
-def mv_bookmarks(bk1, bk2):
-    ''' Swap the positions of two bookmarks '''
+def mv_bookmarks(idx1, idx2):
+    ''' Move bookmarks to the start, end, or at another bookmark's position '''
     try:
+        if idx1 == idx2:
+            sys.stderr.write('Bookmark indices equal!\n')
+            sys.stderr.write(BOOKMARK_HELP)
+            return True
+
         bkmarks = CONFIG['bookmarks']
         b_len = len(bkmarks)
-
         with open(CONFIG_FPATH, 'w') as cfg:
             cfg.write('api_key: {0}'.format(CONFIG['api_key']))
             cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
             cfg.write('\nbookmarks: ')
 
-            idx1 = int(bk1)-1
-            idx2 = int(bk2)-1
-
             ''' Pairs that are both out of range are incorrect '''
             if (idx1 < 0 or idx1 >= b_len) and (idx2 < 0 or idx2 >= b_len):
-                sys.stderr.write('Both bookmark indices out of range.\n')
+                sys.stderr.write('Bookmark indices out of range!\n')
+                sys.stderr.write(BOOKMARK_HELP)
                 return True
 
-            ''' Move a bookmark to the start or end, or swap two '''
+            ''' Move bookmark to the front or end, or insert at an index'''
             if idx1 < 0:
+                ''' Move bookmark 2 to the front '''
                 if idx2 >= 0 and idx2 < b_len:
                     bkmarks.insert(0, bkmarks.pop(idx2))
             elif idx1 >= len(bkmarks):
+                ''' Move bookmark 2 to the end '''
                 if idx2 >= 0 and idx2 < b_len:
                     bkmarks.append(bkmarks.pop(idx2))
             elif idx2 < 0:
+                ''' Move bookmark 1 to the front '''
                 if idx1 >= 0 and idx1 < b_len:
                     bkmarks.insert(0, bkmarks.pop(idx1))
             elif idx2 >= len(bkmarks):
+                ''' Move bookmark 1 to the end '''
                 if idx1 >= 0 and idx1 < b_len:
                     bkmarks.append(bkmarks.pop(idx1))
             else:
-                bkmarks[idx1], bkmarks[idx2] = bkmarks[idx2], bkmarks[idx1]
+                ''' Insert bookmark 1 in bookmark 2's position '''
+                if idx1 > idx2:
+                    prev = bkmarks[idx2]
+                    bkmarks[idx2] = bkmarks[idx1]
+
+                    ''' Move rest of bookmark entries down '''
+                    for i in range(idx2+1, idx1+1):
+                        temp = bkmarks[i]
+                        bkmarks[i] = prev
+                        prev = temp
+                else:
+                    prev = bkmarks[idx2]
+                    bkmarks[idx2] = bkmarks[idx1]
+
+                    ''' Move rest of bookmark entries up '''
+                    for i in range(idx2-1, idx1-1, -1):
+                        temp = bkmarks[i]
+                        bkmarks[i] = prev
+                        prev = temp
 
             for bkmark in bkmarks:
                 cfg.write('\n{0}'.format(bkmark))
@@ -659,7 +683,7 @@ def mv_bookmarks(bk1, bk2):
         return False
 
 
-def del_bookmark(bk_idx):
+def rm_bookmark(bk_idx):
     ''' Remove an existing bookmark from the list of saved bookmarks '''
     try:
         bkmarks = CONFIG['bookmarks']
@@ -751,16 +775,15 @@ def bkmark_untag_cmd(url_arg):
     return untag_bookmark(bkmark_idx, tags_to_rm)
 
 
-def bkmark_move_cmd(url_arg):
-    ''' move: move [num or suburl or tag] [num or suburl or tag] '''
-    split_args = url_arg[4:].strip().split()
-    bk1 = bk1_idx = split_args[0]
-    bk2 = bk2_idx = split_args[1]
-
+def bkmark_mv_cmd(url_arg):
+    ''' move: mv [num or suburl or tag] [num or suburl or tag] '''
+    split_args = url_arg[2:].strip().split()
     if len(split_args) != 2:
         sys.stderr.write(BOOKMARK_HELP)
         return True
 
+    bk1 = bk1_idx = split_args[0]
+    bk2 = bk2_idx = split_args[1]
     if not utils.check_input(bk1, num=True):
         bk1_idx = find_bookmark_idx(bk1)
     if not utils.check_input(bk2, num=True):
@@ -773,11 +796,12 @@ def bkmark_move_cmd(url_arg):
         sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk2))
         return False
 
-    return mv_bookmarks(bk1_idx, bk2_idx)
+    ''' Account for zero-indexed list '''
+    return mv_bookmarks(int(bk1_idx)-1, int(bk2_idx)-1)
 
 
-def bkmark_del_cmd(url_arg):
-    ''' delete: del [num or suburl or tag..] '''
+def bkmark_rm_cmd(url_arg):
+    ''' delete: rm [num or suburl or tag..] '''
     split_args = url_arg[3:].strip().split()
 
     bkmark_idxs = []
@@ -791,7 +815,7 @@ def bkmark_del_cmd(url_arg):
         else:
             bkmark_idxs.append(u_arg)
 
-    return del_bookmark(bkmark_idxs)
+    return rm_bookmark(bkmark_idxs)
 
 
 def bkmark_open_cmd(args, url_arg, bkmarks):
@@ -849,10 +873,10 @@ def bookmarks(args, url_arg):
         return bkmark_tag_cmd(url_arg)
     elif url_arg.startswith('untag'):
         return bkmark_untag_cmd(url_arg)
-    elif url_arg.startswith('move'):
-        return bkmark_move_cmd(url_arg)
-    elif url_arg.startswith('del'):
-        return bkmark_del_cmd(url_arg)
+    elif url_arg.startswith('mv'):
+        return bkmark_mv_cmd(url_arg)
+    elif url_arg.startswith('rm'):
+        return bkmark_rm_cmd(url_arg)
     else:
         return bkmark_open_cmd(args, url_arg, bkmarks)
 
