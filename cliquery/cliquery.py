@@ -517,13 +517,23 @@ def reload_bookmarks():
 
 
 def find_bookmark_idx(url_arg):
-    ''' Find the index of a bookmark given a substring '''
+    ''' Find the index of a bookmark given substrings '''
     bkmarks = CONFIG['bookmarks']
 
-    url_arg = url_arg.strip()
+    url_arg = url_arg.strip().split()
+    most_matches = 0
+    matched_idx = 0
     for i, bkmark in enumerate(bkmarks):
-        if url_arg in bkmark:
-            return i+1
+        matches = 0
+        for arg in url_arg:
+            if arg in bkmark:
+                matches += 1
+        if matches > most_matches:
+            most_matches = matches
+            matched_idx = i
+
+    if most_matches > 0:
+        return matched_idx+1
     return -1
 
 
@@ -655,24 +665,23 @@ def mv_bookmarks(idx1, idx2):
                     bkmarks.append(bkmarks.pop(idx1))
             else:
                 ''' Insert bookmark 1 in bookmark 2's position '''
+                prev = bkmarks[idx2]
+                bkmarks[idx2] = bkmarks[idx1]
                 if idx1 > idx2:
-                    prev = bkmarks[idx2]
-                    bkmarks[idx2] = bkmarks[idx1]
-
-                    ''' Move rest of bookmark entries down '''
-                    for i in range(idx2+1, idx1+1):
-                        temp = bkmarks[i]
-                        bkmarks[i] = prev
-                        prev = temp
+                    ''' Move entries down '''
+                    start_range = idx2+1 
+                    end_range = idx1+1
+                    range_inc = 1
                 else:
-                    prev = bkmarks[idx2]
-                    bkmarks[idx2] = bkmarks[idx1]
+                    ''' Move entries up '''
+                    start_range = idx2-1
+                    end_range = idx1-1
+                    range_inc = -1
 
-                    ''' Move rest of bookmark entries up '''
-                    for i in range(idx2-1, idx1-1, -1):
-                        temp = bkmarks[i]
-                        bkmarks[i] = prev
-                        prev = temp
+                for i in range(start_range, end_range, range_inc):
+                    temp = bkmarks[i]
+                    bkmarks[i] = prev
+                    prev = temp
 
             for bkmark in bkmarks:
                 cfg.write('\n{0}'.format(bkmark))
@@ -821,39 +830,42 @@ def bkmark_rm_cmd(url_arg):
 def bkmark_open_cmd(args, url_arg, bkmarks):
     ''' open: [num or suburl or tag..] '''
     split_args = url_arg.strip().split()
+    bookmark_nums = [x for x in split_args if utils.check_input(x, num=True)]
+    bookmark_kws = list(split_args)
+    [bookmark_kws.remove(x) for x in bookmark_nums]
+    bookmark_kws = ' '.join(bookmark_kws)
 
-    for u_arg in split_args:
-        if utils.check_input(u_arg, num=True):
-            ''' open: [num] '''
-            try:
-                bkmark = bkmarks[int(u_arg) - 1]
-                if '(' in bkmark and ')' in bkmark:
-                    open_url(args, bkmark.split('(')[0].strip())
-                else:
-                    open_url(args, bkmark)
-                return True
-            except IndexError:
-                sys.stderr.write('Bookmark {0} not found.\n'
-                                 .format(u_arg))
-                return False
-        else:
-            ''' open: [suburl or tag] '''
-            bk_idx = find_bookmark_idx(u_arg)
-            if bk_idx > 0:
-                try:
-                    bkmark = bkmarks[int(bk_idx)-1]
-                    if '(' in bkmark and ')' in bkmark:
-                        open_url(args, bkmark.split('(')[0].strip())
-                    else:
-                        open_url(args, bkmark)
-                    return True
-                except IndexError:
-                    sys.stderr.write('Bookmark {0} not found.\n'
-                                     .format(bk_idx))
-                    return False
+    for num in bookmark_nums:
+        ''' open: [num] '''
+        try:
+            bkmark = bkmarks[int(num) - 1]
+            if '(' in bkmark and ')' in bkmark:
+                open_url(args, bkmark.split('(')[0].strip())
             else:
-                sys.stderr.write(BOOKMARK_HELP)
-                return True
+                open_url(args, bkmark)
+            return True
+        except IndexError:
+            sys.stderr.write('Bookmark {0} not found.\n'
+                             .format(num))
+            return False
+
+    ''' open: [suburl or tag] '''
+    bk_idx = find_bookmark_idx(bookmark_kws)
+    if bk_idx > 0:
+        try:
+            bkmark = bkmarks[int(bk_idx)-1]
+            if '(' in bkmark and ')' in bkmark:
+                open_url(args, bkmark.split('(')[0].strip())
+            else:
+                open_url(args, bkmark)
+            return True
+        except IndexError:
+            sys.stderr.write('Bookmark {0} not found.\n'
+                             .format(bk_idx))
+            return False
+    else:
+        sys.stderr.write(BOOKMARK_HELP)
+        return True
 
 
 def bookmarks(args, url_arg):

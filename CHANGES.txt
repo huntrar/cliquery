@@ -1,3 +1,8 @@
+1.2.0
+------
+
+ - open bookmarks with most matched terms rather than first found
+
 1.1.9
 ------
 
