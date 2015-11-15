@@ -41,7 +41,7 @@ Do the following to copy .cliqrc to .local.cliqrc:
       -b, --bookmark     view and modify bookmarks
       -c, --config       print location of config file
       -C, --clear-cache  clear the cache
-      -d, --describe     display page snippet
+      -d, --describe     display link summary
       -f, --first        open first link
       -o, --open         open link or browser manually
       -p, --print        print link to stdout

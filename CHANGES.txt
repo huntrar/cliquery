@@ -1,3 +1,8 @@
+1.2.1
+------
+
+ - describe method now uses pyteaser.SummarizeUrl()
+
 1.2.0
 ------
 

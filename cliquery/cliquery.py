@@ -20,6 +20,7 @@ import sys
 import time
 import webbrowser
 
+import pyteaser
 import requests_cache
 
 from cliquery import utils
@@ -81,7 +82,7 @@ LINK_HELP = ('Enter one of the following flags abbreviated or not,'
              '\ts, search    display search links\n'
              '\to, open      open link manually\n'
              '\tw, wolfram   display wolfram results\n'
-             '\td, describe  display page snippet\n'
+             '\td, describe  display link summary\n'
              '\tb, bookmark  view and modify bookmarks\n'
              '\tp, print     print link to stdout\n'
              '\tc, config    print location of config file\n'
@@ -110,7 +111,7 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-C', '--clear-cache', help='clear the cache',
                         action='store_true')
-    parser.add_argument('-d', '--describe', help='display page snippet',
+    parser.add_argument('-d', '--describe', help='display link summary',
                         action='store_true')
     parser.add_argument('-f', '--first', help='open first link',
                         action='store_true')
@@ -738,7 +739,13 @@ def bkmark_add_cmd(url_arg):
         u_arg = utils.append_scheme(u_arg)
 
         if '.' not in u_arg:
-            u_arg = '{0}.com'.format(u_arg)
+            if '(' in u_arg and ')' in u_arg:
+                split_arg = u_arg.split('(')
+                tag = split_arg[1].rstrip(')')
+                bkmark = split_arg[0].strip()
+                u_arg = '{0}.com ({1})'.format(bkmark, tag)
+            else:
+                u_arg = '{0}.com'.format(u_arg)
 
         clean_bkmarks.append(u_arg)
 
@@ -938,61 +945,16 @@ def open_url(args, urls):
 def describe_url(url):
     ''' Print a text preview of a given URL '''
     try:
-        if url.startswith('/images/') or url.startswith('/videos/'):
-            sys.stderr.write('Link was an image/video, could not describe.\n')
+        if not url.startswith('http://') and not url.startswith('https://'):
+            url = 'http://{0}'.format(url)
+        description = pyteaser.SummarizeUrl(url)
+        if not description:
+            sys.stderr.write('Failed to describe {0}\n.'.format(url))
             return False
-        elif not url.startswith('http://') and not url.startswith('https://'):
-            desc_url = 'http://{0}'.format(url)
-        else:
-            desc_url = url
+        return True
     except AttributeError:
-        sys.stderr.write('Failed to describe link {0}\n.'.format(url))
+        sys.stderr.write('Failed to describe {0}\n.'.format(url))
         return False
-
-    html = utils.get_html(desc_url)
-    body = ''.join(html.xpath('//body//*[not(self::script) and '
-                              'not(self::style)]/text()')).split('\n')
-    if not body:
-        print(('{0}\n'.format(desc_url)).encode('utf-8'))
-        print('Extended description not found.\n')
-        return False
-
-    stripped_body = [x.strip() for x in body]
-    filtered_body = [x for x in stripped_body if x]
-    if not filtered_body:
-        print(('{0}\n'.format(desc_url)).encode('utf-8'))
-        print('Extended description not found.\n')
-        return False
-
-    ''' Only print lines greater than a fifth of the average line length '''
-    body_avg_sum = len(''.join(filtered_body)) / len(filtered_body)+1
-    qual_len = body_avg_sum / 5
-    print_body = [x for x in filtered_body if len(x) > qual_len]
-
-    if print_body:
-        print(('{0}\n'.format(desc_url)).encode('utf-8'))
-
-        see_more = False
-        msg_count = 0
-        for msg in print_body:
-            msg_count += len(msg)
-            print(msg.encode('utf-8'))
-            if msg_count > PREVIEW_MSG_MAX:
-                if not utils.check_input(input(SEE_MORE), empty=True):
-                    break
-                see_more = True
-                msg_count = 0
-                print('')
-    else:
-        print(('{0}\n'.format(desc_url)).encode('utf-8'))
-        print('Extended description not found.\n')
-        return False
-
-    if not see_more:
-        time.sleep(1)
-
-    print('')
-    return True
 
 
 def search(args):
