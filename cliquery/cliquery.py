@@ -61,9 +61,6 @@ CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'cliquery')
 CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
     SYS_VERSION if SYS_VERSION == 3 else ''))
 
-''' The maximum length of a preview message before having to see more '''
-PREVIEW_MSG_MAX = 200
-
 ''' The length of the link prompt border '''
 BORDER_LEN = 28
 BORDER = ' '.join(['+']*BORDER_LEN)
@@ -949,11 +946,11 @@ def describe_url(url):
             url = 'http://{0}'.format(url)
         description = pyteaser.SummarizeUrl(url)
         if not description:
-            sys.stderr.write('Failed to describe {0}\n.'.format(url))
+            sys.stderr.write('Failed to describe {0}.\n'.format(url))
             return False
         return True
     except AttributeError:
-        sys.stderr.write('Failed to describe {0}\n.'.format(url))
+        sys.stderr.write('Failed to describe {0}.\n'.format(url))
         return False
 
 

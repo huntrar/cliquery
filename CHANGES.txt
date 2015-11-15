@@ -1,3 +1,8 @@
+1.2.2
+------
+
+ - fixed describe error message
+
 1.2.1
 ------
 
