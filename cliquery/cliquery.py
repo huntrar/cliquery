@@ -948,6 +948,7 @@ def describe_url(url):
         if not description:
             sys.stderr.write('Failed to describe {0}.\n'.format(url))
             return False
+        print(' '.join(description))
         return True
     except AttributeError:
         sys.stderr.write('Failed to describe {0}.\n'.format(url))
