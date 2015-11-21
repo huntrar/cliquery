@@ -86,7 +86,6 @@ def split_title(title, delim):
         if piece_len > largest_len:
             largest_len = piece_len
             largest_piece = piece
-    print('largest piece is %s' % largest_piece)
     return largest_piece or title
 
 
@@ -102,10 +101,8 @@ def get_title(html):
     common_delim = ['|', '-', '–', '»', ':']
     for delim in common_delim:
         if delim in title:
-            print('%s in title' % delim)
             title = split_title(title, delim)
             break
-    print('title is %s' % title)
     return title
 
 

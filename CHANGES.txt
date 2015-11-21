@@ -1,3 +1,11 @@
+1.2.7
+------
+
+ - added pyteaser test
+ - removed extraneous print statements
+ - updated program flag descriptions
+ - updated README example in notes
+
 1.2.6
 ------
 
