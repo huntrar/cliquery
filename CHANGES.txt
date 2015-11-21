@@ -1,3 +1,8 @@
+1.2.5
+------
+
+ - added pyteaser file with no third party dependencies
+
 1.2.4
 ------
 

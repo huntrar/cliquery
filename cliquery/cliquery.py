@@ -20,10 +20,9 @@ import sys
 import time
 import webbrowser
 
-import pyteaser
 import requests_cache
 
-from cliquery import utils
+from cliquery import utils, pyteaser
 from . import __version__
 
 
@@ -668,7 +667,7 @@ def mv_bookmarks(idx1, idx2):
                 bkmarks[idx2] = bkmarks[idx1]
                 if idx1 > idx2:
                     ''' Move entries down '''
-                    start_range = idx2+1 
+                    start_range = idx2+1
                     end_range = idx1+1
                     range_inc = 1
                 else:
@@ -951,7 +950,7 @@ def describe_url(url):
         title = utils.get_title(html)
         text = utils.get_text(html)
         if title and text:
-            desc = pyteaser.Summarize(title, ' '.join(text))
+            desc = pyteaser.summarize(title, ' '.join(text))
         else:
             desc = ''
 
