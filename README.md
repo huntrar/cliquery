@@ -39,15 +39,15 @@ Do the following to copy .cliqrc to .local.cliqrc:
     optional arguments:
       -h, --help         show this help message and exit
       -b, --bookmark     view and modify bookmarks
-      -c, --config       print location of config file
+      -c, --config       print config file location
       -C, --clear-cache  clear the cache
-      -d, --describe     display link summary
+      -d, --describe     summarize links
       -f, --first        open first link
-      -o, --open         open link or browser manually
-      -p, --print        print link to stdout
-      -s, --search       display search links
+      -o, --open         directly open links
+      -p, --print        print links to stdout
+      -s, --search       search for links
       -v, --version      display current version
-      -w, --wolfram      display wolfram results
+      -w, --wolfram      search WolframAlpha
 
 ## Author
 * Hunter Hammond (huntrar@gmail.com)
@@ -65,25 +65,24 @@ Try entering the following to fix:
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility. Entering h or help will list all possible prompt commands.
     ```
     + + + + + + + + + + + + + + + + + + + + + + + + + + + +
-    1. A Simple Makefile Tutorial
-    2. simple sentence - definition and examples of simple ...
-    3. HTML Examples - W3Schools
-    4. A Simple Guide to HTML - Welcome
-    5. What Is Simple Future Tense With Example - Askives Docs
-    6. A Simple Example: After Cache - How Caching Works
-    7. Basic HTML Sample Page - Sheldon Brown
-    8. ENG 1001: Sentences: Simple, Compound, and Complex
+    1. Guido van Rossum - Official Site
+    2. Images of python guido   
+    3. Guido van Rossum - Wikipedia, the free encyclopedia
+    4. Guido van Rossum (@gvanrossum) | Twitter
+    5. Guido van Rossum Wants to Bring Type Annotations to Python
+    6. The Python Tutorial — Python 2.7.10 documentation
+    7. Python (programming language) - Wikipedia, the free ...
+    8. Van Rossum: Python is not too slow | InfoWorld
+    9. GuiProgramming - Python Wiki
     + + + + + + + + + + + + + + + + + + + + + + + + + + + +
-    : d 4
+    : d 1
 
-
-    http://www.simplehtmlguide.com/
-
-    A Simple Guide to HTML
-    html cheat sheet
-    Welcome to my HTML Guide -- I hope you find it useful :)
-    This easy guide for beginners covers several topics, with short and basic descriptions of the HTML tags you are likely to need when learning how to make your own website.
-    See more? [Press Enter] 
+    Guido's Personal Home Page     Guido van Rossum - Personal Home Page  "Gawky and proud of it."
+    Dutch spelling rules dictate that when used in combination with myfirst name, "van" is not capitalized: "Guido van Rossum".
+    But when mylast name is used alone to refer to me, it is capitalized, forexample: "As usual, Van Rossum was right."
+    More Hyperlinks   Here's a collection of  essays  relating to Pythonthat I've written, including the foreword I wrote for Mark Lutz' book"Programming Python".
+    The Audio File Formats FAQ  I was the original creator and maintainer of the Audio File FormatsFAQ.  It is now maintained by Chris Bagwellat  http://www.cnpbagwell.com/audio-faq .
+    [Press Enter to continue..]
     ```
 * To choose multiple links at once, a range may be specified by separating the start and end range with a dash. Leaving one end of the range blank will choose all links until the other end of that range. For example, given 10 links, entering 5- would effectively be the same as entering 5-10.
 * Using the bookmark flag with no arguments will list all current bookmarks in .cliqrc, ordered by time of entry. Entering help with the flag will list all possible commands including add, delete, tag/untag (for aliasing), move, and open. Bookmarks like other flags may be entered during runtime in the link prompt.
