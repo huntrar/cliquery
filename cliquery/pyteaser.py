@@ -187,7 +187,7 @@ def split_sentences(text):
     the last item of the sentences list. The second to last line adds this
     item to the s_iter list and the last line returns the full list.
     '''
-    sentences = regex_split(u'(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
+    sentences = regex_split('(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
                             text, flags=REGEX_UNICODE)
     s_iter = zip(*[iter(sentences[:-1])] * 2)
     s_iter = [''.join(unicode(x) for x in y).lstrip() for y in s_iter]
