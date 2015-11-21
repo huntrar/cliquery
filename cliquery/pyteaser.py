@@ -5,6 +5,18 @@ from __future__ import print_function
 from collections import Counter
 from math import fabs
 from re import split as regex_split, sub as regex_sub, UNICODE as REGEX_UNICODE
+import sys
+
+SYS_VERSION = sys.version_info[0]
+if SYS_VERSION == 2:
+    import codecs
+
+    def u(x):
+        return codecs.unicode_escape_decode(x)[0]
+else:
+    def u(x):
+        return x
+
 
 STOPWORDS = set([
     "-", " ", ",", ".", "a", "e", "i", "o", "u", "t", "about", "above",
@@ -64,6 +76,7 @@ STOPWORDS = set([
     "august", "september", "october", "november", "december",
     "government", "police"
 ])
+
 IDEAL = 20.0
 
 
@@ -190,7 +203,7 @@ def split_sentences(text):
     sentences = regex_split('(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
                             text, flags=REGEX_UNICODE)
     s_iter = zip(*[iter(sentences[:-1])] * 2)
-    s_iter = [''.join(unicode(x) for x in y).lstrip() for y in s_iter]
+    s_iter = [''.join(u(x) for x in y).lstrip() for y in s_iter]
     s_iter.append(sentences[-1])
     return s_iter
 
