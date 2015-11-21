@@ -75,13 +75,13 @@ CONFIG = {}
 LINK_HELP = ('Enter one of the following flags abbreviated or not,'
              'possibly followed by a link number:\n'
              '\th, help      show this help message\n'
-             '\ts, search    display search links\n'
-             '\to, open      open link manually\n'
-             '\tw, wolfram   display wolfram results\n'
-             '\td, describe  display link summary\n'
+             '\ts, search    search for links\n'
+             '\to, open      directly open links\n'
+             '\tw, wolfram   search WolframAlpha\n'
+             '\td, describe  summarize links\n'
              '\tb, bookmark  view and modify bookmarks\n'
-             '\tp, print     print link to stdout\n'
-             '\tc, config    print location of config file\n'
+             '\tp, print     print links to stdout\n'
+             '\tc, config    print config file location\n'
              '\tv, version   display current version\n')
 
 BOOKMARK_HELP = ('Usage: '
@@ -104,23 +104,23 @@ def get_parser():
                         help='keywords to search')
     parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
                         action='store_true')
-    parser.add_argument('-c', '--config', help='print location of config file',
+    parser.add_argument('-c', '--config', help='print config file location',
                         action='store_true')
     parser.add_argument('-C', '--clear-cache', help='clear the cache',
                         action='store_true')
-    parser.add_argument('-d', '--describe', help='display link summary',
+    parser.add_argument('-d', '--describe', help='summarize links',
                         action='store_true')
     parser.add_argument('-f', '--first', help='open first link',
                         action='store_true')
-    parser.add_argument('-o', '--open', help='open link or browser manually',
+    parser.add_argument('-o', '--open', help='directly open links',
                         action='store_true')
-    parser.add_argument('-p', '--print', help='print link to stdout',
+    parser.add_argument('-p', '--print', help='print links to stdout',
                         action='store_true')
-    parser.add_argument('-s', '--search', help='display search links',
+    parser.add_argument('-s', '--search', help='search for links',
                         action='store_true')
     parser.add_argument('-v', '--version', help='display current version',
                         action='store_true')
-    parser.add_argument('-w', '--wolfram', help='display wolfram results',
+    parser.add_argument('-w', '--wolfram', help='search WolframAlpha',
                         action='store_true')
     return parser
 
@@ -984,7 +984,7 @@ def search(args):
     default_search = False
 
     if args['open']:
-        ''' Open a link manually '''
+        ''' Open a link directly '''
         return open_url(args, url_args)
     elif args['bookmark']:
         ''' Add, delete, or open bookmarks '''
