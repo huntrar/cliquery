@@ -94,7 +94,8 @@ BOOKMARK_HELP = ('Usage: '
                  '\ndelete: rm [num or suburl or tag..]'
                  '\n')
 
-SEE_MORE = 'See more? [Press Enter] '
+CONTINUE = '[Press Enter to continue..] '
+SEE_MORE = 'See more? {0}'.format(CONTINUE)
 
 
 def get_parser():
@@ -944,11 +945,21 @@ def describe_url(url):
     try:
         if not url.startswith('http://') and not url.startswith('https://'):
             url = 'http://{0}'.format(url)
-        description = pyteaser.SummarizeUrl(url)
-        if not description:
+
+        ''' Get title and text for summarization '''
+        html = utils.get_html(url)
+        title = utils.get_title(html)
+        text = utils.get_text(html)
+        if title and text:
+            desc = pyteaser.Summarize(title, ' '.join(text))
+        else:
+            desc = ''
+
+        if not desc:
             sys.stderr.write('Failed to describe {0}.\n'.format(url))
             return False
-        print(' '.join(description))
+        print('\n'.join(x.replace('\n', '').replace('\t', '') for x in desc))
+        utils.check_input(input(CONTINUE))
         return True
     except AttributeError:
         sys.stderr.write('Failed to describe {0}.\n'.format(url))

@@ -1,3 +1,8 @@
+1.2.4
+------
+
+ - replaced pyteaser SummarizeUrl with Summarize, removing dependency on Goose
+
 1.2.3
 ------
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import random
 import sys
 
@@ -68,10 +70,47 @@ def get_html(url):
         headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
         return lh.fromstring(request.text.encode('utf-8'))
-    except Exception as err:
+    except Exception:
         sys.stderr.write('Failed to retrieve {0}.\n'.format(url))
-        sys.stderr.write('{0}\n'.format(str(err)))
-        return None
+        raise
+
+
+def split_title(title, delim):
+    ''' Return largest title piece '''
+    largest_len = 0
+    largest_piece = None
+    piece_len = 0
+
+    for piece in title.split(delim):
+        piece_len = len(piece)
+        if piece_len > largest_len:
+            largest_len = piece_len
+            largest_piece = piece
+    print('largest piece is %s' % largest_piece)
+    return largest_piece or title
+
+
+def get_title(html):
+    ''' Extract title from HTML '''
+    title = html.xpath('//title/text()')
+    if not title:
+        return ''
+    else:
+        title = title[0].encode('utf-8')
+
+    ''' Split title by common delimeters '''
+    common_delim = ['|', '-', '–', '»', ':']
+    for delim in common_delim:
+        if delim in title:
+            print('%s in title' % delim)
+            title = split_title(title, delim)
+            break
+    print('title is %s' % title)
+    return title
+
+
+def get_text(html):
+    return html.xpath('//*[not(self::script) and not(self::style)]/text()')
 
 
 def clean_query(url_args, open_flag, bookmark_flag):
@@ -107,14 +146,14 @@ def check_input(u_input, num=False, empty=False):
         sys.exit()
 
     if num:
-        return check_num(u_input)
+        return is_num(u_input)
     elif empty:
         return not u_input
     return True
 
 
-def check_num(num):
-    ''' Check if input can be an int '''
+def is_num(num):
+    ''' Return whether num can be an int '''
     try:
         num = int(num)
         return True
