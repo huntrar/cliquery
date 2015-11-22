@@ -192,7 +192,8 @@ def split_sentences(text):
     sentences = regex_split('(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
                             text, flags=REGEX_UNICODE)
     s_iter = zip(*[iter(sentences[:-1])] * 2)
-    s_iter = [''.join(x.encode('utf-8') for x in y).lstrip() for y in s_iter]
+    s_iter = [''.join(x.decode('ascii', 'ignore') if isinstance(x, bytes) else 
+              x.encode('utf-8') for x in y).lstrip() for y in s_iter]
     s_iter.append(sentences[-1])
     return s_iter
 
