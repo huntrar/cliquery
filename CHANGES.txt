@@ -1,3 +1,9 @@
+1.2.9
+------
+
+ - allowed all urls to be candidates for describe_url()
+ - changed pyteaser unicode codecs function with encode()
+
 1.2.8
 ------
 

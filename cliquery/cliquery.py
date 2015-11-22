@@ -342,8 +342,6 @@ def bing_search(args, html):
     if html is None:
         return open_url(args, 'https://www.google.com')
 
-    base_url = 'www.bing.com'
-
     try:
         unprocessed_urls = html.xpath('//h2/a/@href')
     except AttributeError:
@@ -355,8 +353,18 @@ def bing_search(args, html):
 
     urls = []
     url_descs = []
+    base_url = 'www.bing.com'
     for url in unprocessed_urls:
-        if url.startswith('http://') or url.startswith('https://'):
+        if url.startswith('/') and base_url not in url:
+            ''' Add missing base url '''
+            urls.append('http://{0}{1}'.format(base_url, url))
+            if "'" in url:
+                ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
+            else:
+                ld_xpath = "//h2/a[@href='{0}']//text()".format(url)
+
+            url_descs.append(''.join(html.xpath(ld_xpath)))
+        elif url.startswith('http://') or url.startswith('https://'):
             urls.append(url)
             if "'" in url:
                 ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
@@ -364,16 +372,6 @@ def bing_search(args, html):
                 ld_xpath = "//h2/a[@href='{0}']//text()".format(url)
 
             url_descs.append(''.join(html.xpath(ld_xpath)))
-        elif url.startswith('/images/') or url.startswith('/videos/'):
-            if base_url not in url:
-                ''' Add missing base url to image links '''
-                urls.append('http://{0}{1}'.format(base_url, url))
-                if "'" in url:
-                    ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
-                else:
-                    ld_xpath = "//h2/a[@href='{0}']//text()".format(url)
-
-                url_descs.append(''.join(html.xpath(ld_xpath)))
 
     if urls and url_descs:
         return show_link_prompt(args, urls, url_descs)
@@ -476,32 +474,14 @@ def bing_instant(html):
 
 def open_first(args, html):
     ''' Open the first Bing link available, `Feeling Lucky` '''
-    base_url = 'www.bing.com'
-
     try:
         bing_urls = html.xpath('//h2/a/@href')
-
         if not bing_urls:
             sys.stderr.write('Failed to retrieve links from Bing.\n')
             return None
-
-        if args['describe']:
-            url = ''
-            for bing_url in bing_urls:
-                if (not bing_url.startswith('/images/') and
-                        not bing_url.startswith('/videos/')):
-                    url = bing_url
-                    break
-            if not url:
-                sys.stderr.write('Failed to find a link to describe.\n')
-                return None
-        else:
-            url = bing_urls[0]
-    except (AttributeError, IndexError):
+        url = bing_urls[0]
+    except AttributeError:
         raise AttributeError('Failed to retrieve data from lxml object!')
-
-    if url.startswith('/images/') or url.startswith('/videos/'):
-        url = 'http://{0}{1}'.format(base_url, url)
 
     if url.startswith('http://') or url.startswith('https://'):
         return open_url(args, url)
@@ -909,42 +889,50 @@ def open_browser(url):
 
 
 def open_url(args, urls):
-    ''' Print, describe, or open a URL in the browser '''
-    if args['print']:
-        urls = utils.append_scheme(urls)
-        if isinstance(urls, list):
+    ''' Print, describe, or open URL's in the browser '''
+    base_url = 'www.bing.com'
+    urls = utils.append_scheme(urls)
+
+    if isinstance(urls, list):
+        urls = ['http://{0}{1}'.format(base_url, x) if x.startswith('/') else x
+                for x in urls]
+
+        if args['print']:
             for url in urls:
                 print(url)
-        else:
-            print(urls)
-        return urls
-    elif args['describe']:
-        urls = utils.append_scheme(urls)
-        if isinstance(urls, list):
+            return urls
+        elif args['describe']:
             for url in urls:
                 describe_url(url)
+            return urls
         else:
-            describe_url(urls)
-        return urls
-    else:
-        if not urls:
-            open_browser('')
-        else:
-            urls = utils.append_scheme(urls)
-            if isinstance(urls, list):
+            if not urls:
+                open_browser('')
+            else:
                 for url in urls:
                     open_browser(url)
+            return True
+    else:
+        if urls.startswith('/'):
+            urls = 'http://{0}{1}'.format(base_url, urls)
+
+        if args['print']:
+            print(urls)
+            return urls
+        elif args['describe']:
+            describe_url(urls)
+            return urls
+        else:
+            if not urls:
+                open_browser('')
             else:
                 open_browser(urls)
-        return True
+            return True
 
 
 def describe_url(url):
     ''' Print a text preview of a given URL '''
     try:
-        if not url.startswith('http://') and not url.startswith('https://'):
-            url = 'http://{0}'.format(url)
-
         ''' Get title and text for summarization '''
         html = utils.get_html(url)
         title = utils.get_title(html)
