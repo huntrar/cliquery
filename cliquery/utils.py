@@ -110,42 +110,42 @@ def get_text(html):
     return html.xpath('//*[not(self::script) and not(self::style)]/text()')
 
 
-def clean_query(url_args, open_flag, bookmark_flag):
+def clean_query(query, open_flag, bookmark_flag):
     """Replace special characters/append URL extensions if necessary"""
     if bookmark_flag:
-        return url_args
+        return query
     elif not open_flag:
         # Replace special characters with hex encoded escapes
-        return url_quote(url_args)
+        return url_quote(query)
     else:
         # Arguments should be URLs
         urls = []
-        for url_arg in url_args.split():
-            if '.' not in url_arg and 'localhost:' not in url_arg:
-                urls.append('{0}.com'.format(url_arg))
+        for arg in query.split():
+            if '.' not in arg and 'localhost:' not in arg:
+                urls.append('{0}.com'.format(arg))
             else:
-                urls.append(url_arg)
+                urls.append(arg)
         return urls
 
 
-def check_input(u_input, num=False, empty=False):
+def check_input(user_input, num=False, empty=False):
     """Check user input for empty, a number, or for an exit signal"""
-    if isinstance(u_input, list):
-        u_input = ''.join(u_input)
+    if isinstance(user_input, list):
+        user_input = ''.join(user_input)
 
     try:
-        u_inp = u_input.lower().strip()
+        u_inp = user_input.lower().strip()
     except AttributeError:
-        u_inp = u_input
+        u_inp = user_input
 
     # Check for exit signal
     if u_inp == 'q' or u_inp == 'quit' or u_inp == 'exit':
         sys.exit()
 
     if num:
-        return is_num(u_input)
+        return is_num(user_input)
     elif empty:
-        return not u_input
+        return not user_input
     return True
 
 

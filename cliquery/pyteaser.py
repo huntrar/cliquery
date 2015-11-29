@@ -171,7 +171,7 @@ def get_keywords(text):
     """Get the top 10 keywords and their frequency scores
         ignores blacklisted words in STOPWORDS,
         counts the number of occurrences of each word
-   """
+    """
     text = split_words(text)
     num_words = len(text)  # of words before removing blacklist words
     freq = Counter(x for x in text if x not in STOPWORDS)
@@ -187,7 +187,7 @@ def get_keywords(text):
 
 
 def split_sentences(text):
-   """
+    """
     The regular expression matches all sentence ending punctuation and
     splits the string at those points.
     At this point in the code, the list looks like this ["Hello, world", "!"
@@ -201,7 +201,7 @@ def split_sentences(text):
     of the line. Now, the s_iter list is formatted correctly but it is missing
     the last item of the sentences list. The second to last line adds this
     item to the s_iter list and the last line returns the full list.
-   """
+    """
     sentences = regex_split('(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
                             text, flags=REGEX_UNICODE)
     s_iter = zip(*[iter(sentences[:-1])] * 2)
@@ -232,7 +232,7 @@ def title_score(title, sentence):
 def sentence_position(i, size):
     """Different sentence positions indicate different
         probability of being an important sentence
-   """
+    """
     normalized = i*1.0 / size
     if 0 < normalized <= 0.1:
         return 0.17

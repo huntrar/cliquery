@@ -174,33 +174,38 @@ def clear_cache():
 
 def get_search_html(args):
     """Get Bing or Wolfram HTML, or neither"""
-    url_args = args['query']
     if args['bookmark']:
         return ''
     if not args['open']:
         if not args['wolfram']:
-            return get_bing_html(url_args)
+            return get_bing_html(args['query'])
         else:
-            return get_wolfram_html(url_args)
+            return get_wolfram_html(args['query'])
     else:
         return ''
 
 
-def get_bing_html(url_args):
+def get_bing_html(query):
     """Get HTML from Bing query"""
     base_url = 'www.bing.com'
-    return utils.get_html('http://{0}/search?q={1}'.format(base_url, url_args))
+    return utils.get_html('http://{0}/search?q={1}'.format(base_url, query))
 
 
-def get_wolfram_html(url_args):
+def get_wolfram_html(query):
     """Get HTML from Wolfram API query"""
     base_url = 'http://api.wolframalpha.com/v2/query?input='
     api = CONFIG['api_key']
-    return utils.get_html('{0}{1}&appid={2}'.format(base_url, url_args, api))
+    return utils.get_html('{0}{1}&appid={2}'.format(base_url, query, api))
 
 
 def open_link_range(args, urls, input_args):
-    """Open a link number range"""
+    """Open a link number range
+    
+       Keyword arguments:
+       args -- program arguments (dict)
+       urls -- Bing URL's found (list)
+       input_args -- command arguments entered in link prompt (list)
+    """
     split_args = ''.join(input_args).split('-')
     start = split_args[0].strip()
     end = split_args[1].strip()
@@ -225,7 +230,13 @@ def open_link_range(args, urls, input_args):
 
 
 def open_links(args, urls, input_args):
-    """Open one or more links"""
+    """Open one or more links
+
+       Keyword arguments:
+       args -- program arguments (dict)
+       urls -- Bing URL's found (list)
+       input_args -- command arguments entered in link prompt (list)
+    """
     if not isinstance(input_args, list):
         input_args = [input_args]
 
@@ -241,7 +252,13 @@ def open_links(args, urls, input_args):
 
 
 def exec_bkmark(args, urls, input_args):
-    """Execute a bookmark command"""
+    """Execute a bookmark command
+
+       Keyword arguments:
+       args -- program arguments (dict)
+       urls -- Bing URL's found (list)
+       input_args -- command arguments entered in link prompt (list)
+    """
     if 'add' in input_args:
         # If adding a bookmark, must resolve URL first
         temp_args = []
@@ -258,7 +275,16 @@ def exec_bkmark(args, urls, input_args):
 
 
 def exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt):
-    """Execute a command in the link prompt"""
+    """Execute a command in the link prompt
+
+       Keyword arguments:
+       args -- program arguments (dict)
+       urls -- Bing URL's found (list)
+       input_args -- command arguments entered in link prompt (list)
+       display_prompt -- whether link prompt is being displayed (bool)
+
+       Possible commands are listed under LINK_HELP.
+    """
     reset_flags = True
     if input_cmd[0] not in ascii_letters:
         # Default command is open
@@ -305,7 +331,13 @@ def exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt):
 
 
 def show_link_prompt(args, urls, url_descs):
-    """Print URL's and their descriptions alongside a prompt"""
+    """Print URL's and their descriptions alongside a prompt
+
+       Keyword arguments:
+       args -- program arguments (dict)
+       urls -- Bing URL's found (list)
+       url_descs -- descriptions of Bing URL's found (list)
+    """
     display_prompt = True
     while display_prompt:
         print('\n{0}'.format(BORDER))
@@ -393,7 +425,6 @@ def wolfram_search(args, html):
     """Search WolframAlpha using their API, requires API key in .cliqrc"""
     if html is None:
         return open_url(args, 'http://www.wolframalpha.com')
-
     try:
         # Filter unnecessary title fields
         titles = list(OrderedDict.fromkeys(
@@ -486,16 +517,16 @@ def reload_bookmarks():
     CONFIG['bookmarks'] = read_config()[2]
 
 
-def find_bookmark_idx(url_arg):
+def find_bookmark_idx(query):
     """Find the index of a bookmark given substrings"""
     bkmarks = CONFIG['bookmarks']
 
-    url_arg = url_arg.strip().split()
+    query = query.strip().split()
     most_matches = 0
     matched_idx = 0
     for i, bkmark in enumerate(bkmarks):
         matches = 0
-        for arg in url_arg:
+        for arg in query:
             if arg in bkmark:
                 matches += 1
         if matches > most_matches:
@@ -695,45 +726,45 @@ def print_bookmarks(bkmarks):
     return True
 
 
-def bkmark_add_cmd(url_arg):
+def bkmark_add_cmd(query):
     """add: add [url..]"""
-    url_arg = url_arg[3:].strip()
-    url_args = url_arg.split()
+    query = query[3:].strip()
+    queries = query.split()
     clean_bkmarks = []
-    for u_arg in url_args:
-        u_arg = utils.append_scheme(u_arg)
-        if '.' not in u_arg:
-            if '(' in u_arg and ')' in u_arg:
-                split_arg = u_arg.split('(')
+    for arg in queries:
+        arg = utils.append_scheme(arg)
+        if '.' not in arg:
+            if '(' in arg and ')' in arg:
+                split_arg = arg.split('(')
                 tag = split_arg[1].rstrip(')')
                 bkmark = split_arg[0].strip()
-                u_arg = '{0}.com ({1})'.format(bkmark, tag)
+                arg = '{0}.com ({1})'.format(bkmark, tag)
             else:
-                u_arg = '{0}.com'.format(u_arg)
-        clean_bkmarks.append(u_arg)
+                arg = '{0}.com'.format(arg)
+        clean_bkmarks.append(arg)
     return add_bookmark(clean_bkmarks)
 
 
-def bkmark_tag_cmd(url_arg):
+def bkmark_tag_cmd(query):
     """tag: tag [num or suburl] [tag..]"""
-    split_args = url_arg[3:].strip().split()
-    url_arg = split_args[0]
+    split_args = query[3:].strip().split()
+    query = split_args[0]
     tags = split_args[1:]
-    if not utils.check_input(url_arg, num=True):
+    if not utils.check_input(query, num=True):
         # If input is not a number then find the correct number
-        bk_idx = find_bookmark_idx(url_arg)
+        bk_idx = find_bookmark_idx(query)
         if bk_idx > 0:
-            url_arg = bk_idx
-    if utils.check_input(url_arg, num=True):
-        return tag_bookmark(url_arg, tags)
+            query = bk_idx
+    if utils.check_input(query, num=True):
+        return tag_bookmark(query, tags)
     else:
         sys.stderr.write('Failed to tag bookmark {0}.\n'
-                         .format(str(url_arg)))
+                         .format(str(query)))
 
 
-def bkmark_untag_cmd(url_arg):
+def bkmark_untag_cmd(query):
     """untag: untag [num or suburl or tag] [subtag..]"""
-    split_args = url_arg[5:].strip().split()
+    split_args = query[5:].strip().split()
     tags_to_rm = split_args[1:]
     # Find the bookmark index
     bkmark_idx = 0
@@ -747,9 +778,9 @@ def bkmark_untag_cmd(url_arg):
     return untag_bookmark(bkmark_idx, tags_to_rm)
 
 
-def bkmark_mv_cmd(url_arg):
+def bkmark_mv_cmd(query):
     """move: mv [num or suburl or tag] [num or suburl or tag]"""
-    split_args = url_arg[2:].strip().split()
+    split_args = query[2:].strip().split()
     if len(split_args) != 2:
         sys.stderr.write(BOOKMARK_HELP)
         return True
@@ -770,9 +801,9 @@ def bkmark_mv_cmd(url_arg):
     return mv_bookmarks(int(bk1_idx)-1, int(bk2_idx)-1)
 
 
-def bkmark_rm_cmd(url_arg):
+def bkmark_rm_cmd(query):
     """delete: rm [num or suburl or tag..]"""
-    split_args = url_arg[3:].strip().split()
+    split_args = query[3:].strip().split()
     bkmark_idxs = []
     for u_arg in split_args:
         if not utils.check_input(u_arg, num=True):
@@ -785,9 +816,9 @@ def bkmark_rm_cmd(url_arg):
     return rm_bookmark(bkmark_idxs)
 
 
-def bkmark_open_cmd(args, url_arg, bkmarks):
+def bkmark_open_cmd(args, query, bkmarks):
     """open: [num or suburl or tag..]"""
-    split_args = url_arg.strip().split()
+    split_args = query.strip().split()
     bookmark_nums = [x for x in split_args if utils.check_input(x, num=True)]
     bookmark_kws = list(split_args)
     [bookmark_kws.remove(x) for x in bookmark_nums]
@@ -825,27 +856,27 @@ def bkmark_open_cmd(args, url_arg, bkmarks):
         return True
 
 
-def bookmarks(args, url_arg):
+def bookmarks(args, query):
     """Open, add, tag, untag, move, or delete bookmarks"""
     bkmarks = CONFIG['bookmarks']
-    if isinstance(url_arg, list):
-        url_arg = ' '.join(url_arg)
-    if not url_arg:
+    if isinstance(query, list):
+        query = ' '.join(query)
+    if not query:
         # Print bookmarks if no arguments provided
         return print_bookmarks(bkmarks)
 
-    if url_arg.startswith('add'):
-        return bkmark_add_cmd(url_arg)
-    elif url_arg.startswith('tag'):
-        return bkmark_tag_cmd(url_arg)
-    elif url_arg.startswith('untag'):
-        return bkmark_untag_cmd(url_arg)
-    elif url_arg.startswith('mv'):
-        return bkmark_mv_cmd(url_arg)
-    elif url_arg.startswith('rm'):
-        return bkmark_rm_cmd(url_arg)
+    if query.startswith('add'):
+        return bkmark_add_cmd(query)
+    elif query.startswith('tag'):
+        return bkmark_tag_cmd(query)
+    elif query.startswith('untag'):
+        return bkmark_untag_cmd(query)
+    elif query.startswith('mv'):
+        return bkmark_mv_cmd(query)
+    elif query.startswith('rm'):
+        return bkmark_rm_cmd(query)
     else:
-        return bkmark_open_cmd(args, url_arg, bkmarks)
+        return bkmark_open_cmd(args, query, bkmarks)
 
 
 def open_browser(url):
@@ -935,16 +966,14 @@ def search(args):
         html = get_search_html(args)
     else:
         html = None
-    url_args = args['query']
-
     # Default search if no flags provided or Wolfram search fails
     default_search = False
     if args['open']:
         # Open a link directly
-        return open_url(args, url_args)
+        return open_url(args, args['query'])
     elif args['bookmark']:
         # Add, delete, or open bookmarks
-        return bookmarks(args, url_args)
+        return bookmarks(args, args['query'])
     elif args['search']:
         # Perform a Bing search and show an interactive prompt
         return bing_search(args, html)
@@ -968,7 +997,7 @@ def search(args):
         #    3. Check Bing for search results
         result = None
         if args['wolfram']:
-            bing_html = get_bing_html(url_args)
+            bing_html = get_bing_html(args['query'])
             wolf_html = html
         else:
             bing_html = html
@@ -976,7 +1005,7 @@ def search(args):
         result = bing_instant(bing_html)
         if not result:
             if not args['wolfram']:
-                wolf_html = get_wolfram_html(url_args)
+                wolf_html = get_wolfram_html(args['query'])
             result = wolfram_search(args, wolf_html)
             if not result:
                 return bing_search(args, bing_html)
