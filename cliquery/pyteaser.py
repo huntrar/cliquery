@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-''' Credit to https://github.com/xiaoxu193/PyTeaser '''
+"""Credit to https://github.com/xiaoxu193/PyTeaser"""
 
 from __future__ import print_function
 from collections import Counter
@@ -83,7 +83,7 @@ IDEAL = 20.0
 
 
 def summarize(title, text):
-    ''' Summarize text using the title as a reference '''
+    """Summarize text using the title as a reference"""
     summaries = []
     sentences = split_sentences(text)
     keys = get_keywords(text)
@@ -92,7 +92,7 @@ def summarize(title, text):
     if len(sentences) <= 5:
         return sentences
 
-    ''' Score sentences, and use the top 5 sentences '''
+    # Score sentences, and use the top 5 sentences
     ranks = get_score(sentences, title_words, keys).most_common(5)
     for rank in ranks:
         summaries.append(rank[0])
@@ -101,7 +101,7 @@ def summarize(title, text):
 
 
 def get_score(sentences, title_words, keywords):
-    ''' Score sentences based on different features '''
+    """Score sentences based on different features"""
     sen_size = len(sentences)
     ranks = Counter()
     for i, sen in enumerate(sentences):
@@ -113,7 +113,7 @@ def get_score(sentences, title_words, keywords):
         dbs_feature = dbs(sentence, keywords)
         frequency = (sbs_feature + dbs_feature) / 2.0 * 10.0
 
-        ''' Weighted average of scores from four categories '''
+        # Weighted average of scores from four categories
         total_score = (title_feature*1.5 + frequency*2.0 +
                        sentence_length*1.0 + sentence_pos*1.0) / 4.0
         ranks[sen] = total_score
@@ -121,7 +121,7 @@ def get_score(sentences, title_words, keywords):
 
 
 def sbs(words, keywords):
-    ''' Summation based selection '''
+    """Summation based selection"""
     score = 0.0
     if len(words) == 0:
         return 0
@@ -132,7 +132,7 @@ def sbs(words, keywords):
 
 
 def dbs(words, keywords):
-    ''' Density based selection '''
+    """Density based selection"""
     if len(words) == 0:
         return 0
 
@@ -151,15 +151,15 @@ def dbs(words, keywords):
                 dif = first[0] - second[0]
                 summ += (first[1]*second[1]) / (dif ** 2)
 
-    ''' Number of intersections '''
+    # Number of intersections
     k = len(set(keywords.keys()).intersection(set(words))) + 1
     return 1/(k*(k+1.0))*summ
 
 
 def split_words(text):
-    ''' Split a string into array of words '''
+    """Split a string into array of words"""
     try:
-        ''' Strip special characters '''
+        # Strip special characters
         text = regex_sub(r'[^\w ]', '', text, flags=REGEX_UNICODE)
         return [x.strip('.').lower() for x in text.split()]
     except TypeError:
@@ -168,10 +168,10 @@ def split_words(text):
 
 
 def get_keywords(text):
-    ''' Get the top 10 keywords and their frequency scores
+    """Get the top 10 keywords and their frequency scores
         ignores blacklisted words in STOPWORDS,
         counts the number of occurrences of each word
-    '''
+   """
     text = split_words(text)
     num_words = len(text)  # of words before removing blacklist words
     freq = Counter(x for x in text if x not in STOPWORDS)
@@ -187,7 +187,7 @@ def get_keywords(text):
 
 
 def split_sentences(text):
-    '''
+   """
     The regular expression matches all sentence ending punctuation and
     splits the string at those points.
     At this point in the code, the list looks like this ["Hello, world", "!"
@@ -201,7 +201,7 @@ def split_sentences(text):
     of the line. Now, the s_iter list is formatted correctly but it is missing
     the last item of the sentences list. The second to last line adds this
     item to the s_iter list and the last line returns the full list.
-    '''
+   """
     sentences = regex_split('(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
                             text, flags=REGEX_UNICODE)
     s_iter = zip(*[iter(sentences[:-1])] * 2)
@@ -211,12 +211,12 @@ def split_sentences(text):
 
 
 def length_score(sentence):
-    ''' Score the sentence based on length '''
+    """Score the sentence based on length"""
     return 1 - fabs(IDEAL - len(sentence)) / IDEAL
 
 
 def title_score(title, sentence):
-    ''' Score the title based on occurrence of words in the sentence '''
+    """Score the title based on occurrence of words in the sentence"""
     title = [x for x in title if x not in STOPWORDS]
     count = 0.0
     for word in sentence:
@@ -230,9 +230,9 @@ def title_score(title, sentence):
 
 
 def sentence_position(i, size):
-    ''' Different sentence positions indicate different
+    """Different sentence positions indicate different
         probability of being an important sentence
-    '''
+   """
     normalized = i*1.0 / size
     if 0 < normalized <= 0.1:
         return 0.17

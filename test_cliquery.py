@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-''' Unit tests for cliquery '''
+"""Unit tests for cliquery"""
 import os
 import unittest
 
@@ -23,7 +23,7 @@ class CliqueryTestCase(unittest.TestCase):
         pass
 
     def test_answer_links(self):
-        ''' -fp returns the url of top link '''
+        """-fp returns the url of top link"""
         for query in self.queries:
             links = self.call_search(query + ' -fp')
             if isinstance(links, list):
@@ -31,7 +31,7 @@ class CliqueryTestCase(unittest.TestCase):
                     self.assertTrue(link.startswith('http://') or
                                     link.startswith('https://'))
             elif links is None:
-                ''' Return None if there is an internet connection error '''
+                # Return None if there is an internet connection error
                 pass
             elif not isinstance(links, bool):
                 self.assertTrue(links.startswith('http://') or
