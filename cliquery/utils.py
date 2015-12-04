@@ -95,7 +95,7 @@ def get_title(html):
     if not title:
         return ''
     else:
-        title = title[0].encode('utf-8')
+        title = title[0]
 
     """Split title by common delimeters"""
     common_delim = ['|', '-', '–', '»', ':']

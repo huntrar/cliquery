@@ -945,7 +945,9 @@ def describe_url(url):
             sys.stderr.write('Failed to describe {0}.\n'.format(url))
             return False
 
-        print('\n'.join(x.replace('\n', '').replace('\t', '') for x in desc))
+        clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
+        print('\n'.join(x if isinstance(x, str) else x.encode('utf-8')
+              for x in clean_desc))
         utils.check_input(input(CONTINUE))
         return True
     except AttributeError:

@@ -1,3 +1,8 @@
+1.3.3
+------
+
+ - fixed describe function not working for python3
+
 1.3.2
 ------
 
