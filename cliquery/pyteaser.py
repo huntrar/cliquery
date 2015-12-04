@@ -10,14 +10,13 @@ import sys
 
 SYS_VERSION = sys.version_info[0]
 if SYS_VERSION == 2:
-    def u(x):
+    def uni(x):
+        """Python 2 utf-8 encode"""
         return x.encode('utf-8')
 else:
-    def u(x):
-        if isinstance(x, bytes):
-            return x.decode('utf-8')
-        else:
-            return x
+    def uni(x):
+        """Python 3 utf-8 encode"""
+        return x
 
 
 STOPWORDS = set([
@@ -205,7 +204,7 @@ def split_sentences(text):
     sentences = regex_split('(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
                             text, flags=REGEX_UNICODE)
     s_iter = zip(*[iter(sentences[:-1])] * 2)
-    s_iter = [''.join(u(x) for x in y).lstrip() for y in s_iter]
+    s_iter = [''.join(uni(x) for x in y).lstrip() for y in s_iter]
     s_iter.append(sentences[-1])
     return s_iter
 

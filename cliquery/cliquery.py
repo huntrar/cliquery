@@ -46,11 +46,11 @@ if SYS_VERSION == 2:
         """Python 2 dictionary iteritems()"""
         return dct.iteritems()
 
-    def u(x):
+    def uni(x):
         """Python 2 utf-8 encode"""
         return x.encode('utf-8')
 
-    def a(x):
+    def asc(x):
         """Python 2 ascii-ignore encode"""
         return x.encode('ascii', 'ignore')
 else:
@@ -62,11 +62,11 @@ else:
         """Python 3 dictionary iteritems()"""
         return iter(dct.items())
 
-    def u(x):
+    def uni(x):
         """Python 3 utf-8 encode"""
         return x
 
-    def a(x):
+    def asc(x):
         """Python 3 ascii-ignore encode"""
         return x
 
@@ -360,7 +360,7 @@ def show_link_prompt(args, urls, url_descs):
         for i in range(len(urls)):
             #print_desc = (str(i+1) + '. ' + url_descs[i]).encode('utf-8')
             #print(print_desc)  # Print url choices
-            print('{0}. {1}'.format(i+1, u(url_descs[i])))
+            print('{0}. {1}'.format(i+1, uni(url_descs[i])))
         print(BORDER)
 
         # Handle link prompt input
@@ -430,9 +430,9 @@ def reformat_wolfram_entries(titles, entries):
                 entry = '\n\t{0}'.format(entry.replace(' |', ':')
                                          .replace('\n', '\n\t'))
             if title == 'Result':
-                output_list.append(u(entry))
+                output_list.append(uni(entry))
             else:
-                output_list.append(u(title + ': ' + entry))
+                output_list.append(uni(title + ': ' + entry))
         except (AttributeError, UnicodeEncodeError):
             pass
     return output_list
@@ -461,7 +461,7 @@ def wolfram_search(args, html):
         for title in titles:
             if isinstance(title, str):
                 # Encode to ascii-ignore in Python 2
-                title = a(title)
+                title = asc(title)
             entry_xpath = ("//pod[@title='{0}']/subpod/plaintext/text()"
                            .format(title))
             entry = html.xpath(entry_xpath)
@@ -477,11 +477,11 @@ def wolfram_search(args, html):
         if not output_list:
             return False
         elif len(output_list) > 2:
-            print(u('\n'.join(output_list[:2])))
+            print(uni('\n'.join(output_list[:2])))
             if utils.check_input(input(SEE_MORE), empty=True):
-                print(u('\n'.join(output_list[2:])))
+                print(uni('\n'.join(output_list[2:])))
         else:
-            print(u('\n'.join(output_list)))
+            print(uni('\n'.join(output_list)))
         return True
     else:
         return False
@@ -505,9 +505,9 @@ def bing_instant(html):
     try:
         if inst_result:
             if len(inst_result) == 1:
-                print(u(inst_result[0]))
+                print(uni(inst_result[0]))
             else:
-                print(u('\n'.join(inst_result)))
+                print(uni('\n'.join(inst_result)))
             return True
     except AttributeError:
         pass
@@ -965,7 +965,8 @@ def describe_url(url):
             return False
 
         clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
-        print('\n'.join(x if isinstance(x, str) else u(x) for x in clean_desc))
+        print('\n'.join(x if isinstance(x, str) else uni(x)
+              for x in clean_desc))
         utils.check_input(input(CONTINUE))
         return True
     except AttributeError:
