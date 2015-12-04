@@ -16,8 +16,10 @@ if SYS_VERSION == 2:
 else:
     def uni(x):
         """Python 3 utf-8 encode"""
-        return x
-
+        if isinstance(x, bytes):
+            return x.decode('utf-8')
+        else:
+            return x
 
 STOPWORDS = set([
     "-", " ", ",", ".", "a", "e", "i", "o", "u", "t", "about", "above",
