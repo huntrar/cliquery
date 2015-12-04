@@ -2,6 +2,7 @@
 ------
 
  - fixed python 2 vs 3 encodings
+ - added bing instant test
 
 1.3.3
 ------

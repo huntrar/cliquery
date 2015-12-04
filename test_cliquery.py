@@ -18,6 +18,7 @@ class CliqueryTestCase(unittest.TestCase):
         self.queries = ['testing one two three',
                         'sentence with $p3c!@l-chars',
                         'nospaces']
+        self.inst_queries = ['how old is barack obama']
 
     def tearDown(self):
         pass
@@ -31,11 +32,16 @@ class CliqueryTestCase(unittest.TestCase):
                     self.assertTrue(link.startswith('http://') or
                                     link.startswith('https://'))
             elif links is None:
-                # Return None if there is an internet connection error
+                # None indicates an internet connection error
                 pass
             elif not isinstance(links, bool):
                 self.assertTrue(links.startswith('http://') or
                                 links.startswith('https://'))
+
+    def test_instant_resp(self):
+        """instant response questions from Bing"""
+        for query in self.inst_queries:
+            self.assertTrue(self.call_search(query))
 
 
 class TestSummarize(unittest.TestCase):
