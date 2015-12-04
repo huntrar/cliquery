@@ -45,6 +45,14 @@ if SYS_VERSION == 2:
     def iteritems(dct):
         """Python 2 dictionary iteritems()"""
         return dct.iteritems()
+
+    def u(x):
+        """Python 2 utf-8 encode"""
+        return x.encode('utf-8')
+
+    def a(x):
+        """Python 2 ascii-ignore encode"""
+        return x.encode('ascii', 'ignore')
 else:
     def itervalues(dct):
         """Python 3 dictionary itervalues()"""
@@ -53,6 +61,14 @@ else:
     def iteritems(dct):
         """Python 3 dictionary iteritems()"""
         return iter(dct.items())
+
+    def u(x):
+        """Python 3 utf-8 encode"""
+        return x
+
+    def a(x):
+        """Python 3 ascii-ignore encode"""
+        return x
 
 XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
                                os.path.join(os.path.expanduser('~'), '.cache'))
@@ -342,8 +358,9 @@ def show_link_prompt(args, urls, url_descs):
     while display_prompt:
         print('\n{0}'.format(BORDER))
         for i in range(len(urls)):
-            print_desc = (str(i+1) + '. ' + url_descs[i]).encode('utf-8')
-            print(print_desc)  # Print url choices
+            #print_desc = (str(i+1) + '. ' + url_descs[i]).encode('utf-8')
+            #print(print_desc)  # Print url choices
+            print('{0}. {1}'.format(i+1, u(url_descs[i])))
         print(BORDER)
 
         # Handle link prompt input
@@ -413,9 +430,9 @@ def reformat_wolfram_entries(titles, entries):
                 entry = '\n\t{0}'.format(entry.replace(' |', ':')
                                          .replace('\n', '\n\t'))
             if title == 'Result':
-                output_list.append(entry.encode('utf-8'))
+                output_list.append(u(entry))
             else:
-                output_list.append(title + ': ' + entry).encode('utf-8')
+                output_list.append(u(title + ': ' + entry))
         except (AttributeError, UnicodeEncodeError):
             pass
     return output_list
@@ -442,14 +459,16 @@ def wolfram_search(args, html):
     entries = []
     if titles:
         for title in titles:
+            if isinstance(title, str):
+                # Encode to ascii-ignore in Python 2
+                title = a(title)
             entry_xpath = ("//pod[@title='{0}']/subpod/plaintext/text()"
-                           .format(title.encode('ascii', 'ignore')))
+                           .format(title))
             entry = html.xpath(entry_xpath)
             if entry:
                 entries.append(entry[0])
 
         entries = list(OrderedDict.fromkeys(entries))
-
         # Return False if results were empty
         if len(entries) == 1 and entries[0] == '{}':
             return False
@@ -458,11 +477,11 @@ def wolfram_search(args, html):
         if not output_list:
             return False
         elif len(output_list) > 2:
-            print('\n'.join(output_list[:2]).encode('utf-8'))
+            print(u('\n'.join(output_list[:2])))
             if utils.check_input(input(SEE_MORE), empty=True):
-                print('\n'.join(output_list[2:]).encode('utf-8'))
+                print(u('\n'.join(output_list[2:])))
         else:
-            print('\n'.join(output_list).encode('utf-8'))
+            print(u('\n'.join(output_list)))
         return True
     else:
         return False
@@ -486,9 +505,9 @@ def bing_instant(html):
     try:
         if inst_result:
             if len(inst_result) == 1:
-                print(inst_result[0].encode('utf-8'))
+                print(u(inst_result[0]))
             else:
-                print('\n'.join(inst_result).encode('utf-8'))
+                print(u('\n'.join(inst_result)))
             return True
     except AttributeError:
         pass
@@ -946,8 +965,7 @@ def describe_url(url):
             return False
 
         clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
-        print('\n'.join(x if isinstance(x, str) else x.encode('utf-8')
-              for x in clean_desc))
+        print('\n'.join(x if isinstance(x, str) else u(x) for x in clean_desc))
         utils.check_input(input(CONTINUE))
         return True
     except AttributeError:
