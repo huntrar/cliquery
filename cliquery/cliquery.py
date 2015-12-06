@@ -346,7 +346,7 @@ def exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt):
                 search(args)
 
 
-def show_link_prompt(args, urls, url_descs):
+def display_link_prompt(args, urls, url_descs):
     """Print URL's and their descriptions alongside a prompt
 
        Keyword arguments:
@@ -358,8 +358,6 @@ def show_link_prompt(args, urls, url_descs):
     while display_prompt:
         print('\n{0}'.format(BORDER))
         for i in range(len(urls)):
-            #print_desc = (str(i+1) + '. ' + url_descs[i]).encode('utf-8')
-            #print(print_desc)  # Print url choices
             print('{0}. {1}'.format(i+1, uni(url_descs[i])))
         print(BORDER)
 
@@ -417,7 +415,7 @@ def bing_search(args, html):
             url_descs.append(''.join(html.xpath(ld_xpath)))
 
     if urls and url_descs:
-        return show_link_prompt(args, urls, url_descs)
+        return display_link_prompt(args, urls, url_descs)
     return False
 
 
@@ -459,9 +457,7 @@ def wolfram_search(args, html):
     entries = []
     if titles:
         for title in titles:
-            if isinstance(title, str):
-                # Encode to ascii-ignore in Python 2
-                title = asc(title)
+            title = asc(title) # Encode to ascii-ignore
             entry_xpath = ("//pod[@title='{0}']/subpod/plaintext/text()"
                            .format(title))
             entry = html.xpath(entry_xpath)
@@ -477,11 +473,11 @@ def wolfram_search(args, html):
         if not output_list:
             return False
         elif len(output_list) > 2:
-            print(uni('\n'.join(output_list[:2])))
+            print('\n'.join(output_list[:2]))
             if utils.check_input(input(SEE_MORE), empty=True):
-                print(uni('\n'.join(output_list[2:])))
+                print('\n'.join(output_list[2:]))
         else:
-            print(uni('\n'.join(output_list)))
+            print('\n'.join(output_list))
         return True
     else:
         return False
