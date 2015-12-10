@@ -1,12 +1,8 @@
 #!/usr/bin/env python
+""" cliquery - a command-line browsing utility
 
-#############################################################
-#                                                           #
-# cliquery - a command-line browsing utility                #
-# written by Hunter Hammond (huntrar@gmail.com)             #
-#                                                           #
-#############################################################
-
+    written by Hunter Hammond (huntrar@gmail.com)
+"""
 
 from __future__ import absolute_import, print_function
 import argparse as argp
@@ -17,58 +13,18 @@ import re
 from subprocess import call
 from string import ascii_letters
 import sys
-import time
 import webbrowser
 
 import requests_cache
 
 from cliquery import utils, pyteaser
+from .compat import SYS_VERSION, iteritems, uni, asc
 from . import __version__
 
 
-SYS_VERSION = sys.version_info[0]
 if SYS_VERSION == 2:
-    try:
-        input = raw_input
-    except NameError:
-        pass
-
-    try:
-        range = xrange
-    except NameError:
-        pass
-
-    def itervalues(dct):
-        """Python 2 dictionary itervalues()"""
-        return dct.itervalues()
-
-    def iteritems(dct):
-        """Python 2 dictionary iteritems()"""
-        return dct.iteritems()
-
-    def uni(x):
-        """Python 2 utf-8 encode"""
-        return x.encode('utf-8')
-
-    def asc(x):
-        """Python 2 ascii-ignore encode"""
-        return x.encode('ascii', 'ignore')
-else:
-    def itervalues(dct):
-        """Python 3 dictionary itervalues()"""
-        return iter(dct.values())
-
-    def iteritems(dct):
-        """Python 3 dictionary iteritems()"""
-        return iter(dct.items())
-
-    def uni(x):
-        """Python 3 utf-8 encode"""
-        return x
-
-    def asc(x):
-        """Python 3 ascii-ignore encode"""
-        return x
+    input = raw_input
+    range = xrange
 
 XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
                                os.path.join(os.path.expanduser('~'), '.cache'))
@@ -77,7 +33,7 @@ CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
     SYS_VERSION if SYS_VERSION == 3 else ''))
 
 
-BORDER_LEN = 28 # The length of the link prompt border
+BORDER_LEN = 28  # The length of the link prompt border
 BORDER = ' '.join(['+']*BORDER_LEN)
 
 CONFIG_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -201,10 +157,21 @@ def get_search_html(args):
         return ''
 
 
+def get_bing_query_url(query):
+    """Get Bing query url"""
+    base_url = 'www.bing.com'
+    return 'http://{0}/search?q={1}'.format(base_url, query)
+
+
 def get_bing_html(query):
     """Get HTML from Bing query"""
-    base_url = 'www.bing.com'
-    return utils.get_html('http://{0}/search?q={1}'.format(base_url, query))
+    return utils.get_html(get_bing_query_url(query))
+
+
+def get_wolfram_query_url(query):
+    """Get Wolfram query url"""
+    base_url = 'www.wolframalpha.com'
+    return 'http://{0}/input/?i={1}'.format(base_url, query)
 
 
 def get_wolfram_html(query):
@@ -216,7 +183,7 @@ def get_wolfram_html(query):
 
 def open_link_range(args, urls, input_args):
     """Open a link number range
-    
+
        Keyword arguments:
        args -- program arguments (dict)
        urls -- Bing URL's found (list)
@@ -386,6 +353,9 @@ def bing_search(args, html):
     """Perform a Bing search"""
     if html is None:
         return open_url(args, 'https://www.google.com')
+    elif args['open']:
+        return open_url(args, args['query'])
+
     try:
         unprocessed_urls = html.xpath('//h2/a/@href')
     except AttributeError:
@@ -440,6 +410,9 @@ def wolfram_search(args, html):
     """Search WolframAlpha using their API, requires API key in .cliqrc"""
     if html is None:
         return open_url(args, 'http://www.wolframalpha.com')
+    elif args['open']:
+        return open_url(args, args['query'])
+
     try:
         # Filter unnecessary title fields
         titles = list(OrderedDict.fromkeys(
@@ -457,7 +430,7 @@ def wolfram_search(args, html):
     entries = []
     if titles:
         for title in titles:
-            title = asc(title) # Encode to ascii-ignore
+            title = asc(title)  # Encode to ascii-ignore
             entry_xpath = ("//pod[@title='{0}']/subpod/plaintext/text()"
                            .format(title))
             entry = html.xpath(entry_xpath)
@@ -535,7 +508,6 @@ def reload_bookmarks():
 def find_bookmark_idx(query):
     """Find the index of a bookmark given substrings"""
     bkmarks = CONFIG['bookmarks']
-
     query = query.strip().split()
     most_matches = 0
     matched_idx = 0
@@ -555,180 +527,157 @@ def find_bookmark_idx(query):
 
 def add_bookmark(urls):
     """Add a bookmark to the list of saved bookmarks"""
-    try:
-        with open(CONFIG_FPATH, 'a') as cfg:
-            if isinstance(urls, list):
-                for url in urls:
-                    cfg.write('\n{0}'.format(url))
-            elif isinstance(urls, str):
-                cfg.write('\n{0}'.format(urls))
-        reload_bookmarks()
-        return True
-    except Exception as err:
-        sys.stderr.write('Error adding bookmark: {0}\n'.format(str(err)))
-        return False
+    with open(CONFIG_FPATH, 'a') as cfg:
+        if isinstance(urls, list):
+            for url in urls:
+                cfg.write('\n{0}'.format(url))
+        elif isinstance(urls, str):
+            cfg.write('\n{0}'.format(urls))
+    reload_bookmarks()
+    return True
 
 
 def tag_bookmark(bk_idx, tags):
     """Tag an existing bookmark with an alias"""
-    try:
-        bkmarks = CONFIG['bookmarks']
+    bkmarks = CONFIG['bookmarks']
+    if isinstance(tags, list):
+        tags = ' '.join(tags)
+    with open(CONFIG_FPATH, 'w') as cfg:
+        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbookmarks: ')
 
-        if isinstance(tags, list):
-            tags = ' '.join(tags)
+        for i, bkmark in enumerate(bkmarks):
+            if i == int(bk_idx)-1:
+                # Save previous tags if any, enclosed in parentheses
+                prev_tags = re.search('(?<=\().*(?=\))', bkmark)
+                if prev_tags:
+                    tags = '{0} {1}'.format(prev_tags.group(), tags)
 
-        with open(CONFIG_FPATH, 'w') as cfg:
-            cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-            cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
-            cfg.write('\nbookmarks: ')
-
-            for i, bkmark in enumerate(bkmarks):
-                if i == int(bk_idx)-1:
-                    # Save previous tags if any, enclosed in parentheses
-                    prev_tags = re.search('(?<=\().*(?=\))', bkmark)
-                    if prev_tags:
-                        tags = '{0} {1}'.format(prev_tags.group(), tags)
-
-                    cfg.write('\n{0} ({1})'
-                              .format(bkmark.split('(')[0].strip(), tags))
-                else:
-                    cfg.write('\n{0}'.format(bkmark))
-        reload_bookmarks()
-        return True
-    except Exception as err:
-        sys.stderr.write('Error tagging bookmark: {0}\n'.format(str(err)))
-        return False
+                cfg.write('\n{0} ({1})'
+                          .format(bkmark.split('(')[0].strip(), tags))
+            else:
+                cfg.write('\n{0}'.format(bkmark))
+    reload_bookmarks()
+    return True
 
 
 def untag_bookmark(bk_idx, tags_to_rm):
     """Remove a tag from a bookmark"""
-    try:
-        bkmarks = CONFIG['bookmarks']
+    bkmarks = CONFIG['bookmarks']
+    with open(CONFIG_FPATH, 'w') as cfg:
+        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbookmarks: ')
 
-        with open(CONFIG_FPATH, 'w') as cfg:
-            cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-            cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
-            cfg.write('\nbookmarks: ')
+        for i, bkmark in enumerate(bkmarks):
+            if i == int(bk_idx)-1 and '(' in bkmark and ')' in bkmark:
+                # Remove tags
+                split_bkmark = bkmark.split('(')
 
-            for i, bkmark in enumerate(bkmarks):
-                if i == int(bk_idx)-1 and '(' in bkmark and ')' in bkmark:
-                    # Remove tags
-                    split_bkmark = bkmark.split('(')
+                if tags_to_rm:
+                    curr_tags = split_bkmark[1].rstrip(')').split()
+                    new_tags = list(curr_tags)
 
-                    if tags_to_rm:
-                        curr_tags = split_bkmark[1].rstrip(')').split()
-                        new_tags = list(curr_tags)
+                    # Match current tags by substrings of tags to remove
+                    for tag in curr_tags:
+                        for rm_tag in tags_to_rm:
+                            if rm_tag in tag:
+                                new_tags.remove(tag)
 
-                        # Match current tags by substrings of tags to remove
-                        for tag in curr_tags:
-                            for rm_tag in tags_to_rm:
-                                if rm_tag in tag:
-                                    new_tags.remove(tag)
-
-                        if new_tags:
-                            cfg.write('\n{0} ({1})'.format(split_bkmark[0],
-                                                           ' '.join(new_tags)))
-                        else:
-                            cfg.write('\n{0}'.format(split_bkmark[0]))
+                    if new_tags:
+                        cfg.write('\n{0} ({1})'.format(split_bkmark[0],
+                                                       ' '.join(new_tags)))
                     else:
                         cfg.write('\n{0}'.format(split_bkmark[0]))
                 else:
-                    cfg.write('\n{0}'.format(bkmark))
-        reload_bookmarks()
-        return True
-    except Exception as err:
-        sys.stderr.write('Error untagging bookmark: {0}\n'.format(str(err)))
-        return False
+                    cfg.write('\n{0}'.format(split_bkmark[0]))
+            else:
+                cfg.write('\n{0}'.format(bkmark))
+    reload_bookmarks()
+    return True
 
 
 def mv_bookmarks(idx1, idx2):
     """Move bookmarks to the start, end, or at another bookmark's position"""
-    try:
-        if idx1 == idx2:
-            sys.stderr.write('Bookmark indices equal!\n')
+    if idx1 == idx2:
+        sys.stderr.write('Bookmark indices equal!\n')
+        sys.stderr.write(BOOKMARK_HELP)
+        return True
+
+    bkmarks = CONFIG['bookmarks']
+    b_len = len(bkmarks)
+    with open(CONFIG_FPATH, 'w') as cfg:
+        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbookmarks: ')
+
+        # Pairs that are both out of range are incorrect
+        if (idx1 < 0 or idx1 >= b_len) and (idx2 < 0 or idx2 >= b_len):
+            sys.stderr.write('Bookmark indices out of range!\n')
             sys.stderr.write(BOOKMARK_HELP)
             return True
 
-        bkmarks = CONFIG['bookmarks']
-        b_len = len(bkmarks)
-        with open(CONFIG_FPATH, 'w') as cfg:
-            cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-            cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
-            cfg.write('\nbookmarks: ')
-
-            # Pairs that are both out of range are incorrect
-            if (idx1 < 0 or idx1 >= b_len) and (idx2 < 0 or idx2 >= b_len):
-                sys.stderr.write('Bookmark indices out of range!\n')
-                sys.stderr.write(BOOKMARK_HELP)
-                return True
-
-            # Move bookmark to the front or end, or insert at an index
-            if idx1 < 0:
-                # Move bookmark 2 to the front
-                if idx2 >= 0 and idx2 < b_len:
-                    bkmarks.insert(0, bkmarks.pop(idx2))
-            elif idx1 >= len(bkmarks):
-                # Move bookmark 2 to the end
-                if idx2 >= 0 and idx2 < b_len:
-                    bkmarks.append(bkmarks.pop(idx2))
-            elif idx2 < 0:
-                # Move bookmark 1 to the front
-                if idx1 >= 0 and idx1 < b_len:
-                    bkmarks.insert(0, bkmarks.pop(idx1))
-            elif idx2 >= len(bkmarks):
-                # Move bookmark 1 to the end
-                if idx1 >= 0 and idx1 < b_len:
-                    bkmarks.append(bkmarks.pop(idx1))
+        # Move bookmark to the front or end, or insert at an index
+        if idx1 < 0:
+            # Move bookmark 2 to the front
+            if idx2 >= 0 and idx2 < b_len:
+                bkmarks.insert(0, bkmarks.pop(idx2))
+        elif idx1 >= len(bkmarks):
+            # Move bookmark 2 to the end
+            if idx2 >= 0 and idx2 < b_len:
+                bkmarks.append(bkmarks.pop(idx2))
+        elif idx2 < 0:
+            # Move bookmark 1 to the front
+            if idx1 >= 0 and idx1 < b_len:
+                bkmarks.insert(0, bkmarks.pop(idx1))
+        elif idx2 >= len(bkmarks):
+            # Move bookmark 1 to the end
+            if idx1 >= 0 and idx1 < b_len:
+                bkmarks.append(bkmarks.pop(idx1))
+        else:
+            # Insert bookmark 1 in bookmark 2's position
+            prev = bkmarks[idx2]
+            bkmarks[idx2] = bkmarks[idx1]
+            if idx1 > idx2:
+                # Move entries down
+                start_range = idx2+1
+                end_range = idx1+1
+                range_inc = 1
             else:
-                # Insert bookmark 1 in bookmark 2's position
-                prev = bkmarks[idx2]
-                bkmarks[idx2] = bkmarks[idx1]
-                if idx1 > idx2:
-                    # Move entries down
-                    start_range = idx2+1
-                    end_range = idx1+1
-                    range_inc = 1
-                else:
-                    # Move entries up
-                    start_range = idx2-1
-                    end_range = idx1-1
-                    range_inc = -1
-                for i in range(start_range, end_range, range_inc):
-                    temp = bkmarks[i]
-                    bkmarks[i] = prev
-                    prev = temp
+                # Move entries up
+                start_range = idx2-1
+                end_range = idx1-1
+                range_inc = -1
+            for i in range(start_range, end_range, range_inc):
+                temp = bkmarks[i]
+                bkmarks[i] = prev
+                prev = temp
 
-            for bkmark in bkmarks:
-                cfg.write('\n{0}'.format(bkmark))
-        reload_bookmarks()
-        return True
-    except Exception as err:
-        sys.stderr.write('Error moving bookmarks: {0}\n'.format(str(err)))
-        return False
+        for bkmark in bkmarks:
+            cfg.write('\n{0}'.format(bkmark))
+    reload_bookmarks()
+    return True
 
 
 def rm_bookmark(bk_idx):
     """Remove an existing bookmark from the list of saved bookmarks"""
-    try:
-        bkmarks = CONFIG['bookmarks']
-        with open(CONFIG_FPATH, 'w') as cfg:
-            cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-            cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
-            cfg.write('\nbookmarks: ')
-            if isinstance(bk_idx, list):
-                bk_idx = [int(x)-1 for x in bk_idx]
-                for i, bkmark in enumerate(bkmarks):
-                    if i not in bk_idx:
-                        cfg.write('\n{0}'.format(bkmark))
-            else:
-                for i, bkmark in enumerate(bkmarks):
-                    if i != int(bk_idx)-1:
-                        cfg.write('\n{0}'.format(bkmark))
-        reload_bookmarks()
-        return True
-    except Exception as err:
-        sys.stderr.write('Error deleting bookmark: {0}\n'.format(str(err)))
-        return False
+    bkmarks = CONFIG['bookmarks']
+    with open(CONFIG_FPATH, 'w') as cfg:
+        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbookmarks: ')
+        if isinstance(bk_idx, list):
+            bk_idx = [int(x)-1 for x in bk_idx]
+            for i, bkmark in enumerate(bkmarks):
+                if i not in bk_idx:
+                    cfg.write('\n{0}'.format(bkmark))
+        else:
+            for i, bkmark in enumerate(bkmarks):
+                if i != int(bk_idx)-1:
+                    cfg.write('\n{0}'.format(bkmark))
+    reload_bookmarks()
+    return True
 
 
 def print_bookmarks(bkmarks):
@@ -836,7 +785,8 @@ def bkmark_open_cmd(args, query, bkmarks):
     split_args = query.strip().split()
     bookmark_nums = [x for x in split_args if utils.check_input(x, num=True)]
     bookmark_kws = list(split_args)
-    [bookmark_kws.remove(x) for x in bookmark_nums]
+    for num in bookmark_nums:
+        bookmark_kws.remove(num)
     bookmark_kws = ' '.join(bookmark_kws)
     for num in bookmark_nums:
         # open: [num]
@@ -907,9 +857,16 @@ def open_browser(url):
 
 def open_url(args, urls):
     """Print, describe, or open URL's in the browser"""
+    if args['open']:
+        if args['search']:
+            open_browser(get_bing_query_url(args['query']))
+            return True
+        elif args['wolfram']:
+            open_browser(get_wolfram_query_url(args['query']))
+            return True
+
     base_url = 'www.bing.com'
     urls = utils.append_scheme(urls)
-
     if isinstance(urls, list):
         urls = ['http://{0}{1}'.format(base_url, x) if x.startswith('/') else x
                 for x in urls]
@@ -962,7 +919,7 @@ def describe_url(url):
 
         clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
         print('\n'.join(x if isinstance(x, str) else uni(x)
-              for x in clean_desc))
+                        for x in clean_desc))
         utils.check_input(input(CONTINUE))
         return True
     except AttributeError:
@@ -978,8 +935,8 @@ def search(args):
         return False
 
     if args['query']:
-        args['query'] = utils.clean_query(' '.join(args['query']),
-                                          args['open'], args['bookmark'])
+        args['query'] = utils.clean_query(args, ' '.join(args['query']))
+        # Get response from Bing or WolframAlpha based on program flags
         html = get_search_html(args)
     else:
         html = None

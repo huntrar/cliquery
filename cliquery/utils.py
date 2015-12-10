@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Contains cliquery utility functions"""
 
 import random
 import sys
@@ -6,35 +7,16 @@ import sys
 import lxml.html as lh
 import requests
 
+from .compat import SYS_VERSION, iteritems
 
-try:
+
+if SYS_VERSION == 2:
     from urllib import quote_plus as url_quote
-except ImportError:
-    from urllib.parse import quote_plus as url_quote
-
-try:
     from urllib import getproxies
-except ImportError:
-    from urllib.request import getproxies
 
-try:
-    dict.iteritems
-except AttributeError:
-    def itervalues(dct):
-        """Python 3 dictionary itervalues()"""
-        return iter(dct.values())
-
-    def iteritems(dct):
-        """Python 3 dictionary iteritems()"""
-        return iter(dct.items())
 else:
-    def itervalues(dct):
-        """Python 2 dictionary itervalues()"""
-        return dct.itervalues()
-
-    def iteritems(dct):
-        """Python 2 dictionary iteritems()"""
-        return dct.iteritems()
+    from urllib.parse import quote_plus as url_quote
+    from urllib.request import getproxies
 
 
 USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) '
@@ -97,7 +79,7 @@ def get_title(html):
     else:
         title = title[0]
 
-    """Split title by common delimeters"""
+    # Split title by common delimeters
     common_delim = ['|', '-', '–', '»', ':']
     for delim in common_delim:
         if delim in title:
@@ -107,14 +89,16 @@ def get_title(html):
 
 
 def get_text(html):
+    """Return text that is not within a script or style tag"""
     return html.xpath('//*[not(self::script) and not(self::style)]/text()')
 
 
-def clean_query(query, open_flag, bookmark_flag):
+def clean_query(args, query):
     """Replace special characters/append URL extensions if necessary"""
-    if bookmark_flag:
+    if args['bookmark']:
         return query
-    elif not open_flag:
+    elif (((args['search'] or args['wolfram']) and args['open']) or not
+          args['open']):
         # Replace special characters with hex encoded escapes
         return url_quote(query)
     else:

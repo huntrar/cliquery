@@ -5,18 +5,9 @@ from __future__ import print_function
 from collections import Counter
 from math import fabs
 from re import split as regex_split, sub as regex_sub, UNICODE as REGEX_UNICODE
-import sys
 
+from .compat import iterkeys, uni
 
-SYS_VERSION = sys.version_info[0]
-if SYS_VERSION == 2:
-    def uni(x):
-        """Python 2 utf-8 encode"""
-        return x.encode('utf-8')
-else:
-    def uni(x):
-        """Python 3 utf-8 encode"""
-        return x
 
 STOPWORDS = set([
     "-", " ", ",", ".", "a", "e", "i", "o", "u", "t", "about", "above",
@@ -150,7 +141,7 @@ def dbs(words, keywords):
                 summ += (first[1]*second[1]) / (dif ** 2)
 
     # Number of intersections
-    k = len(set(keywords.keys()).intersection(set(words))) + 1
+    k = len(set(iterkeys(keywords)).intersection(set(words))) + 1
     return 1/(k*(k+1.0))*summ
 
 
