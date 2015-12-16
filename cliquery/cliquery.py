@@ -910,7 +910,8 @@ def describe_url(url):
         title = utils.get_title(html)
         text = utils.get_text(html)
         if title and text:
-            desc = pyteaser.summarize(title, ' '.join(text))
+            desc = utils.remove_whitespace(
+                pyteaser.summarize(title, ' '.join(text)))
         else:
             desc = ''
         if not desc:

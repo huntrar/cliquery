@@ -6,4 +6,4 @@
    flags to enter. Opening a link will invoke a browser supplied by the user
    or detected automatically.
 """
-__version__ = '1.3.9'
+__version__ = '1.4.0'

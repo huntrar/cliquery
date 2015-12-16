@@ -86,7 +86,7 @@ def summarize(title, text):
     for rank in ranks:
         summaries.append(rank[0])
 
-    return summaries
+    return [uni(x) for x in summaries]
 
 
 def get_score(sentences, title_words, keywords):
@@ -194,7 +194,7 @@ def split_sentences(text):
     sentences = regex_split('(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
                             text, flags=REGEX_UNICODE)
     s_iter = zip(*[iter(sentences[:-1])] * 2)
-    s_iter = [''.join(uni(x) for x in y).lstrip() for y in s_iter]
+    s_iter = [''.join(x for x in y).lstrip() for y in s_iter]
     s_iter.append(sentences[-1])
     return s_iter
 
