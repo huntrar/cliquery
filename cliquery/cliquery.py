@@ -345,7 +345,7 @@ def display_link_prompt(args, urls, url_descs):
             # Check input in case of quit
             utils.check_input(link_input)
             exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt)
-        except (KeyboardInterrupt, ValueError, IndexError):
+        except (KeyboardInterrupt, EOFError, ValueError, IndexError):
             return False
 
 
