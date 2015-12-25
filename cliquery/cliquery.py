@@ -11,14 +11,13 @@ import glob
 import os
 import re
 from subprocess import call
-from string import ascii_letters
 import sys
 import webbrowser
 
 import requests_cache
 
 from cliquery import utils, pyteaser
-from .compat import SYS_VERSION, iteritems, uni, asc
+from .compat import SYS_VERSION, iteritems, itervalues, iterkeys, uni, asc
 from . import __version__
 
 
@@ -43,18 +42,7 @@ else:
     CONFIG_FPATH = '{0}/.cliqrc'.format(CONFIG_DIR)
 CONFIG = {}
 
-LINK_HELP = ('Enter one of the following flags abbreviated or not,'
-             'possibly followed by a link number:\n'
-             '\th, help      show this help message\n'
-             '\ts, search    search for links\n'
-             '\to, open      directly open links\n'
-             '\tw, wolfram   search WolframAlpha\n'
-             '\td, describe  summarize links\n'
-             '\tb, bookmark  view and modify bookmarks\n'
-             '\tp, print     print links to stdout\n'
-             '\tc, config    print config file location\n'
-             '\tv, version   display current version\n')
-
+PARSER_HELP = ''
 BOOKMARK_HELP = ('Usage: '
                  '\nopen: [num or suburl or tag..]'
                  '\nadd: add [url..]'
@@ -66,6 +54,8 @@ BOOKMARK_HELP = ('Usage: '
 
 CONTINUE = '[Press Enter to continue..] '
 SEE_MORE = 'See more? {0}'.format(CONTINUE)
+
+FLAGS_MODIFIED = False  # Set to True once user enters interactive flags
 
 
 def get_parser():
@@ -160,6 +150,8 @@ def get_search_html(args):
 def get_bing_query_url(query):
     """Get Bing query url"""
     base_url = 'www.bing.com'
+    if not query:
+        return 'http://{0}'.format(base_url)
     return 'http://{0}/search?q={1}'.format(base_url, query)
 
 
@@ -171,6 +163,8 @@ def get_bing_html(query):
 def get_wolfram_query_url(query):
     """Get Wolfram query url"""
     base_url = 'www.wolframalpha.com'
+    if not query:
+        return 'http://{0}'.format(base_url)
     return 'http://{0}/input/?i={1}'.format(base_url, query)
 
 
@@ -181,15 +175,15 @@ def get_wolfram_html(query):
     return utils.get_html('{0}{1}&appid={2}'.format(base_url, query, api))
 
 
-def open_link_range(args, urls, input_args):
+def open_link_range(args, urls, prompt_args):
     """Open a link number range
 
        Keyword arguments:
        args -- program arguments (dict)
        urls -- Bing URL's found (list)
-       input_args -- command arguments entered in link prompt (list)
+       prompt_args -- temporary arguments from link prompt (list)
     """
-    split_args = ''.join(input_args).split('-')
+    split_args = ''.join(prompt_args).split('-')
     start = split_args[0].strip()
     end = split_args[1].strip()
 
@@ -212,105 +206,147 @@ def open_link_range(args, urls, input_args):
                 open_url(args, urls[i-1])
 
 
-def open_links(args, urls, input_args):
+def open_links(args, urls, prompt_args):
     """Open one or more links
 
        Keyword arguments:
        args -- program arguments (dict)
        urls -- Bing URL's found (list)
-       input_args -- command arguments entered in link prompt (list)
+       prompt_args -- temporary arguments from link prompt (list)
     """
-    if not isinstance(input_args, list):
-        input_args = [input_args]
+    if not isinstance(prompt_args, list):
+        prompt_args = [prompt_args]
 
-    for num in input_args:
-        if not utils.check_input(num.strip(), num=True):
-            return
+    validated_args = []
+    for num in prompt_args:
+        if utils.check_input(num.strip(), num=True):
+            validated_args.append(num.strip())
 
     links = []
-    for num in input_args:
+    for num in validated_args:
         if int(num) > 0 and int(num) <= len(urls):
             links.append(urls[int(num)-1])
-    open_url(args, links)
+    open_url(args, links, prompt_args)
 
 
-def exec_bkmark(args, urls, input_args):
-    """Execute a bookmark command
+def process_prompt_cmds(args, urls, prompt_args):
+    """Special processing for link prompt commands
 
        Keyword arguments:
        args -- program arguments (dict)
        urls -- Bing URL's found (list)
-       input_args -- command arguments entered in link prompt (list)
+       prompt_args -- command arguments entered in link prompt (list)
+
+       Return whether to call search as well as possibly modified prompt_args
     """
-    if 'add' in input_args:
-        # If adding a bookmark, must resolve URL first
-        temp_args = []
-        for i, arg in enumerate(input_args):
-            if utils.check_input(arg, num=True):
-                temp_args.append(urls[i-1])
-            else:
-                temp_args.append(arg)
-        input_args = temp_args
+    for flag in iterkeys(args):
+        if args[flag]:
+            # Special flag cases where preprocessing is necessary
+            if flag == 'bookmark' and 'add' in prompt_args:
+                # Resolve URL before adding bookmark
+                temp_args = []
+                for i, arg in enumerate(prompt_args):
+                    if utils.check_input(arg, num=True):
+                        temp_args.append(urls[i-1])
+                    else:
+                        temp_args.append(arg)
+                if utils.check_input(temp_args):
+                    prompt_args = temp_args
+            elif flag in ('describe', 'open', 'print'):
+                if any([',' in arg for arg in prompt_args]):
+                    # Remove commas
+                    prompt_args = ''.join(prompt_args).split(',')
+                    prompt_args = [arg for arg in prompt_args if arg]
 
-    if utils.check_input(input_args):
-        args['query'] = input_args
-        search(args)
+                if any(['-' in arg for arg in prompt_args]):
+                    # Open a range of links
+                    open_link_range(args, urls, prompt_args)
+                    return False, prompt_args
+                else:
+                    # Open one or more links
+                    open_links(args, urls, prompt_args)
+                    return False, prompt_args
+            elif flag == 'first':
+                prompt_args = urls[0]
+    return True, prompt_args
 
 
-def exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt):
+def exec_prompt_cmd(args, urls, prompt_cmd, prompt_args):
     """Execute a command in the link prompt
 
        Keyword arguments:
        args -- program arguments (dict)
        urls -- Bing URL's found (list)
-       input_args -- command arguments entered in link prompt (list)
-       display_prompt -- whether link prompt is being displayed (bool)
+       prompt_cmd -- command entered in link prompt (str)
+       prompt_args -- command arguments entered in link prompt (list)
 
-       Possible commands are listed under LINK_HELP.
+       If there are no preexisting flags, the prompt command defaults to open.
     """
-    reset_flags = True
-    if input_cmd[0] not in ascii_letters:
-        # Default command is open
-        input_args = [input_cmd] + input_args
-        input_cmd = 'o'
-        reset_flags = False
+    # lookup_flags (dict)
+    #   key: abbreviated flag name (first letter of flag)
+    #   value: full flag name
+    lookup_flags = utils.get_lookup_flags(args)
 
-    # get_lookup_flags is a dictionary containing possible flag inputs
-    # Keys are the first letter of the flag name
-    # Possible flag inputs are listed in LINK_HELP
-    for key, value in iteritems(utils.get_lookup_flags(args)):
-        if key == input_cmd or value == input_cmd:
-            # Reset all flags and set chosen flag to True
-            if reset_flags:
-                args = utils.reset_flags(args)
-                args[value] = True
+    global FLAGS_MODIFIED
+    if not FLAGS_MODIFIED:
+        # Some program flags will exhibit different behavior depending on
+        # whether they were entered dynamically or not.
+        #
+        # The following flags are guaranteed to have the same behavior
+        # and thus their state is retained, while others are reset.
+        desc, opn, prnt = args['describe'], args['open'], args['print']
+    else:
+        # If flags have been modified then all flags are reset regardless.
+        desc, opn, prnt = False, False, False
+    args = utils.reset_flags(args)
+    args['describe'], args['open'], args['print'] = desc, opn, prnt
 
-            if key == 'b':
-                exec_bkmark(args, urls, input_args)
-            elif key == 'd' or key == 'o' or key == 'p':
-                # Open/Print/Describe link(s)
+    # A command is not valid if it meets one of the following criteria:
+    #
+    # 1. It is a full command name and is not found in list of full commands
+    # 2. It is one or more abbreviated commands and they do not all exist in
+    #    the list of abbreviated commands
+    if prompt_cmd not in itervalues(lookup_flags):
+        cmd_not_valid = not all(flag in iterkeys(lookup_flags)
+                                for flag in prompt_cmd)
+    else:
+        cmd_not_valid = False
 
-                # Remove commas
-                if any([',' in arg for arg in input_args]):
-                    input_args = ''.join(input_args).split(',')
-                    input_args = [arg for arg in input_args if arg]
+    if cmd_not_valid or prompt_cmd == 'help':
+        if utils.check_input(prompt_cmd[0], num=True):
+            # No command was entered. If user did not choose describe, open,
+            # or print, then the default command is open.
+            prompt_args = [prompt_cmd] + prompt_args
+            if not any((args['describe'], args['open'], args['print'])):
+                prompt_cmd = 'open'
+            else:
+                prompt_cmd = [key for key, value in
+                              iteritems({'describe': args['describe'],
+                                         'open': args['open'],
+                                         'print': args['print']}) if value][0]
+        else:
+            # Print help message and check for quit
+            utils.check_input(input('{0}\n{1}'.format(PARSER_HELP, CONTINUE)))
+            return
+    elif not FLAGS_MODIFIED:
+        # Reset args again because flags were modified
+        FLAGS_MODIFIED = True
+        args = utils.reset_flags(args)
 
-                if any(['-' in arg for arg in input_args]):
-                    # Open a link number range
-                    open_link_range(args, urls, input_args)
-                elif input_args and display_prompt:
-                    # Open one or more links
-                    open_links(args, urls, input_args)
-            elif key == 'f':
-                args['query'] = urls[0]
-                search(args)
-            elif key == 'v':
-                print(__version__)
-            elif key == 'c':
-                print(CONFIG_FPATH)
-            elif key == 's':
-                args['query'] = input_args
-                search(args)
+    if prompt_cmd in itervalues(lookup_flags):
+        if FLAGS_MODIFIED:
+            args[prompt_cmd] = True
+        call_search, prompt_args = process_prompt_cmds(args, urls, prompt_args)
+    else:
+        for cmd in prompt_cmd:
+            if cmd in iterkeys(lookup_flags):
+                if FLAGS_MODIFIED:
+                    args[lookup_flags[cmd]] = True
+        call_search, prompt_args = process_prompt_cmds(args, urls, prompt_args)
+
+    if call_search:
+        args['query'] = prompt_args
+        search(args)
 
 
 def display_link_prompt(args, urls, url_descs):
@@ -321,8 +357,7 @@ def display_link_prompt(args, urls, url_descs):
        urls -- Bing URL's found (list)
        url_descs -- descriptions of Bing URL's found (list)
     """
-    display_prompt = True
-    while display_prompt:
+    while(1):
         print('\n{0}'.format(BORDER))
         for i in range(len(urls)):
             print('{0}. {1}'.format(i+1, uni(url_descs[i])))
@@ -333,18 +368,9 @@ def display_link_prompt(args, urls, url_descs):
             link_input = [inp.strip() for inp in input(': ').split()]
             if not link_input:
                 continue
-            input_cmd = link_input[0]
-            input_args = link_input[1:]
-            while input_cmd == 'h' or input_cmd == 'help':
-                print(LINK_HELP)
-                link_input = [inp.strip() for inp in input(': ').split()]
-                input_cmd = link_input[0]
-                input_args = link_input[1:]
+            utils.check_input(link_input)  # Check input in case of quit
             print('\n')
-
-            # Check input in case of quit
-            utils.check_input(link_input)
-            exec_prompt_cmd(args, urls, input_cmd, input_args, display_prompt)
+            exec_prompt_cmd(args, urls, link_input[0], link_input[1:])
         except (KeyboardInterrupt, EOFError, ValueError, IndexError):
             return False
 
@@ -855,14 +881,26 @@ def open_browser(url):
             sys.stderr.write('Failed to open browser.\n')
 
 
-def open_url(args, urls):
-    """Print, describe, or open URL's in the browser"""
+def open_url(args, urls, prompt_args=None):
+    """Print, describe, or open URL's in the browser
+
+       Keyword arguments:
+           args -- program arguments (dict)
+           urls -- Bing URL's chosen (list)
+           prompt_args -- temporary arguments from link prompt (list)
+    """
+    if urls:
+        # Either opening URL's or searching for link prompt arguments, not both
+        prompt_args = None
+    elif prompt_args and isinstance(prompt_args, list):
+        prompt_args = ' '.join(prompt_args)
+
     if args['open']:
         if args['search']:
-            open_browser(get_bing_query_url(args['query']))
+            open_browser(get_bing_query_url(prompt_args or args['query']))
             return True
         elif args['wolfram']:
-            open_browser(get_wolfram_query_url(args['query']))
+            open_browser(get_wolfram_query_url(prompt_args or args['query']))
             return True
 
     base_url = 'www.bing.com'
@@ -930,11 +968,21 @@ def describe_url(url):
 
 def search(args):
     """Handle web searching, page previewing, and bookmarks"""
+    if args['version']:
+        print(__version__)
+        return
+    if args['config']:
+        print(CONFIG_FPATH)
+        return
+    if args['clear_cache']:
+        clear_cache()
+        print('Cleared {0}.'.format(CACHE_DIR))
+        return
+
     if not any([args['query'], args['open'], args['bookmark'],
                 args['search'], args['wolfram']]):
-        sys.stderr.write('No search terms entered.\n')
+        print(PARSER_HELP)
         return False
-
     if args['query']:
         args['query'] = utils.clean_query(args, ' '.join(args['query']))
         # Get response from Bing or WolframAlpha based on program flags
@@ -990,6 +1038,8 @@ def search(args):
 def command_line_runner():
     """Handle command-line interaction"""
     parser = get_parser()
+    global PARSER_HELP
+    PARSER_HELP = parser.format_help()
     args = vars(parser.parse_args())
 
     api_key, browser, bkmarks = read_config()
@@ -1004,29 +1054,13 @@ def command_line_runner():
     except webbrowser.Error as err:
         sys.stderr.write('{0}: {1}\n'.format(str(err), browser))
 
-    if args['version']:
-        print(__version__)
-        return
-    if args['config']:
-        print(CONFIG_FPATH)
-        return
-    if args['clear_cache']:
-        clear_cache()
-        print('Cleared {0}.'.format(CACHE_DIR))
-        return
-
     # Enable cache unless user sets environ variable CLIQ_DISABLE_CACHE
     if not os.getenv('CLIQ_DISABLE_CACHE'):
         enable_cache()
     if not api_key and args['wolfram']:
         args['wolfram'] = False
         sys.stderr.write('Missing WolframAlpha API key in .cliqrc!\n')
-    if not any([args['query'], args['open'], args['bookmark'],
-                args['search'], args['wolfram']]):
-        parser = get_parser()
-        parser.print_help()
-    else:
-        search(args)
+    search(args)
 
 
 if __name__ == '__main__':

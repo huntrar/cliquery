@@ -176,7 +176,7 @@ def check_input(user_input, num=False, empty=False):
         u_inp = user_input
 
     # Check for exit signal
-    if u_inp == 'q' or u_inp == 'quit' or u_inp == 'exit':
+    if u_inp in ('q', 'quit', 'exit'):
         sys.exit()
 
     if num:
