@@ -333,14 +333,16 @@ def exec_prompt_cmd(args, urls, prompt_cmd, prompt_args):
         FLAGS_MODIFIED = True
         args = utils.reset_flags(args)
 
+    # Set new flags if flags were modified or none are currently set
+    no_flags_set = not any(x for x in itervalues(args) if isinstance(x, bool))
     if prompt_cmd in itervalues(lookup_flags):
-        if FLAGS_MODIFIED:
+        if FLAGS_MODIFIED or no_flags_set:
             args[prompt_cmd] = True
         call_search, prompt_args = process_prompt_cmds(args, urls, prompt_args)
     else:
         for cmd in prompt_cmd:
             if cmd in iterkeys(lookup_flags):
-                if FLAGS_MODIFIED:
+                if FLAGS_MODIFIED or no_flags_set:
                     args[lookup_flags[cmd]] = True
         call_search, prompt_args = process_prompt_cmds(args, urls, prompt_args)
 
