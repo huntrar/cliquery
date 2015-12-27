@@ -138,7 +138,7 @@ def get_search_html(args):
     """Get Bing or Wolfram HTML, or neither"""
     if args['bookmark']:
         return ''
-    if not args['open']:
+    if not args['open'] or args['first']:
         if not args['wolfram']:
             return get_bing_html(args['query'])
         else:
@@ -720,8 +720,9 @@ def rm_bookmark(bk_idx):
     return True
 
 
-def print_bookmarks(bkmarks):
+def print_bookmarks():
     """Print all saved bookmarks"""
+    bkmarks = CONFIG['bookmarks']
     print('Bookmarks:')
     for i, bkmark in enumerate(bkmarks):
         if '(' in bkmark and ')' in bkmark:
@@ -844,17 +845,17 @@ def bk_num_to_url(bkmarks, num, append_arg):
         return None
 
 
-def bkmark_open_cmd(args, query, bkmarks):
+def bkmark_open_cmd(args, query):
     """open: [num.. or suburl or tag] [additional URL args..]
 
        Keyword arguments:
            args -- program arguments (dict)
            query -- query containing phrase to match/additional args (str)
-           bkmarks -- bookmarks read in from config file (list)
 
        Keywords that do not exist in bookmarks are interpreted to be additional
        URL args, and are appended to the end of any matched bookmark URL's.
     """
+    bkmarks = CONFIG['bookmarks']
     if isinstance(query, str):
         split_query = query.strip().split()
     bookmark_nums = [x for x in split_query if utils.check_input(x, num=True)]
@@ -894,11 +895,10 @@ def bkmark_open_cmd(args, query, bkmarks):
 
 def bookmarks(args, query):
     """Open, add, tag, untag, move, or delete bookmarks"""
-    bkmarks = CONFIG['bookmarks']
     if isinstance(query, list):
         query = ' '.join(query)
     if not query:
-        return print_bookmarks(bkmarks)
+        return print_bookmarks()
 
     if query.startswith('add'):
         return bkmark_add_cmd(query)
@@ -911,7 +911,7 @@ def bookmarks(args, query):
     elif query.startswith('rm'):
         return bkmark_rm_cmd(query)
     else:
-        return bkmark_open_cmd(args, query, bkmarks)
+        return bkmark_open_cmd(args, query)
 
 
 def open_browser(url):
@@ -1035,18 +1035,18 @@ def search(args):
         html = None
     # Default search if no flags provided or Wolfram search fails
     default_search = False
+    if args['bookmark']:
+        # Add, delete, or open bookmarks
+        return bookmarks(args, args['query'])
+    if args['first']:
+        # Open the first Bing link available, 'Feeling Lucky'
+        return open_first(args, html)
     if args['open']:
         # Open a link directly
         return open_url(args, args['query'])
-    elif args['bookmark']:
-        # Add, delete, or open bookmarks
-        return bookmarks(args, args['query'])
     elif args['search']:
         # Perform a Bing search and show an interactive prompt
         return bing_search(args, html)
-    elif args['first']:
-        # Open the first Bing link available, 'Feeling Lucky'
-        return open_first(args, html)
     elif args['wolfram']:
         # Search WolframAlpha and continues search if failed
         success = wolfram_search(args, html)

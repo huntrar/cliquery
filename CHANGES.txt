@@ -1,3 +1,9 @@
+1.4.6
+------
+
+ - search now checks bookmark and first flags before others
+ - other general cleanup
+
 1.4.5
 ------
 
