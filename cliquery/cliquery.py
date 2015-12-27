@@ -186,24 +186,34 @@ def open_link_range(args, urls, prompt_args):
     split_args = ''.join(prompt_args).split('-')
     start = split_args[0].strip()
     end = split_args[1].strip()
-
     start_is_num = utils.check_input(start, num=True)
+    if start_is_num:
+        start = int(start)-1
     end_is_num = utils.check_input(end, num=True)
+    if end_is_num:
+        end = int(end)-1
+
     if start_is_num and end_is_num:
-        # Open close-ended range of urls
-        if int(start) > 0 and int(end) <= len(urls)+1:
-            for i in range(int(start), int(end)+1):
-                open_url(args, urls[i-1])
+        # Open close-ended range of urls (like #-#)
+        if utils.in_range(len(urls), start, end):
+            open_url(args, urls[start:end+1])
+        else:
+            sys.stderr.write('{0}-{1} is out of range.\n'
+                             .format(start+1, end+1))
     elif start_is_num:
-        # Open open-ended range of urls
-        if int(start) > 0:
-            for i in range(int(start), len(urls)+1):
-                open_url(args, urls[i-1])
+        # Open open-ended range of urls (like #-)
+        if utils.in_range(len(urls), start):
+            open_url(args, urls[start:])
+        else:
+            sys.stderr.write('{0}- is out of range.\n'.format(start+1))
     elif end_is_num:
-        # Open open-ended range of urls
-        if int(end) < len(urls)+1:
-            for i in range(1, int(end)+1):
-                open_url(args, urls[i-1])
+        # Open open-ended range of urls (like -#)
+        if utils.in_range(len(urls), end):
+            open_url(args, urls[:end+1])
+        else:
+            sys.stderr.write('-{0} is out of range.\n'.format(end+1))
+    else:
+        sys.stderr.write('{0} is not a number.\n'.format(start or end))
 
 
 def open_links(args, urls, prompt_args):
@@ -216,17 +226,19 @@ def open_links(args, urls, prompt_args):
     """
     if not isinstance(prompt_args, list):
         prompt_args = [prompt_args]
-
-    validated_args = []
+    link_num = 0
+    links = []
     for num in prompt_args:
         if utils.check_input(num.strip(), num=True):
-            validated_args.append(num.strip())
-
-    links = []
-    for num in validated_args:
-        if int(num) > 0 and int(num) <= len(urls):
-            links.append(urls[int(num)-1])
-    open_url(args, links, prompt_args)
+            link_num = int(num.strip()) - 1
+            if utils.in_range(len(urls), link_num):
+                links.append(urls[link_num])
+            else:
+                sys.stderr.write('{0} is out of range.\n'.format(num))
+        else:
+            sys.stderr.write('{0} is not a number.\n'.format(num))
+    if links:
+        open_url(args, links, prompt_args)
 
 
 def process_prompt_cmds(args, urls, prompt_args):
@@ -313,9 +325,10 @@ def exec_prompt_cmd(args, urls, prompt_cmd, prompt_args):
         cmd_not_valid = False
 
     if cmd_not_valid or prompt_cmd == 'help':
-        if utils.check_input(prompt_cmd[0], num=True):
-            # No command was entered. If user did not choose describe, open,
-            # or print, then the default command is open.
+        if prompt_cmd[0] == '-' or utils.check_input(prompt_cmd[0], num=True):
+            # No explicit command, either a number or number range (hence dash)
+            # If user did not choose describe, open, or print, then
+            # default command is open.
             prompt_args = [prompt_cmd] + prompt_args
             if not any((args['describe'], args['open'], args['print'])):
                 prompt_cmd = 'open'
@@ -629,40 +642,38 @@ def untag_bookmark(bk_idx, tags_to_rm):
 
 def mv_bookmarks(idx1, idx2):
     """Move bookmarks to the start, end, or at another bookmark's position"""
+    bkmarks = CONFIG['bookmarks']
+    b_len = len(bkmarks)
     if idx1 == idx2:
-        sys.stderr.write('Bookmark indices equal!\n')
+        sys.stderr.write('Bookmark indices equal.\n')
+        sys.stderr.write(BOOKMARK_HELP)
+        return True
+    elif not utils.in_range(b_len, idx1) and not utils.in_range(b_len, idx2):
+        sys.stderr.write('Bookmark indices out of range.\n')
         sys.stderr.write(BOOKMARK_HELP)
         return True
 
-    bkmarks = CONFIG['bookmarks']
-    b_len = len(bkmarks)
     with open(CONFIG_FPATH, 'w') as cfg:
         cfg.write('api_key: {0}'.format(CONFIG['api_key']))
         cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
         cfg.write('\nbookmarks: ')
 
-        # Pairs that are both out of range are incorrect
-        if (idx1 < 0 or idx1 >= b_len) and (idx2 < 0 or idx2 >= b_len):
-            sys.stderr.write('Bookmark indices out of range!\n')
-            sys.stderr.write(BOOKMARK_HELP)
-            return True
-
         # Move bookmark to the front or end, or insert at an index
         if idx1 < 0:
             # Move bookmark 2 to the front
-            if idx2 >= 0 and idx2 < b_len:
+            if utils.in_range(b_len, idx2):
                 bkmarks.insert(0, bkmarks.pop(idx2))
-        elif idx1 >= len(bkmarks):
+        elif idx1 >= b_len:
             # Move bookmark 2 to the end
-            if idx2 >= 0 and idx2 < b_len:
+            if utils.in_range(b_len, idx2):
                 bkmarks.append(bkmarks.pop(idx2))
         elif idx2 < 0:
             # Move bookmark 1 to the front
-            if idx1 >= 0 and idx1 < b_len:
+            if utils.in_range(b_len, idx1):
                 bkmarks.insert(0, bkmarks.pop(idx1))
-        elif idx2 >= len(bkmarks):
+        elif idx2 >= b_len:
             # Move bookmark 1 to the end
-            if idx1 >= 0 and idx1 < b_len:
+            if utils.in_range(b_len, idx1):
                 bkmarks.append(bkmarks.pop(idx1))
         else:
             # Insert bookmark 1 in bookmark 2's position

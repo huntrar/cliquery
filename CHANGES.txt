@@ -1,3 +1,12 @@
+1.4.5
+------
+
+ - empty browser no longer opened when out of range link number entered
+ - fixed open ended range mistakenly printing help message (like -num)
+ - proper bounds checking for open ended ranges
+ - added in_range utils function
+ - moved bookmark mv error before file overwriting
+
 1.4.4
 ------
 

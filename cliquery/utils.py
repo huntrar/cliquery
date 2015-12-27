@@ -195,14 +195,29 @@ def is_num(num):
         return False
 
 
+def in_range(length, start=None, end=None):
+    """Return if start and end are between [0, length)"""
+    if start is None and end is None:
+        return False
+    elif start is not None and end is None:
+        end = start
+    elif end is not None and start is None:
+        start = end
+
+    if not isinstance(start, int) and is_num(start):
+        start = int(start)
+    if not isinstance(end, int) and is_num(end):
+        end = int(end)
+    return start >= 0 and end < length
+
+
 def append_scheme(urls):
     """Append scheme to URL's if not present"""
     if isinstance(urls, list):
         scheme_urls = []
 
         for url in urls:
-            if not url.startswith('http://')\
-                    and not url.startswith('https://'):
+            if not (url.startswith('http://') or url.startswith('https://')):
                 scheme_urls.append('http://{0}'.format(url))
             else:
                 scheme_urls.append(url)
