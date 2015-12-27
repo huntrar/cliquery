@@ -44,7 +44,7 @@ CONFIG = {}
 
 PARSER_HELP = ''
 BOOKMARK_HELP = ('Usage: '
-                 '\nopen: [num or suburl or tag..]'
+                 '\nopen: [num.. or suburl or tag] [additional URL args..]'
                  '\nadd: add [url..]'
                  '\ntag: tag [num or suburl] [tag..]'
                  '\nuntag: untag [num or suburl or tag] [subtag..]'
@@ -359,7 +359,7 @@ def display_link_prompt(args, urls, url_descs):
        urls -- Bing URL's found (list)
        url_descs -- descriptions of Bing URL's found (list)
     """
-    while(1):
+    while 1:
         print('\n{0}'.format(BORDER))
         for i in range(len(urls)):
             print('{0}. {1}'.format(i+1, uni(url_descs[i])))
@@ -536,7 +536,8 @@ def reload_bookmarks():
 def find_bookmark_idx(query):
     """Find the index of a bookmark given substrings"""
     bkmarks = CONFIG['bookmarks']
-    query = query.strip().split()
+    if isinstance(query, str):
+        query = query.strip().split()
     most_matches = 0
     matched_idx = 0
     for i, bkmark in enumerate(bkmarks):
@@ -808,44 +809,75 @@ def bkmark_rm_cmd(query):
     return rm_bookmark(bkmark_idxs)
 
 
-def bkmark_open_cmd(args, query, bkmarks):
-    """open: [num or suburl or tag..]"""
-    split_args = query.strip().split()
-    bookmark_nums = [x for x in split_args if utils.check_input(x, num=True)]
-    bookmark_kws = list(split_args)
-    for num in bookmark_nums:
-        bookmark_kws.remove(num)
-    bookmark_kws = ' '.join(bookmark_kws)
-    for num in bookmark_nums:
-        # open: [num]
-        try:
-            bkmark = bkmarks[int(num) - 1]
-            if '(' in bkmark and ')' in bkmark:
-                open_url(args, bkmark.split('(')[0].strip())
-            else:
-                open_url(args, bkmark)
-            return True
-        except IndexError:
-            sys.stderr.write('Bookmark {0} not found.\n'
-                             .format(num))
-            return False
+def bk_num_to_url(bkmarks, num, append_arg):
+    """Convert a bookmark number to a URL
 
-    # open: [suburl or tag]
-    bk_idx = find_bookmark_idx(bookmark_kws)
-    if bk_idx > 0:
-        try:
-            bkmark = bkmarks[int(bk_idx)-1]
-            if '(' in bkmark and ')' in bkmark:
-                open_url(args, bkmark.split('(')[0].strip())
-            else:
-                open_url(args, bkmark)
-            return True
-        except IndexError:
-            sys.stderr.write('Bookmark {0} not found.\n'
-                             .format(bk_idx))
-            return False
-    else:
+       Keyword arguments:
+           bkmarks -- bookmarks read in from config file (list)
+           num -- bookmark num to convert (str)
+           append_arg -- additional args possibly found (str)
+
+       Return the URL found or None.
+    """
+    try:
+        bkmark = bkmarks[int(num) - 1]
+        if '(' in bkmark and ')' in bkmark:
+            url = bkmark.split('(')[0].strip()
+        else:
+            url = bkmark
+        if append_arg:
+            url = '{0}/{1}'.format(url.rstrip('/'), append_arg)
+        return url
+    except IndexError:
+        sys.stderr.write('Bookmark {0} not found.\n'.format(num))
+        return None
+
+
+def bkmark_open_cmd(args, query, bkmarks):
+    """open: [num.. or suburl or tag] [additional URL args..]
+
+       Keyword arguments:
+           args -- program arguments (dict)
+           query -- query containing phrase to match/additional args (str)
+           bkmarks -- bookmarks read in from config file (list)
+
+       Keywords that do not exist in bookmarks are interpreted to be additional
+       URL args, and are appended to the end of any matched bookmark URL's.
+    """
+    if isinstance(query, str):
+        split_query = query.strip().split()
+    bookmark_nums = [x for x in split_query if utils.check_input(x, num=True)]
+    bookmark_words = [x for x in split_query if x not in bookmark_nums]
+    append_args = [x for x in bookmark_words
+                   if not any(x in bk for bk in bkmarks)]
+
+    urls = []
+    bk_idx = None
+    for i, keyword in enumerate(split_query):
+        if keyword in bookmark_words and bk_idx is None:
+            # open: [suburl or tag]
+            # Only need to resolve this once as words are grouped together
+            bk_idx = find_bookmark_idx(bookmark_words)
+            if bk_idx > 0:
+                append_arg = ''
+                if i+1 < len(split_query) and split_query[i+1] in append_args:
+                    # If the next query is an append arg, add it to the url
+                    append_arg = split_query[i+1]
+                urls.append(bk_num_to_url(bkmarks, str(bk_idx), append_arg))
+        elif keyword in bookmark_nums:
+            # open: [num..]
+            append_arg = ''
+            if i+1 < len(split_query) and split_query[i+1] in append_args:
+                # If the next query is an append arg, add it to the url
+                append_arg = split_query[i+1]
+            urls.append(bk_num_to_url(bkmarks, keyword, append_arg))
+
+    valid_urls = [x for x in urls if x]
+    if not valid_urls:
         sys.stderr.write(BOOKMARK_HELP)
+        return False
+    else:
+        open_url(args, valid_urls)
         return True
 
 
@@ -855,7 +887,6 @@ def bookmarks(args, query):
     if isinstance(query, list):
         query = ' '.join(query)
     if not query:
-        # Print bookmarks if no arguments provided
         return print_bookmarks(bkmarks)
 
     if query.startswith('add'):
