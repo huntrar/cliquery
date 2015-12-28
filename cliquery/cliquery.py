@@ -282,7 +282,8 @@ def process_prompt_cmds(args, urls, prompt_args):
                     open_links(args, urls, prompt_args)
                     return False, prompt_args
             elif flag == 'first':
-                prompt_args = urls[0]
+                open_url(args, urls[0])
+                return False, prompt_args
     return True, prompt_args
 
 
