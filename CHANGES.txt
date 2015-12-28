@@ -1,3 +1,8 @@
+1.4.9
+------
+
+ - fixed get_title bug that snuck in during cleanup
+
 1.4.8
 ------
 

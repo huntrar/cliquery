@@ -137,7 +137,7 @@ def split_title(title, delim):
 
 def get_title(resp):
     """Extract title from webpage response"""
-    return resp.xpath('//title/text()')
+    title = resp.xpath('//title/text()')
     if not title:
         return ''
     else:
