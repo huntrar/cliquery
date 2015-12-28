@@ -61,7 +61,7 @@ Do the following to copy .cliqrc to .local.cliqrc:
 Try entering the following to fix:
 
     sudo chmod a+x "$(cliquery -c)" && sudo chown $USER "$(cliquery -c)" 
-* A search may return immediate results, such as calculations or facts, or instead a page of search results comprised of descriptive links to follow.
+* A search may return immediate results, such as calculations or facts (via WolframAlpha), or instead a page of search results comprised of descriptive links to follow (via Google).
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility. Entering h or help will list all possible prompt commands.
     ```
     + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -73,7 +73,6 @@ Try entering the following to fix:
     6. The Python Tutorial — Python 2.7.10 documentation
     7. Python (programming language) - Wikipedia, the free ...
     8. Van Rossum: Python is not too slow | InfoWorld
-    9. GuiProgramming - Python Wiki
     + + + + + + + + + + + + + + + + + + + + + + + + + + + +
     : d 1
 

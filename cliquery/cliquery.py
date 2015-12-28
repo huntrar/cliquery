@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function
 import argparse as argp
 from collections import OrderedDict
 import glob
+import json
 import os
 import re
 from subprocess import call
@@ -134,30 +135,12 @@ def clear_cache():
         os.remove(cache)
 
 
-def get_search_html(args):
-    """Get Bing or Wolfram HTML, or neither"""
-    if args['bookmark']:
-        return ''
-    if not args['open'] or args['first']:
-        if not args['wolfram']:
-            return get_bing_html(args['query'])
-        else:
-            return get_wolfram_html(args['query'])
-    else:
-        return ''
-
-
-def get_bing_query_url(query):
-    """Get Bing query url"""
-    base_url = 'www.bing.com'
+def get_google_query_url(query):
+    """Get Google query url"""
+    base_url = 'www.google.com'
     if not query:
         return 'http://{0}'.format(base_url)
     return 'http://{0}/search?q={1}'.format(base_url, query)
-
-
-def get_bing_html(query):
-    """Get HTML from Bing query"""
-    return utils.get_html(get_bing_query_url(query))
 
 
 def get_wolfram_query_url(query):
@@ -168,11 +151,31 @@ def get_wolfram_query_url(query):
     return 'http://{0}/input/?i={1}'.format(base_url, query)
 
 
-def get_wolfram_html(query):
-    """Get HTML from Wolfram API query"""
+def get_google_resp(query):
+    """Get JSON response from Google API as a dict object (top 8 results)"""
+    base_url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
+    raw_resp = utils.get_raw_resp('{0}&q={1}&rsz=8'.format(base_url, query))
+    return json.loads(raw_resp)['responseData']
+
+
+def get_wolfram_resp(query):
+    """Get XML response from Wolfram API as an lxml.html.HtmlElement object"""
     base_url = 'http://api.wolframalpha.com/v2/query?input='
-    api = CONFIG['api_key']
-    return utils.get_html('{0}{1}&appid={2}'.format(base_url, query, api))
+    api_key = CONFIG['api_key']
+    return utils.get_resp('{0}{1}&appid={2}'.format(base_url, query, api_key))
+
+
+def get_search_resp(args):
+    """Retrieve Google or WolframAlpha response, or neither"""
+    if args['bookmark']:
+        return ''
+    if not args['open'] or args['first']:
+        if not args['wolfram']:
+            return get_google_resp(args['query'])
+        else:
+            return get_wolfram_resp(args['query'])
+    else:
+        return ''
 
 
 def open_link_range(args, urls, prompt_args):
@@ -180,7 +183,7 @@ def open_link_range(args, urls, prompt_args):
 
        Keyword arguments:
        args -- program arguments (dict)
-       urls -- Bing URL's found (list)
+       urls -- search URL's found (list)
        prompt_args -- temporary arguments from link prompt (list)
     """
     split_args = ''.join(prompt_args).split('-')
@@ -221,7 +224,7 @@ def open_links(args, urls, prompt_args):
 
        Keyword arguments:
        args -- program arguments (dict)
-       urls -- Bing URL's found (list)
+       urls -- search URL's found (list)
        prompt_args -- temporary arguments from link prompt (list)
     """
     if not isinstance(prompt_args, list):
@@ -246,7 +249,7 @@ def process_prompt_cmds(args, urls, prompt_args):
 
        Keyword arguments:
        args -- program arguments (dict)
-       urls -- Bing URL's found (list)
+       urls -- search URL's found (list)
        prompt_args -- command arguments entered in link prompt (list)
 
        Return whether to call search as well as possibly modified prompt_args
@@ -288,7 +291,7 @@ def exec_prompt_cmd(args, urls, prompt_cmd, prompt_args):
 
        Keyword arguments:
        args -- program arguments (dict)
-       urls -- Bing URL's found (list)
+       urls -- search URL's found (list)
        prompt_cmd -- command entered in link prompt (str)
        prompt_args -- command arguments entered in link prompt (list)
 
@@ -369,8 +372,8 @@ def display_link_prompt(args, urls, url_descs):
 
        Keyword arguments:
        args -- program arguments (dict)
-       urls -- Bing URL's found (list)
-       url_descs -- descriptions of Bing URL's found (list)
+       urls -- search URL's found (list)
+       url_descs -- descriptions of search URL's found (list)
     """
     while 1:
         print('\n{0}'.format(BORDER))
@@ -390,44 +393,24 @@ def display_link_prompt(args, urls, url_descs):
             return False
 
 
-def bing_search(args, html):
-    """Perform a Bing search"""
-    if html is None:
+def google_search(args, resp):
+    """Perform a Google search and display links in an interactive prompt"""
+    if resp is None:
         return open_url(args, 'https://www.google.com')
     elif args['open']:
         return open_url(args, args['query'])
 
-    try:
-        unprocessed_urls = html.xpath('//h2/a/@href')
-    except AttributeError:
-        raise AttributeError('Failed to retrieve data from lxml object!')
-    if not unprocessed_urls:
-        sys.stderr.write('Failed to retrieve links from Bing.\n')
-        return None
-
-    urls = []
-    url_descs = []
-    base_url = 'www.bing.com'
-    for url in unprocessed_urls:
-        if url.startswith('/') and base_url not in url:
-            # Add missing base url
-            urls.append('http://{0}{1}'.format(base_url, url))
-            if "'" in url:
-                ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
-            else:
-                ld_xpath = "//h2/a[@href='{0}']//text()".format(url)
-            url_descs.append(''.join(html.xpath(ld_xpath)))
-        elif url.startswith('http://') or url.startswith('https://'):
-            urls.append(url)
-            if "'" in url:
-                ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
-            else:
-                ld_xpath = "//h2/a[@href='{0}']//text()".format(url)
-            url_descs.append(''.join(html.xpath(ld_xpath)))
-
+    results = resp['results']
+    urls = [x['url'] for x in results]
+    url_descs = [x['titleNoFormatting'] for x in results]
     if urls and url_descs:
         return display_link_prompt(args, urls, url_descs)
     return False
+
+
+def open_first(args, resp):
+    """Open the first Google link available, also known as 'Feeling Lucky'"""
+    return open_url(args, resp['results'][0]['url'])
 
 
 def reformat_wolfram_entries(titles, entries):
@@ -447,9 +430,9 @@ def reformat_wolfram_entries(titles, entries):
     return output_list
 
 
-def wolfram_search(args, html):
+def wolfram_search(args, resp):
     """Search WolframAlpha using their API, requires API key in .cliqrc"""
-    if html is None:
+    if resp is None:
         return open_url(args, 'http://www.wolframalpha.com')
     elif args['open']:
         return open_url(args, args['query'])
@@ -457,7 +440,7 @@ def wolfram_search(args, html):
     try:
         # Filter unnecessary title fields
         titles = list(OrderedDict.fromkeys(
-            html.xpath("//pod[@title != '' and "
+            resp.xpath("//pod[@title != '' and "
                        "@title != 'Number line' and "
                        "@title != 'Input' and "
                        "@title != 'Visual representation' and "
@@ -474,7 +457,7 @@ def wolfram_search(args, html):
             title = asc(title)  # Encode to ascii-ignore
             entry_xpath = ("//pod[@title='{0}']/subpod/plaintext/text()"
                            .format(title))
-            entry = html.xpath(entry_xpath)
+            entry = resp.xpath(entry_xpath)
             if entry:
                 entries.append(entry[0])
 
@@ -495,50 +478,6 @@ def wolfram_search(args, html):
         return True
     else:
         return False
-
-
-def bing_instant(html):
-    """Check for a Bing instant result"""
-    try:
-        inst_result = html.xpath('//span[@id="rcTB"]/text()'
-                                 '|//div[@class="b_focusTextMedium"]/text()'
-                                 '|//p[@class="b_secondaryFocus df_p"]'
-                                 '/text()'
-                                 '|//div[@class="b_xlText b_secondaryText"]'
-                                 '/text()'
-                                 '|//input[@id="uc_rv"]/@value'
-                                 '|//ol[@class="b_dList b_indent"]'  # define
-                                 '/li/div/text()')
-    except AttributeError:
-        raise AttributeError('Failed to retrieve data from lxml object!')
-
-    try:
-        if inst_result:
-            if len(inst_result) == 1:
-                print(uni(inst_result[0]))
-            else:
-                print(uni('\n'.join(inst_result)))
-            return True
-    except AttributeError:
-        pass
-    return False
-
-
-def open_first(args, html):
-    """Open the first Bing link available, `Feeling Lucky`"""
-    try:
-        bing_urls = html.xpath('//h2/a/@href')
-        if not bing_urls:
-            sys.stderr.write('Failed to retrieve links from Bing.\n')
-            return None
-        url = bing_urls[0]
-    except AttributeError:
-        raise AttributeError('Failed to retrieve data from lxml object!')
-
-    if url.startswith('http://') or url.startswith('https://'):
-        return open_url(args, url)
-    else:
-        return open_url(args, 'http://{0}'.format(url))
 
 
 def reload_bookmarks():
@@ -930,67 +869,49 @@ def open_url(args, urls, prompt_args=None):
 
        Keyword arguments:
            args -- program arguments (dict)
-           urls -- Bing URL's chosen (list)
+           urls -- search URL's chosen (list)
            prompt_args -- temporary arguments from link prompt (list)
     """
     if urls:
         # Either opening URL's or searching for link prompt arguments, not both
         prompt_args = None
+        if not isinstance(urls, list):
+            urls = [urls]
     elif prompt_args and isinstance(prompt_args, list):
         prompt_args = ' '.join(prompt_args)
-
     if args['open']:
         if args['search']:
-            open_browser(get_bing_query_url(prompt_args or args['query']))
+            open_browser(get_google_query_url(prompt_args or args['query']))
             return True
         elif args['wolfram']:
             open_browser(get_wolfram_query_url(prompt_args or args['query']))
             return True
 
-    base_url = 'www.bing.com'
-    urls = utils.append_scheme(urls)
-    if isinstance(urls, list):
-        urls = ['http://{0}{1}'.format(base_url, x) if x.startswith('/') else x
-                for x in urls]
-        if args['print']:
-            for url in urls:
-                print(url)
-            return urls
-        elif args['describe']:
-            for url in urls:
-                describe_url(url)
-            return urls
-        else:
-            if not urls:
-                open_browser('')
-            else:
-                for url in urls:
-                    open_browser(url)
-            return True
+    if args['print']:
+        for url in urls:
+            print(url)
+        return urls
+    elif args['describe']:
+        for url in urls:
+            describe_url(url)
+            print('\n')
+        return urls
     else:
-        if urls.startswith('/'):
-            urls = 'http://{0}{1}'.format(base_url, urls)
-        if args['print']:
-            print(urls)
-            return urls
-        elif args['describe']:
-            describe_url(urls)
-            return urls
+        if not urls:
+            open_browser('')
         else:
-            if not urls:
-                open_browser('')
-            else:
-                open_browser(urls)
-            return True
+            for url in urls:
+                open_browser(url)
+        return True
 
 
 def describe_url(url):
     """Print a text preview of a given URL"""
     try:
         # Get title and text for summarization
-        html = utils.get_html(url)
-        title = utils.get_title(html)
-        text = utils.get_text(html)
+        resp = utils.get_resp(url)
+        title = utils.get_title(resp)
+        text = utils.get_text(resp)
         if title and text:
             desc = utils.remove_whitespace(
                 pyteaser.summarize(title, ' '.join(text)))
@@ -1022,61 +943,42 @@ def search(args):
         clear_cache()
         print('Cleared {0}.'.format(CACHE_DIR))
         return
-
     if not any([args['query'], args['open'], args['bookmark'],
                 args['search'], args['wolfram']]):
         print(PARSER_HELP)
         return False
+
+    resp = None
     if args['query']:
         args['query'] = utils.clean_query(args, ' '.join(args['query']))
-        # Get response from Bing or WolframAlpha based on program flags
-        html = get_search_html(args)
-    else:
-        html = None
-    # Default search if no flags provided or Wolfram search fails
-    default_search = False
+        resp = get_search_resp(args)
+
     if args['bookmark']:
-        # Add, delete, or open bookmarks
+        # Open, add, tag, untag, move, or delete bookmarks
         return bookmarks(args, args['query'])
     if args['first']:
-        # Open the first Bing link available, 'Feeling Lucky'
-        return open_first(args, html)
+        # Open the first Google link available, also known as 'Feeling Lucky'
+        return open_first(args, resp)
     if args['open']:
-        # Open a link directly
+        # Print, describe, or open URL's in the browser
         return open_url(args, args['query'])
     elif args['search']:
-        # Perform a Bing search and show an interactive prompt
-        return bing_search(args, html)
-    elif args['wolfram']:
-        # Search WolframAlpha and continues search if failed
-        success = wolfram_search(args, html)
-        if not success:
-            default_search = True
-        else:
-            return success
+        # Perform a Google search and display links in an interactive prompt
+        return google_search(args, resp)
     else:
-        default_search = True
-
-    if default_search:
-        # Default program behavior
-        #    1. Check Bing for an instant result
-        #    2. Check WolframAlpha for a result
-        #    3. Check Bing for search results
-        result = None
+        # Return WolframAlpha result if exists, otherwise return Google results
         if args['wolfram']:
-            bing_html = get_bing_html(args['query'])
-            wolf_html = html
-        else:
-            bing_html = html
-
-        result = bing_instant(bing_html)
-        if not result:
-            if not args['wolfram']:
-                wolf_html = get_wolfram_html(args['query'])
-            result = wolfram_search(args, wolf_html)
+            # Response will have already been set to Wolfram response
+            w_resp = resp
+            result = wolfram_search(args, w_resp)
             if not result:
-                return bing_search(args, bing_html)
-        return result
+                g_resp = get_google_resp(args['query'])
+                result = google_search(args, g_resp)
+            return result
+        else:
+            g_resp = resp
+            w_resp = get_wolfram_resp(args['query'])
+            return wolfram_search(args, w_resp) or google_search(args, g_resp)
 
 
 def command_line_runner():

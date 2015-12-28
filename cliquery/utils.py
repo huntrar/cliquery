@@ -46,14 +46,25 @@ def get_proxies():
     return filtered_proxies
 
 
-def get_html(url):
-    """Get HTML response as an lxml.html.HtmlElement object"""
+def get_resp(url):
+    """Get webpage response as an lxml.html.HtmlElement object"""
     try:
         headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
         return lh.fromstring(request.text.encode('utf-8'))
     except Exception:
         sys.stderr.write('Failed to retrieve {0}.\n'.format(url))
+        raise
+
+
+def get_raw_resp(url):
+    """Get webpage response as a str object"""
+    try:
+        headers = {'User-Agent': random.choice(USER_AGENTS)}
+        request = requests.get(url, headers=headers, proxies=get_proxies())
+        return request.text.encode('utf-8')
+    except Exception:
+        sys.stderr.write('Failed to retrieve {0} as str.\n'.format(url))
         raise
 
 
@@ -124,9 +135,9 @@ def split_title(title, delim):
     return largest_piece or title
 
 
-def get_title(html):
-    """Extract title from HTML"""
-    title = html.xpath('//title/text()')
+def get_title(resp):
+    """Extract title from webpage response"""
+    return resp.xpath('//title/text()')
     if not title:
         return ''
     else:
@@ -141,9 +152,9 @@ def get_title(html):
     return title
 
 
-def get_text(html):
+def get_text(resp):
     """Return text that is not within a script or style tag"""
-    return html.xpath('//*[not(self::script) and not(self::style)]/text()')
+    return resp.xpath('//*[not(self::script) and not(self::style)]/text()')
 
 
 def clean_query(args, query):
