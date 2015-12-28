@@ -155,7 +155,7 @@ def get_google_resp(query):
     """Get JSON response from Google API as a dict object (top 8 results)"""
     base_url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
     raw_resp = utils.get_raw_resp('{0}&q={1}&rsz=8'.format(base_url, query))
-    return json.loads(raw_resp)['responseData']
+    return json.loads(raw_resp.decode('utf-8'))['responseData']
 
 
 def get_wolfram_resp(query):
