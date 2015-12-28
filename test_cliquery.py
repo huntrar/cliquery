@@ -38,11 +38,6 @@ class CliqueryTestCase(unittest.TestCase):
                 self.assertTrue(links.startswith('http://') or
                                 links.startswith('https://'))
 
-    def test_instant_resp(self):
-        """instant response questions from Bing"""
-        for query in self.inst_queries:
-            self.assertTrue(self.call_search(query))
-
 
 class TestSummarize(unittest.TestCase):
     def testText(self):
