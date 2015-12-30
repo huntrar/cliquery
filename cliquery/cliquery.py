@@ -49,8 +49,9 @@ BOOKMARK_HELP = ('Usage: '
                  '\nadd: add [url..]'
                  '\ntag: tag [num or suburl] [tag..]'
                  '\nuntag: untag [num or suburl or tag] [subtag..]'
+                 '\ndescribe: desc [num.. or suburl.. or tag..]'
                  '\nmove: mv [num or suburl or tag] [num or suburl or tag]'
-                 '\ndelete: rm [num or suburl or tag..]'
+                 '\ndelete: rm [num.. or suburl.. or tag..]'
                  '\n')
 
 CONTINUE = '[Press Enter to continue..] '
@@ -507,6 +508,20 @@ def find_bookmark_idx(query):
     return -1
 
 
+def find_bookmark_indices(split_args):
+    """Find all bookmark indices given indices or substrings"""
+    bkmark_idxs = []
+    for u_arg in split_args:
+        if not utils.check_input(u_arg, num=True):
+            # If input is not a number then find the correct number
+            bk_idx = find_bookmark_idx(u_arg)
+            if bk_idx > 0:
+                bkmark_idxs.append(bk_idx)
+        else:
+            bkmark_idxs.append(u_arg)
+    return bkmark_idxs
+
+
 def add_bookmark(urls):
     """Add a bookmark to the list of saved bookmarks"""
     with open(CONFIG_FPATH, 'a') as cfg:
@@ -577,6 +592,14 @@ def untag_bookmark(bk_idx, tags_to_rm):
             else:
                 cfg.write('\n{0}'.format(bkmark))
     reload_bookmarks()
+    return True
+
+
+def desc_bookmark(bk_indices):
+    """Print the URL behind a tagged bookmark"""
+    bkmarks = CONFIG['bookmarks']
+    for bk_idx in bk_indices:
+        print(bk_num_to_url(bkmarks, bk_idx))
     return True
 
 
@@ -693,34 +716,22 @@ def bkmark_add_cmd(query):
 def bkmark_tag_cmd(query):
     """tag: tag [num or suburl] [tag..]"""
     split_args = query[3:].strip().split()
-    query = split_args[0]
     tags = split_args[1:]
-    if not utils.check_input(query, num=True):
-        # If input is not a number then find the correct number
-        bk_idx = find_bookmark_idx(query)
-        if bk_idx > 0:
-            query = bk_idx
-    if utils.check_input(query, num=True):
-        return tag_bookmark(query, tags)
-    else:
-        sys.stderr.write('Failed to tag bookmark {0}.\n'
-                         .format(str(query)))
+    return tag_bookmark(find_bookmark_indices([split_args[0]])[0], tags)
 
 
 def bkmark_untag_cmd(query):
     """untag: untag [num or suburl or tag] [subtag..]"""
     split_args = query[5:].strip().split()
     tags_to_rm = split_args[1:]
-    # Find the bookmark index
-    bkmark_idx = 0
-    if not utils.check_input(split_args[0], num=True):
-        # If input is not a number then find the correct number
-        bk_idx = find_bookmark_idx(split_args[0])
-        if bk_idx > 0:
-            bkmark_idx = bk_idx
-    else:
-        bkmark_idx = split_args[0]
-    return untag_bookmark(bkmark_idx, tags_to_rm)
+    return untag_bookmark(find_bookmark_indices([split_args[0]])[0],
+                          tags_to_rm)
+
+
+def bkmark_desc_cmd(query):
+    """describe: desc [num or suburl or tag]"""
+    split_args = query[4:].strip().split()
+    return desc_bookmark(find_bookmark_indices(split_args))
 
 
 def bkmark_mv_cmd(query):
@@ -749,25 +760,16 @@ def bkmark_mv_cmd(query):
 def bkmark_rm_cmd(query):
     """delete: rm [num or suburl or tag..]"""
     split_args = query[3:].strip().split()
-    bkmark_idxs = []
-    for u_arg in split_args:
-        if not utils.check_input(u_arg, num=True):
-            # If input is not a number then find the correct number
-            bk_idx = find_bookmark_idx(u_arg)
-            if bk_idx > 0:
-                bkmark_idxs.append(bk_idx)
-        else:
-            bkmark_idxs.append(u_arg)
-    return rm_bookmark(bkmark_idxs)
+    return rm_bookmark(find_bookmark_indices(split_args))
 
 
-def bk_num_to_url(bkmarks, num, append_arg):
+def bk_num_to_url(bkmarks, num, append_arg=None):
     """Convert a bookmark number to a URL
 
        Keyword arguments:
            bkmarks -- bookmarks read in from config file (list)
            num -- bookmark num to convert (str)
-           append_arg -- additional args possibly found (str)
+           append_arg -- additional args possibly found (str) (default: None)
 
        Return the URL found or None.
     """
@@ -834,7 +836,7 @@ def bkmark_open_cmd(args, query):
 
 
 def bookmarks(args, query):
-    """Open, add, tag, untag, move, or delete bookmarks"""
+    """Open, add, tag, untag, describe, move, or delete bookmarks"""
     if isinstance(query, list):
         query = ' '.join(query)
     if not query:
@@ -846,6 +848,8 @@ def bookmarks(args, query):
         return bkmark_tag_cmd(query)
     elif query.startswith('untag'):
         return bkmark_untag_cmd(query)
+    elif query.startswith('desc'):
+        return bkmark_desc_cmd(query)
     elif query.startswith('mv'):
         return bkmark_mv_cmd(query)
     elif query.startswith('rm'):
