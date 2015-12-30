@@ -166,19 +166,6 @@ def get_wolfram_resp(query):
     return utils.get_resp('{0}{1}&appid={2}'.format(base_url, query, api_key))
 
 
-def get_search_resp(args):
-    """Retrieve Google or WolframAlpha response, or neither"""
-    if args['bookmark']:
-        return ''
-    if not args['open'] or args['first']:
-        if not args['wolfram']:
-            return get_google_resp(args['query'])
-        else:
-            return get_wolfram_resp(args['query'])
-    else:
-        return ''
-
-
 def open_link_range(args, urls, prompt_args):
     """Open a link number range
 
@@ -433,7 +420,7 @@ def reformat_wolfram_entries(titles, entries):
 
 
 def wolfram_search(args, resp):
-    """Search WolframAlpha using their API, requires API key in .cliqrc"""
+    """Perform a WolframAlpha search, may require an API key in .cliqrc"""
     if resp is None:
         return open_url(args, 'http://www.wolframalpha.com')
     elif args['open']:
@@ -963,37 +950,33 @@ def search(args):
         print(PARSER_HELP)
         return False
 
-    resp = None
     if args['query']:
         args['query'] = utils.clean_query(args, ' '.join(args['query']))
-        resp = get_search_resp(args)
 
     if args['bookmark']:
         # Open, add, tag, untag, move, or delete bookmarks
         return bookmarks(args, args['query'])
     if args['first']:
         # Open the first Google link available, also known as 'Feeling Lucky'
-        return open_first(args, resp)
+        return open_first(args, get_google_resp(args['query']))
     if args['open']:
         # Print, describe, or open URL's in the browser
         return open_url(args, args['query'])
     elif args['search']:
         # Perform a Google search and display links in an interactive prompt
-        return google_search(args, resp)
+        return google_search(args, get_google_resp(args['query']))
+    elif args['wolfram']:
+        # Perform a WolframAlpha search, may require an API key in .cliqrc
+        result = wolfram_search(args, get_wolfram_resp(args['query']))
+        if not result:
+            print('No answer available from WolframAlpha.')
+        return result
     else:
-        # Return WolframAlpha result if exists, otherwise return Google results
-        if args['wolfram']:
-            # Response will have already been set to Wolfram response
-            w_resp = resp
-            result = wolfram_search(args, w_resp)
-            if not result:
-                g_resp = get_google_resp(args['query'])
-                result = google_search(args, g_resp)
-            return result
-        else:
-            g_resp = resp
-            w_resp = get_wolfram_resp(args['query'])
-            return wolfram_search(args, w_resp) or google_search(args, g_resp)
+        # Default behavior is to check WolframAlpha, then Google.
+        result = wolfram_search(args, get_wolfram_resp(args['query']))
+        if not result:
+            result = google_search(args, get_google_resp(args['query']))
+        return result
 
 
 def command_line_runner():
@@ -1020,7 +1003,7 @@ def command_line_runner():
         enable_cache()
     if not api_key and args['wolfram']:
         args['wolfram'] = False
-        sys.stderr.write('Missing WolframAlpha API key in .cliqrc!\n')
+        sys.stderr.write('Missing WolframAlpha API key in .cliqrc file.\n')
     search(args)
 
 

@@ -161,12 +161,9 @@ def clean_query(args, query):
     """Replace special characters/append URL extensions if necessary"""
     if args['bookmark']:
         return query
-    elif (((args['search'] or args['wolfram']) and args['open']) or not
-          args['open']):
-        # Replace special characters with hex encoded escapes
-        return url_quote(query)
-    else:
-        # Arguments should be URLs
+    elif args['open'] and not (args['search'] or args['wolfram'] or
+                               args['first']):
+        # The query consists of links to open directly
         urls = []
         for arg in query.split():
             if '.' not in arg and 'localhost:' not in arg:
@@ -174,6 +171,9 @@ def clean_query(args, query):
             else:
                 urls.append(arg)
         return urls
+    else:
+        # Replace special characters with hex encoded escapes
+        return url_quote(query)
 
 
 def check_input(user_input, num=False, empty=False):

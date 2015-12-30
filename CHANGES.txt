@@ -1,3 +1,8 @@
+1.5.3
+------
+
+ - refined search and query preprocessing behavior
+
 1.5.2
 ------
 
