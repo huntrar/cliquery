@@ -45,13 +45,13 @@ CONFIG = {}
 
 PARSER_HELP = ''
 BOOKMARK_HELP = ('Usage: '
-                 '\nopen: [num.. or suburl or tag] [additional URL args..]'
+                 '\nopen: [num.. OR url/tag substr] [additional URL args..]'
                  '\nadd: add [url..]'
-                 '\ntag: tag [num or suburl] [tag..]'
-                 '\nuntag: untag [num or suburl or tag] [subtag..]'
-                 '\ndescribe: desc [num.. or suburl.. or tag..]'
-                 '\nmove: mv [num or suburl or tag] [num or suburl or tag]'
-                 '\ndelete: rm [num.. or suburl.. or tag..]'
+                 '\nremove: rm [num.. OR url/tag substr..]'
+                 '\ntag: tag [num OR suburl] [tag..]'
+                 '\nuntag: untag [num OR url/tag substr] [tag..]'
+                 '\ndescribe: desc [num.. OR url/tag substr..]'
+                 '\nmove: mv [num OR url/tag substr] [num OR url/tag substr]'
                  '\n')
 
 CONTINUE = '[Press Enter to continue..] '
@@ -508,18 +508,55 @@ def find_bookmark_idx(query):
     return -1
 
 
-def find_bookmark_indices(split_args):
+def find_bookmark_indices(query_args):
     """Find all bookmark indices given indices or substrings"""
-    bkmark_idxs = []
-    for u_arg in split_args:
-        if not utils.check_input(u_arg, num=True):
-            # If input is not a number then find the correct number
-            bk_idx = find_bookmark_idx(u_arg)
-            if bk_idx > 0:
-                bkmark_idxs.append(bk_idx)
+    bk_indices = []
+    for arg in query_args:
+        if utils.check_input(arg, num=True):
+            # Substring is already a bookmark index
+            bk_indices.append(arg)
         else:
-            bkmark_idxs.append(u_arg)
-    return bkmark_idxs
+            bk_idx = find_bookmark_idx(arg)
+            if bk_idx > 0:
+                bk_indices.append(bk_idx)
+            else:
+                sys.stderr.write('Could not find bookmark {0}.\n'.format(arg))
+    return bk_indices
+
+
+def bk_num_to_url(bkmarks, num, append_arg=None):
+    """Convert a bookmark number to a URL
+
+       Keyword arguments:
+           bkmarks -- bookmarks read in from config file (list)
+           num -- bookmark num to convert (str)
+           append_arg -- additional args possibly found (str) (default: None)
+
+       Return the URL found or None.
+    """
+    try:
+        bkmark = bkmarks[int(num) - 1]
+        if '(' in bkmark and ')' in bkmark:
+            url = bkmark.split('(')[0].strip()
+        else:
+            url = bkmark
+        if append_arg:
+            url = '{0}/{1}'.format(url.rstrip('/'), append_arg)
+        return url
+    except IndexError:
+        sys.stderr.write('Bookmark {0} not found.\n'.format(num))
+        return None
+
+
+def print_bookmarks():
+    """Print all saved bookmarks"""
+    bkmarks = CONFIG['bookmarks']
+    print('Bookmarks:')
+    for i, bkmark in enumerate(bkmarks):
+        if '(' in bkmark and ')' in bkmark:
+            bkmark = bkmark.split('(')[1].rstrip(')')
+        print('{0}. {1}'.format(str(i+1), bkmark))
+    return True
 
 
 def add_bookmark(urls):
@@ -530,6 +567,26 @@ def add_bookmark(urls):
                 cfg.write('\n{0}'.format(url))
         elif isinstance(urls, str):
             cfg.write('\n{0}'.format(urls))
+    reload_bookmarks()
+    return True
+
+
+def remove_bookmark(bk_idx):
+    """Remove an existing bookmark from the list of saved bookmarks"""
+    bkmarks = CONFIG['bookmarks']
+    with open(CONFIG_FPATH, 'w') as cfg:
+        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbookmarks: ')
+        if isinstance(bk_idx, list):
+            bk_idx = [int(x)-1 for x in bk_idx]
+            for i, bkmark in enumerate(bkmarks):
+                if i not in bk_idx:
+                    cfg.write('\n{0}'.format(bkmark))
+        else:
+            for i, bkmark in enumerate(bkmarks):
+                if i != int(bk_idx)-1:
+                    cfg.write('\n{0}'.format(bkmark))
     reload_bookmarks()
     return True
 
@@ -571,17 +628,14 @@ def untag_bookmark(bk_idx, tags_to_rm):
             if i == int(bk_idx)-1 and '(' in bkmark and ')' in bkmark:
                 # Remove tags
                 split_bkmark = bkmark.split('(')
-
                 if tags_to_rm:
                     curr_tags = split_bkmark[1].rstrip(')').split()
                     new_tags = list(curr_tags)
-
                     # Match current tags by substrings of tags to remove
                     for tag in curr_tags:
                         for rm_tag in tags_to_rm:
                             if rm_tag in tag:
                                 new_tags.remove(tag)
-
                     if new_tags:
                         cfg.write('\n{0} ({1})'.format(split_bkmark[0],
                                                        ' '.join(new_tags)))
@@ -595,7 +649,7 @@ def untag_bookmark(bk_idx, tags_to_rm):
     return True
 
 
-def desc_bookmark(bk_indices):
+def describe_bookmark(bk_indices):
     """Print the URL behind a tagged bookmark"""
     bkmarks = CONFIG['bookmarks']
     for bk_idx in bk_indices:
@@ -603,7 +657,7 @@ def desc_bookmark(bk_indices):
     return True
 
 
-def mv_bookmarks(idx1, idx2):
+def move_bookmark(idx1, idx2):
     """Move bookmarks to the start, end, or at another bookmark's position"""
     bkmarks = CONFIG['bookmarks']
     b_len = len(bkmarks)
@@ -663,132 +717,8 @@ def mv_bookmarks(idx1, idx2):
     return True
 
 
-def rm_bookmark(bk_idx):
-    """Remove an existing bookmark from the list of saved bookmarks"""
-    bkmarks = CONFIG['bookmarks']
-    with open(CONFIG_FPATH, 'w') as cfg:
-        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
-        cfg.write('\nbookmarks: ')
-        if isinstance(bk_idx, list):
-            bk_idx = [int(x)-1 for x in bk_idx]
-            for i, bkmark in enumerate(bkmarks):
-                if i not in bk_idx:
-                    cfg.write('\n{0}'.format(bkmark))
-        else:
-            for i, bkmark in enumerate(bkmarks):
-                if i != int(bk_idx)-1:
-                    cfg.write('\n{0}'.format(bkmark))
-    reload_bookmarks()
-    return True
-
-
-def print_bookmarks():
-    """Print all saved bookmarks"""
-    bkmarks = CONFIG['bookmarks']
-    print('Bookmarks:')
-    for i, bkmark in enumerate(bkmarks):
-        if '(' in bkmark and ')' in bkmark:
-            bkmark = bkmark.split('(')[1].rstrip(')')
-        print('{0}. {1}'.format(str(i+1), bkmark))
-    return True
-
-
-def bkmark_add_cmd(query):
-    """add: add [url..]"""
-    query = query[3:].strip()
-    queries = query.split()
-    clean_bkmarks = []
-    for arg in queries:
-        arg = utils.append_scheme(arg)
-        if '.' not in arg:
-            if '(' in arg and ')' in arg:
-                split_arg = arg.split('(')
-                tag = split_arg[1].rstrip(')')
-                bkmark = split_arg[0].strip()
-                arg = '{0}.com ({1})'.format(bkmark, tag)
-            else:
-                arg = '{0}.com'.format(arg)
-        clean_bkmarks.append(arg)
-    return add_bookmark(clean_bkmarks)
-
-
-def bkmark_tag_cmd(query):
-    """tag: tag [num or suburl] [tag..]"""
-    split_args = query[3:].strip().split()
-    tags = split_args[1:]
-    return tag_bookmark(find_bookmark_indices([split_args[0]])[0], tags)
-
-
-def bkmark_untag_cmd(query):
-    """untag: untag [num or suburl or tag] [subtag..]"""
-    split_args = query[5:].strip().split()
-    tags_to_rm = split_args[1:]
-    return untag_bookmark(find_bookmark_indices([split_args[0]])[0],
-                          tags_to_rm)
-
-
-def bkmark_desc_cmd(query):
-    """describe: desc [num or suburl or tag]"""
-    split_args = query[4:].strip().split()
-    return desc_bookmark(find_bookmark_indices(split_args))
-
-
-def bkmark_mv_cmd(query):
-    """move: mv [num or suburl or tag] [num or suburl or tag]"""
-    split_args = query[2:].strip().split()
-    if len(split_args) != 2:
-        sys.stderr.write(BOOKMARK_HELP)
-        return True
-
-    bk1 = bk1_idx = split_args[0]
-    bk2 = bk2_idx = split_args[1]
-    if not utils.check_input(bk1, num=True):
-        bk1_idx = find_bookmark_idx(bk1)
-    if not utils.check_input(bk2, num=True):
-        bk2_idx = find_bookmark_idx(bk2)
-    if bk1_idx < 0:
-        sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk1))
-        return False
-    if bk2_idx < 0:
-        sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk2))
-        return False
-    # Account for zero-indexed list
-    return mv_bookmarks(int(bk1_idx)-1, int(bk2_idx)-1)
-
-
-def bkmark_rm_cmd(query):
-    """delete: rm [num or suburl or tag..]"""
-    split_args = query[3:].strip().split()
-    return rm_bookmark(find_bookmark_indices(split_args))
-
-
-def bk_num_to_url(bkmarks, num, append_arg=None):
-    """Convert a bookmark number to a URL
-
-       Keyword arguments:
-           bkmarks -- bookmarks read in from config file (list)
-           num -- bookmark num to convert (str)
-           append_arg -- additional args possibly found (str) (default: None)
-
-       Return the URL found or None.
-    """
-    try:
-        bkmark = bkmarks[int(num) - 1]
-        if '(' in bkmark and ')' in bkmark:
-            url = bkmark.split('(')[0].strip()
-        else:
-            url = bkmark
-        if append_arg:
-            url = '{0}/{1}'.format(url.rstrip('/'), append_arg)
-        return url
-    except IndexError:
-        sys.stderr.write('Bookmark {0} not found.\n'.format(num))
-        return None
-
-
-def bkmark_open_cmd(args, query):
-    """open: [num.. or suburl or tag] [additional URL args..]
+def bookmark_open_cmd(args, query):
+    """open: [num.. OR url/tag substr] [additional URL args..]
 
        Keyword arguments:
            args -- program arguments (dict)
@@ -835,27 +765,107 @@ def bkmark_open_cmd(args, query):
         return True
 
 
+def bookmark_add_cmd(query):
+    """add: add [url..]"""
+    split_query = query[3:].strip().split()
+    new_bkmarks = []
+    for arg in split_query:
+        arg = utils.append_scheme(arg)
+        if '.' not in arg:
+            if '(' in arg and ')' in arg:
+                split_arg = arg.split('(')
+                tag = split_arg[1].rstrip(')')
+                bkmark = split_arg[0].strip()
+                arg = '{0}.com ({1})'.format(bkmark, tag)
+            else:
+                arg = '{0}.com'.format(arg)
+        new_bkmarks.append(arg)
+    return add_bookmark(new_bkmarks)
+
+
+def bookmark_rm_cmd(query):
+    """remove: rm [num.. OR url/tag substr..]"""
+    split_query = query[3:].strip().split()
+    bk_indices = find_bookmark_indices(split_query)
+    if bk_indices:
+        return remove_bookmark(bk_indices)
+    return False
+
+
+def bookmark_tag_cmd(query):
+    """tag: tag [num OR suburl] [tag..]"""
+    split_query = query[3:].strip().split()
+    tags = split_query[1:]
+    bk_indices = find_bookmark_indices([split_query[0]])
+    if bk_indices:
+        return tag_bookmark(bk_indices[0], tags)
+    return False
+
+
+def bookmark_untag_cmd(query):
+    """untag: untag [num OR url/tag substr] [tag..]"""
+    split_query = query[5:].strip().split()
+    tags_to_rm = split_query[1:]
+    bk_indices = find_bookmark_indices([split_query[0]])
+    if bk_indices:
+        return untag_bookmark(bk_indices[0], tags_to_rm)
+    return False
+
+
+def bookmark_desc_cmd(query):
+    """describe: desc [num.. OR url/tag substr..]"""
+    split_query = query[4:].strip().split()
+    bk_indices = find_bookmark_indices(split_query)
+    if bk_indices:
+        return describe_bookmark(bk_indices)
+    return False
+
+
+def bookmark_mv_cmd(query):
+    """move: mv [num OR url/tag substr] [num OR url/tag substr]"""
+    split_query = query[2:].strip().split()
+    if len(split_query) != 2:
+        sys.stderr.write(BOOKMARK_HELP)
+        return False
+
+    bk1 = bk1_idx = split_query[0]
+    bk2 = bk2_idx = split_query[1]
+    if not utils.check_input(bk1, num=True):
+        bk1_idx = find_bookmark_idx(bk1)
+    if not utils.check_input(bk2, num=True):
+        bk2_idx = find_bookmark_idx(bk2)
+    if bk1_idx < 0:
+        sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk1))
+        return False
+    if bk2_idx < 0:
+        sys.stderr.write('Failed to find bookmark {0}.\n'.format(bk2))
+        return False
+    # Account for zero-indexed list
+    return move_bookmark(int(bk1_idx)-1, int(bk2_idx)-1)
+
+
 def bookmarks(args, query):
     """Open, add, tag, untag, describe, move, or delete bookmarks"""
-    if isinstance(query, list):
-        query = ' '.join(query)
     if not query:
         return print_bookmarks()
-
-    if query.startswith('add'):
-        return bkmark_add_cmd(query)
-    elif query.startswith('tag'):
-        return bkmark_tag_cmd(query)
-    elif query.startswith('untag'):
-        return bkmark_untag_cmd(query)
-    elif query.startswith('desc'):
-        return bkmark_desc_cmd(query)
-    elif query.startswith('mv'):
-        return bkmark_mv_cmd(query)
-    elif query.startswith('rm'):
-        return bkmark_rm_cmd(query)
+    elif isinstance(query, list):
+        query_cmd = query[0]
+        query = ' '.join(query)
     else:
-        return bkmark_open_cmd(args, query)
+        query_cmd = query.split()[0]
+
+    bookmark_commands = {'add': bookmark_add_cmd,
+                         'rm': bookmark_rm_cmd,
+                         'tag': bookmark_tag_cmd,
+                         'untag': bookmark_untag_cmd,
+                         'desc': bookmark_desc_cmd,
+                         'mv': bookmark_mv_cmd}
+    if query_cmd not in bookmark_commands:
+        # Default command is to open a bookmark
+        return bookmark_open_cmd(args, query)
+    else:
+        # Execute a bookmark command
+        return bookmark_commands[query_cmd](query)
 
 
 def open_browser(url):

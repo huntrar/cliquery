@@ -54,7 +54,7 @@ Do the following to copy .cliqrc to .local.cliqrc:
 
 ## Notes
 * Supports both Python 2.x and Python 3.x.
-* If you receive the following message (or similar) when trying to add or delete bookmarks:
+* If you receive the following message (or similar) when trying to add or remove bookmarks:
 
     IOError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc'
 
@@ -84,5 +84,5 @@ Try entering the following to fix:
     [Press Enter to continue..]
     ```
 * To choose multiple links at once, a range may be specified by separating the start and end range with a dash. Leaving one end of the range blank will choose all links until the other end of that range. For example, given 10 links, entering 5- would effectively be the same as entering 5-10.
-* Using the bookmark flag with no arguments will list all current bookmarks in .cliqrc, ordered by time of entry. Entering help with the flag will list all possible commands including add, delete, tag/untag (for aliasing), describe, move, and open. Bookmarks like other flags may be entered during runtime in the link prompt.
+* Using the bookmark flag with no arguments will list all current bookmarks in .cliqrc, ordered by time of entry. Entering help with the flag will list all possible commands including open, add, remove, tag/untag (for aliasing), describe, and move. Bookmarks like other flags may be entered during runtime in the link prompt.
 * Additional arguments may be appended to bookmarks while opening them. These are interpreted as any non-integer arguments which are not found in any bookmarks (URLs or tags).
