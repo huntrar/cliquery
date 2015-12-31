@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 from collections import Counter
+import itertools
 from math import fabs
 from re import split as regex_split, sub as regex_sub, UNICODE as REGEX_UNICODE
 
@@ -193,7 +194,7 @@ def split_sentences(text):
     """
     sentences = regex_split('(?<![A-ZА-ЯЁ])([.!?]"?)(?=\s+\"?[A-ZА-ЯЁ])',
                             text, flags=REGEX_UNICODE)
-    s_iter = zip(*[iter(sentences[:-1])] * 2)
+    s_iter = itertools.izip(*[iter(sentences[:-1])] * 2)
     s_iter = [''.join(x for x in y).lstrip() for y in s_iter]
     s_iter.append(sentences[-1])
     return s_iter

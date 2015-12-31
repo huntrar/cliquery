@@ -1,3 +1,8 @@
+1.5.4
+------
+
+ - replaced zip with itertools.izip
+
 1.5.3
 ------
 

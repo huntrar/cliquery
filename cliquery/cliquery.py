@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function
 import argparse as argp
 from collections import OrderedDict
 import glob
+import itertools
 import json
 import os
 import re
@@ -405,7 +406,7 @@ def open_first(args, resp):
 def reformat_wolfram_entries(titles, entries):
     """Reformat Wolfram entries"""
     output_list = []
-    for title, entry in zip(titles, entries):
+    for title, entry in itertools.izip(titles, entries):
         try:
             if ' |' in entry:
                 entry = '\n\t{0}'.format(entry.replace(' |', ':')
