@@ -1,3 +1,8 @@
+1.5.8
+------
+
+ - fixed search/wolfram not opening homepages if no query given
+
 1.5.7
 ------
 

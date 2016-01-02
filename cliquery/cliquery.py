@@ -155,6 +155,8 @@ def get_wolfram_query_url(query):
 
 def get_google_resp(query):
     """Get JSON response from Google API as a dict object (top 8 results)"""
+    if not query:
+        return None
     base_url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
     raw_resp = utils.get_raw_resp('{0}&q={1}&rsz=8'.format(base_url, query))
     return json.loads(raw_resp.decode('utf-8'))['responseData']
@@ -162,6 +164,8 @@ def get_google_resp(query):
 
 def get_wolfram_resp(query):
     """Get XML response from Wolfram API as an lxml.html.HtmlElement object"""
+    if not query:
+        return None
     base_url = 'http://api.wolframalpha.com/v2/query?input='
     api_key = CONFIG['api_key']
     return utils.get_resp('{0}{1}&appid={2}'.format(base_url, query, api_key))
