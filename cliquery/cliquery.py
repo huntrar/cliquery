@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" cliquery - a command-line browsing utility
+""" cliquery - a command-line browser interface
 
     written by Hunter Hammond (huntrar@gmail.com)
 """
@@ -63,7 +63,7 @@ FLAGS_MODIFIED = False  # Set to True once user enters interactive flags
 
 def get_parser():
     """Parse command-line arguments"""
-    parser = argp.ArgumentParser(description='a command-line browsing utility')
+    parser = argp.ArgumentParser(description='a command-line browser interface')
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*',
                         help='keywords to search')
     parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',

@@ -1,3 +1,8 @@
+1.5.7
+------
+
+ - renamed "browsing utility" to browser interface
+
 1.5.6
 ------
 

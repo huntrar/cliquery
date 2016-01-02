@@ -1,7 +1,7 @@
 # cliquery [![PyPI Version](https://img.shields.io/pypi/v/cliquery.svg)](https://pypi.python.org/pypi/cliquery) [![Build Status](https://travis-ci.org/huntrar/cliquery.svg?branch=master)](https://travis-ci.org/huntrar/cliquery) [![PyPI Monthly downloads](https://img.shields.io/pypi/dm/cliquery.svg?style=flat)](https://pypi.python.org/pypi/cliquery)
 
 
-## a command-line browsing utility
+## a command-line browser interface
 
 cliquery cuts down on clicking through command-line web searching, page previewing, and page bookmarking, among other features. An interactive prompt allows users to easily make successive queries and enter program flags dynamically; simply typing help will list all possible flags to enter. Opening a link will invoke a browser supplied by the user or detected automatically.
 
@@ -31,7 +31,7 @@ Do the following to copy .cliqrc to .local.cliqrc:
     usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-o] [-p] [-s] [-v] [-w]
                        [QUERY [QUERY ...]]
     
-    a command-line browsing utility
+    a command-line browser interface
     
     positional arguments:
       QUERY              keywords to search
