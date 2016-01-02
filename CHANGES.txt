@@ -1,3 +1,8 @@
+1.5.6
+------
+
+ - improved method of identifying extensions (still not totally reliable)
+
 1.5.5
 ------
 

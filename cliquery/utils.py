@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Contains cliquery utility functions"""
 
+import os
 import random
 import sys
 
@@ -13,9 +14,11 @@ from .compat import SYS_VERSION, iteritems
 if SYS_VERSION == 2:
     from urllib import quote_plus as url_quote
     from urllib import getproxies
+    from urlparse import urlparse
 
 else:
     from urllib.parse import quote_plus as url_quote
+    from urllib.parse import urlparse
     from urllib.request import getproxies
 
 
@@ -157,6 +160,18 @@ def get_text(resp):
     return resp.xpath('//*[not(self::script) and not(self::style)]/text()')
 
 
+def has_ext(url):
+    """Return whether the url has an extension (unreliable in some cases)"""
+    if 'www.' in url:
+        url = url.replace('www.', '')
+    parsed_url = urlparse(url)
+    if not parsed_url.netloc and parsed_url.path:
+        return bool(os.path.splitext(parsed_url.path)[1])
+    elif parsed_url.netloc:
+        return bool(os.path.splitext(parsed_url.netloc)[1])
+    return False
+
+
 def clean_query(args, query):
     """Replace special characters/append URL extensions if necessary"""
     if args['bookmark']:
@@ -166,7 +181,7 @@ def clean_query(args, query):
         # The query consists of links to open directly
         urls = []
         for arg in query.split():
-            if '.' not in arg and 'localhost:' not in arg:
+            if not has_ext(arg) and 'localhost:' not in arg:
                 urls.append('{0}.com'.format(arg))
             else:
                 urls.append(arg)
