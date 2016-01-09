@@ -63,7 +63,8 @@ FLAGS_MODIFIED = False  # Set to True once user enters interactive flags
 
 def get_parser():
     """Parse command-line arguments"""
-    parser = argp.ArgumentParser(description='a command-line browser interface')
+    parser = argp.ArgumentParser(description='a command-line browser interface'
+                                 )
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*',
                         help='keywords to search')
     parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
@@ -719,9 +720,15 @@ def bookmark_open_cmd(args, query):
        Keywords that do not exist in bookmarks are interpreted to be additional
        URL args, and are appended to the end of any matched bookmark URL's.
     """
-    bkmarks = CONFIG['bookmarks']
+    if not query:
+        sys.stderr.write(BOOKMARK_HELP)
+        return False
     if isinstance(query, str):
         split_query = query.strip().split()
+    else:
+        split_query = query
+
+    bkmarks = CONFIG['bookmarks']
     bookmark_nums = [x for x in split_query if utils.check_input(x, num=True)]
     bookmark_words = [x for x in split_query if x not in bookmark_nums]
     append_args = [x for x in bookmark_words
@@ -760,6 +767,10 @@ def bookmark_open_cmd(args, query):
 def bookmark_add_cmd(query):
     """add: add [url..]"""
     split_query = query[3:].strip().split()
+    if not split_query:
+        sys.stderr.write(BOOKMARK_HELP)
+        return False
+
     new_bkmarks = []
     for arg in split_query:
         arg = utils.append_scheme(arg)
@@ -778,6 +789,10 @@ def bookmark_add_cmd(query):
 def bookmark_rm_cmd(query):
     """remove: rm [num.. OR url/tag substr..]"""
     split_query = query[3:].strip().split()
+    if not split_query:
+        sys.stderr.write(BOOKMARK_HELP)
+        return False
+
     bk_indices = find_bookmark_indices(split_query)
     if bk_indices:
         return remove_bookmark(bk_indices)
@@ -787,6 +802,10 @@ def bookmark_rm_cmd(query):
 def bookmark_tag_cmd(query):
     """tag: tag [num OR suburl] [tag..]"""
     split_query = query[3:].strip().split()
+    if not split_query:
+        sys.stderr.write(BOOKMARK_HELP)
+        return False
+
     tags = split_query[1:]
     bk_indices = find_bookmark_indices([split_query[0]])
     if bk_indices:
@@ -797,6 +816,10 @@ def bookmark_tag_cmd(query):
 def bookmark_untag_cmd(query):
     """untag: untag [num OR url/tag substr] [tag..]"""
     split_query = query[5:].strip().split()
+    if not split_query:
+        sys.stderr.write(BOOKMARK_HELP)
+        return False
+
     tags_to_rm = split_query[1:]
     bk_indices = find_bookmark_indices([split_query[0]])
     if bk_indices:
@@ -807,6 +830,10 @@ def bookmark_untag_cmd(query):
 def bookmark_desc_cmd(query):
     """describe: desc [num.. OR url/tag substr..]"""
     split_query = query[4:].strip().split()
+    if not split_query:
+        sys.stderr.write(BOOKMARK_HELP)
+        return False
+
     bk_indices = find_bookmark_indices(split_query)
     if bk_indices:
         return describe_bookmark(bk_indices)
@@ -816,7 +843,7 @@ def bookmark_desc_cmd(query):
 def bookmark_mv_cmd(query):
     """move: mv [num OR url/tag substr] [num OR url/tag substr]"""
     split_query = query[2:].strip().split()
-    if len(split_query) != 2:
+    if not split_query or len(split_query) != 2:
         sys.stderr.write(BOOKMARK_HELP)
         return False
 

@@ -1,3 +1,8 @@
+1.5.9
+------
+
+ - fixed IndexError when passing no args to some bookmark cmds
+
 1.5.8
 ------
 
