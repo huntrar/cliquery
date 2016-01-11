@@ -1,3 +1,8 @@
+1.5.10
+------
+
+ - catches KeyboardInterrupt/EOFError in search
+
 1.5.9
 ------
 
