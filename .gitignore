@@ -6,3 +6,4 @@ build/
 *.sw*
 *.local*
 *.bts
+.idea/
