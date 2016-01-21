@@ -16,8 +16,6 @@ from subprocess import call
 import sys
 import webbrowser
 
-import requests_cache
-
 from cliquery import utils, pyteaser
 from .compat import SYS_VERSION, iteritems, itervalues, iterkeys, uni, asc
 from . import __version__
@@ -159,6 +157,11 @@ def set_config():
 
 def enable_cache():
     """Enable requests library cache"""
+    try:
+        import requests_cache
+    except ImportError as err:
+        sys.stderr.write('Failed to enable cache: {0}\n'.format(str(err)))
+        return
     if not os.path.exists(CACHE_DIR):
         os.makedirs(CACHE_DIR)
     requests_cache.install_cache(CACHE_FILE)
