@@ -152,7 +152,10 @@ def set_config():
             return
 
     # If no valid browser found then use webbrowser to automatically detect one
-    CONFIG['browser'] = webbrowser.get()
+    try:
+        CONFIG['browser'] = webbrowser.get()
+    except webbrowser.Error:
+        pass
 
 
 def enable_cache():

@@ -4,6 +4,7 @@
  - updated error handling notes regarding .cliqrc permissions
  - updated setup.py description and added new keywords
  - wrapped requests_cache in try/except as it is a non-crucial library
+ - wrapped all webbrowser.get()'s in try/except
 
 1.6.0
 ------
