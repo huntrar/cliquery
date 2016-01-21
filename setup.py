@@ -33,7 +33,7 @@ News
 setup(
     name='cliquery',
     version=cliquery.__version__,
-    description='a command-line browsing utility',
+    description='a command-line browser interface',
     long_description=long_description,
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -49,7 +49,7 @@ setup(
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
     ],
-    keywords='cliquery command line search internet utily browser bookmark console preview answer',
+    keywords='cliquery command line console help answer google search feeling lucky wolfram alpha knowledge engine internet browser interface bookmark pyteaser preview',
     author='Hunter Hammond',
     author_email='huntrar@gmail.com',
     maintainer='Hunter Hammond',

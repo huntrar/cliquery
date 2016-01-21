@@ -2,6 +2,7 @@
 ------
 
  - updated error handling notes regarding .cliqrc permissions
+ - updated setup.py description and added new keywords
 
 1.6.0
 ------
