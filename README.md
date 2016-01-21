@@ -54,13 +54,17 @@ Do the following to copy .cliqrc to .local.cliqrc:
 
 ## Notes
 * Supports both Python 2.x and Python 3.x.
-* If you receive the following message (or similar) when trying to add or remove bookmarks:
+* NOTE: If you receive the following message (or similar) when trying to modify bookmarks:
 
-    IOError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc'
+        IOError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc'
 
-Try entering the following to fix:
+Then you have two options:
 
-    sudo chmod a+x "$(cliquery -c)" && sudo chown $USER "$(cliquery -c)" 
+    1. (recommended) Make a one-time change of file ownership from root to user by entering the following:
+
+        sudo chown $USER "$(cliquery -c)" 
+
+    2. Always execute the command as root, using su or sudo.
 * A search may return immediate results, such as calculations or facts (via WolframAlpha), or instead a page of search results comprised of descriptive links to follow (via Google).
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility. Entering h or help will list all possible prompt commands.
     ```
