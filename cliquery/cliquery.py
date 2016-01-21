@@ -64,7 +64,7 @@ FLAGS_MODIFIED = False  # Set to True once user enters interactive flags
 def get_parser():
     """Parse command-line arguments"""
     parser = argp.ArgumentParser(description='a command-line browser interface'
-                                 )
+                                )
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*',
                         help='keywords to search')
     parser.add_argument('-b', '--bookmark', help='view and modify bookmarks',
@@ -107,22 +107,54 @@ def read_config():
                 browser = line[8:].strip()
             else:
                 lines.append(line)
+        if not api_key and not browser:
+            try:
+                api_key = lines[0].strip()
+                browser = lines[1].strip()
+            except IndexError:
+                api_key = ''
+                browser = ''
 
+        # Read in bookmarks
         bkmarks = []
         cfg_bkmarks = cfg.read()
         if cfg_bkmarks.startswith('bookmarks:'):
             cfg_bkmarks = cfg_bkmarks[10:].split('\n')
             bkmarks = [b.strip() for b in cfg_bkmarks if b.strip()]
 
-        if not api_key and not browser:
-            try:
-                api_key = lines[0].strip()
-                browser = lines[1].strip()
-                return api_key, browser, bkmarks
-            except IndexError:
-                return '', '', bkmarks
-        else:
-            return api_key, browser, bkmarks
+        return api_key, browser, bkmarks
+
+
+def set_config():
+    """Set WolframAlpha API key, browser, and bookmarks in CONFIG"""
+    api_key, browser, bkmarks = read_config()
+    CONFIG['api_key'] = api_key
+    CONFIG['browser_name'] = browser
+    CONFIG['bookmarks'] = bkmarks
+
+    # There may be multiple browser options given, pick the first which works
+    if ',' in browser:
+        browsers = browser.split(',')
+    else:
+        browsers = browser.split()
+
+    if browsers:
+        for browser_name in browsers:
+            if browser_name != 'cygwin':
+                try:
+                    CONFIG['browser'] = webbrowser.get(browser_name)
+                    CONFIG['browser_name'] = browser_name
+                    return
+                except webbrowser.Error:
+                    pass
+
+        # No browser found at this point, default to cygwin if it is listed
+        if 'cygwin' in browsers:
+            CONFIG['browser_name'] = 'cygwin'
+            return
+
+    # If no valid browser found then use webbrowser to automatically detect one
+    CONFIG['browser'] = webbrowser.get()
 
 
 def enable_cache():
@@ -569,7 +601,7 @@ def remove_bookmark(bk_idx):
     bkmarks = CONFIG['bookmarks']
     with open(CONFIG_FPATH, 'w') as cfg:
         cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
         cfg.write('\nbookmarks: ')
         if isinstance(bk_idx, list):
             bk_idx = [int(x)-1 for x in bk_idx]
@@ -591,7 +623,7 @@ def tag_bookmark(bk_idx, tags):
         tags = ' '.join(tags)
     with open(CONFIG_FPATH, 'w') as cfg:
         cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
         cfg.write('\nbookmarks: ')
 
         for i, bkmark in enumerate(bkmarks):
@@ -614,7 +646,7 @@ def untag_bookmark(bk_idx, tags_to_rm):
     bkmarks = CONFIG['bookmarks']
     with open(CONFIG_FPATH, 'w') as cfg:
         cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
         cfg.write('\nbookmarks: ')
 
         for i, bkmark in enumerate(bkmarks):
@@ -665,7 +697,7 @@ def move_bookmark(idx1, idx2):
 
     with open(CONFIG_FPATH, 'w') as cfg:
         cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser']))
+        cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
         cfg.write('\nbookmarks: ')
 
         # Move bookmark to the front or end, or insert at an index
@@ -889,11 +921,11 @@ def bookmarks(args, query):
 
 def open_browser(url):
     """Open a browser using webbrowser (or for cygwin use a system call)"""
-    if CONFIG['browser'] == 'cygwin':
+    if CONFIG['browser_name'] == 'cygwin':
         call(['cygstart', url])
     else:
-        if CONFIG['br']:
-            CONFIG['br'].open(url)
+        if CONFIG['browser']:
+            CONFIG['browser'].open(url)
         else:
             sys.stderr.write('Failed to open browser.\n')
 
@@ -977,6 +1009,17 @@ def search(args):
         clear_cache()
         print('Cleared {0}.'.format(CACHE_DIR))
         return
+
+    # Set WolframAlpha API key, browser, and bookmarks in CONFIG
+    if not CONFIG:
+        set_config()
+
+    # Cannot search WolframAlpha without an API key in .cliqrc
+    if args['wolfram'] and not CONFIG['api_key']:
+        args['wolfram'] = False
+        sys.stderr.write('Missing WolframAlpha API key in .cliqrc file.\n')
+
+    # Print help message if none of the following conditions are true
     if not any([args['query'], args['open'], args['bookmark'],
                 args['search'], args['wolfram']]):
         print(PARSER_HELP)
@@ -995,21 +1038,21 @@ def search(args):
         if args['open']:
             # Print, describe, or open URL's in the browser
             return open_url(args, args['query'])
-        elif args['search']:
+        if args['search']:
             # Perform a Google search and display link choice prompt
             return google_search(args, get_google_resp(args['query']))
-        elif args['wolfram']:
+        if args['wolfram']:
             # Perform a WolframAlpha search, may require an API key in .cliqrc
             result = wolfram_search(args, get_wolfram_resp(args['query']))
             if not result:
                 print('No answer available from WolframAlpha.')
             return result
-        else:
-            # Default behavior is to check WolframAlpha, then Google.
-            result = wolfram_search(args, get_wolfram_resp(args['query']))
-            if not result:
-                result = google_search(args, get_google_resp(args['query']))
-            return result
+
+        # Default behavior is to check WolframAlpha, then Google.
+        result = wolfram_search(args, get_wolfram_resp(args['query']))
+        if not result:
+            result = google_search(args, get_google_resp(args['query']))
+        return result
     except (KeyboardInterrupt, EOFError):
         return False
 
@@ -1021,24 +1064,9 @@ def command_line_runner():
     PARSER_HELP = parser.format_help()
     args = vars(parser.parse_args())
 
-    api_key, browser, bkmarks = read_config()
-    CONFIG['api_key'] = api_key
-    CONFIG['browser'] = browser
-    CONFIG['bookmarks'] = bkmarks
-    try:
-        if browser and browser != 'cygwin':
-            CONFIG['br'] = webbrowser.get(browser)
-        else:
-            CONFIG['br'] = webbrowser.get()
-    except webbrowser.Error as err:
-        sys.stderr.write('{0}: {1}\n'.format(str(err), browser))
-
     # Enable cache unless user sets environ variable CLIQ_DISABLE_CACHE
     if not os.getenv('CLIQ_DISABLE_CACHE'):
         enable_cache()
-    if not api_key and args['wolfram']:
-        args['wolfram'] = False
-        sys.stderr.write('Missing WolframAlpha API key in .cliqrc file.\n')
     search(args)
 
 

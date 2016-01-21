@@ -1,3 +1,9 @@
+1.6.0
+------
+
+ - can now enter multiple browsers to fall back on in .cliqrc
+ - moved config setup out of cmd line runner and into search
+
 1.5.10
 ------
 
