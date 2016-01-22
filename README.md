@@ -27,6 +27,8 @@ Do the following to copy .cliqrc to .local.cliqrc:
     cd "$(dirname "$(cliquery -c)")"
     sudo cp .cliqrc .local.cliqrc
 
+If you encounter issues installing lxml, see [here](http://lxml.de/installation.html).
+
 ## Usage
     usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-o] [-p] [-s] [-v] [-w]
                        [QUERY [QUERY ...]]
@@ -58,13 +60,13 @@ Do the following to copy .cliqrc to .local.cliqrc:
 
         IOError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc'
 
-Then you have two options:
+    Then you have two options:
 
-    1. (recommended) Make a one-time change of file ownership from root to user by entering the following:
+        1. (recommended) Make a one-time change of file ownership from root to user by entering the following:
 
-        sudo chown $USER "$(cliquery -c)" 
+                sudo chown $USER "$(cliquery -c)" 
 
-    2. Always execute the command as root, using su or sudo.
+        2. Always execute the command as root, using su or sudo.
 * A search may return immediate results, such as calculations or facts (via WolframAlpha), or instead a page of search results comprised of descriptive links to follow (via Google).
 * Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility. Entering h or help will list all possible prompt commands.
     ```
