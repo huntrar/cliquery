@@ -3,7 +3,7 @@
 
 ## a command-line browser interface
 
-cliquery cuts down on clicking through command-line web searching, page previewing, and page bookmarking, among other features. An interactive prompt allows users to easily make successive queries and enter program flags dynamically; simply typing help will list all possible flags to enter. Opening a link will invoke a browser supplied by the user or detected automatically.
+cliquery cuts down on clicking through command-line web searching, page previewing, and page bookmarking, among other features. An interactive prompt allows users to easily make successive queries and enter program flags dynamically; simply typing help will list all possible flags to enter. Opening a link will invoke a browser supplied by the user or detected automatically across Windows, OSX, and Linux platforms.
 
 ## Installation
     pip install cliquery
@@ -18,7 +18,7 @@ or
     cd cliquery
     python setup.py install
 
-It is recommended to [sign up](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key and enter that and your preferred browser(s) in .cliqrc (cygwin users *MUST* enter `cygwin` as their browser to avoid cross-platform conflicts).
+It is recommended to [sign up](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key and enter that and your preferred browser(s) in .cliqrc (if you do not set a browser, one will be detected automatically). An alternative method of setting your browser is with the BROWSER environment variable.
 
 It is also recommended to create a .local.cliqrc file to use in place of .cliqrc, as .cliqrc is overwritten when updating the program.
 

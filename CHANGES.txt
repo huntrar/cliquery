@@ -1,6 +1,7 @@
 1.6.2
 ------
 
+ - multi-platform browser auto detect replaced "cygwin" option
  - added link to lxml installation & fixed formatting in readme
 
 1.6.1

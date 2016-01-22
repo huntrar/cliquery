@@ -12,7 +12,6 @@ import itertools
 import json
 import os
 import re
-from subprocess import call
 import sys
 import webbrowser
 
@@ -125,35 +124,40 @@ def read_config():
 
 def set_config():
     """Set WolframAlpha API key, browser, and bookmarks in CONFIG"""
-    api_key, browser, bkmarks = read_config()
+    api_key, browser_name, bkmarks = read_config()
     CONFIG['api_key'] = api_key
-    CONFIG['browser_name'] = browser
     CONFIG['bookmarks'] = bkmarks
 
     # There may be multiple browser options given, pick the first which works
-    if ',' in browser:
-        browsers = browser.split(',')
+    if ',' in browser_name:
+        browser_names = browser_name.split(',')
     else:
-        browsers = browser.split()
+        browser_names = browser_name.split()
 
-    if browsers:
-        for browser_name in browsers:
-            if browser_name != 'cygwin':
-                try:
-                    CONFIG['browser'] = webbrowser.get(browser_name)
-                    CONFIG['browser_name'] = browser_name
-                    return
-                except webbrowser.Error:
-                    pass
-
-        # No browser found at this point, default to cygwin if it is listed
-        if 'cygwin' in browsers:
-            CONFIG['browser_name'] = 'cygwin'
-            return
+    if browser_names:
+        for brow_name in browser_names:
+            try:
+                CONFIG['browser_name'] = brow_name
+                CONFIG['browser'] = webbrowser.get(brow_name)
+                return
+            except webbrowser.Error:
+                pass
 
     # If no valid browser found then use webbrowser to automatically detect one
     try:
-        CONFIG['browser'] = webbrowser.get()
+        if sys.platform == 'win32':
+            # Windows
+            browser_name = 'windows-default'
+            browser = webbrowser.get(browser_name)
+        elif sys.platform == 'darwin':
+            # Mac OSX
+            browser_name = 'macosx'
+            browser = webbrowser.get(browser_name)
+        else:
+            browser_name = 'Automatically detected'
+            browser = webbrowser.get()
+        CONFIG['browser_name'] = browser_name
+        CONFIG['browser'] = browser
     except webbrowser.Error:
         pass
 
@@ -926,14 +930,11 @@ def bookmarks(args, query):
 
 
 def open_browser(url):
-    """Open a browser using webbrowser (or for cygwin use a system call)"""
-    if CONFIG['browser_name'] == 'cygwin':
-        call(['cygstart', url])
+    """Open a browser using webbrowser"""
+    if CONFIG['browser']:
+        CONFIG['browser'].open(url)
     else:
-        if CONFIG['browser']:
-            CONFIG['browser'].open(url)
-        else:
-            sys.stderr.write('Failed to open browser.\n')
+        sys.stderr.write('Failed to open browser.\n')
 
 
 def open_url(args, urls, prompt_args=None):
