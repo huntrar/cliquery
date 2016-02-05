@@ -62,13 +62,13 @@ If you encounter issues installing lxml, see [here](http://lxml.de/installation.
 
     Then you have two options:
 
-        1. (recommended) Make a one-time change of file ownership from root to user by entering the following:
+        1. (recommended) Change file ownership from root to user by entering the following:
 
                 sudo chown $USER "$(cliquery -c)" 
 
-        2. Always execute the command as root, using su or sudo.
-* A search may return immediate results, such as calculations or facts (via WolframAlpha), or instead a page of search results comprised of descriptive links to follow (via Google).
-* Interactive use is as easy as passing the regular flag arguments into the link prompt; this overrides any preexisting flags and allows for more even more flexibility. Entering h or help will list all possible prompt commands.
+        2. Execute cliquery as root, using su or sudo.
+* A search may return immediate results, such as calculations or facts made possible by WolframAlpha, or instead a page of Google search results comprised of links and their descriptions.
+* Interactive usage allows the user to continue making new queries by dynamically executing new program flags and/or queries. Entering h or help will list all possible prompt commands.
     ```
     + + + + + + + + + + + + + + + + + + + + + + + + + + + +
     1. Guido van Rossum - Official Site
@@ -90,5 +90,5 @@ If you encounter issues installing lxml, see [here](http://lxml.de/installation.
     [Press Enter to continue..]
     ```
 * To choose multiple links at once, a range may be specified by separating the start and end range with a dash. Leaving one end of the range blank will choose all links until the other end of that range. For example, given 10 links, entering 5- would effectively be the same as entering 5-10.
-* Using the bookmark flag with no arguments will list all current bookmarks in .cliqrc, ordered by time of entry. Entering help with the flag will list all possible commands including open, add, remove, tag/untag (for aliasing), describe, and move. Bookmarks like other flags may be entered during runtime in the link prompt.
+* Using the bookmark flag with no arguments will list all current bookmarks in .cliqrc, naturally ordered by time of entry. Entering help with the flag will list all possible commands including open, add, remove, tag/untag (for aliasing), describe, and move. Bookmarks like other flags may be entered during runtime in the link prompt.
 * Additional arguments may be appended to bookmarks while opening them. These are interpreted as any non-integer arguments which are not found in any bookmarks (URLs or tags).
