@@ -16,13 +16,15 @@ import sys
 import webbrowser
 
 from cliquery import utils, pyteaser
-from .compat import SYS_VERSION, iteritems, itervalues, iterkeys, uni, asc
+from .compat import (SYS_VERSION, unescape, iteritems, itervalues, iterkeys,
+    uni, asc)
 from . import __version__
 
 
 if SYS_VERSION == 2:
     input = raw_input
     range = xrange
+
 
 XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
                                os.path.join(os.path.expanduser('~'), '.cache'))
@@ -415,7 +417,7 @@ def display_link_prompt(args, urls, url_descs):
     while 1:
         print('\n{0}'.format(BORDER))
         for i in range(len(urls)):
-            print('{0}. {1}'.format(i+1, uni(url_descs[i])))
+            print('{0}. {1}'.format(i+1, uni(unescape(url_descs[i]))))
         print(BORDER)
 
         # Handle link prompt input

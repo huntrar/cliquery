@@ -5,6 +5,11 @@ import sys
 
 SYS_VERSION = sys.version_info[0]
 if SYS_VERSION == 2:
+    from HTMLParser import HTMLParser
+    def unescape(x):
+        """Convert character references (e.g. &gt;, &#62;,..) to unicode"""
+        return HTMLParser().unescape(x)
+
     def iteritems(dct):
         """Python 2 dictionary iteritems()"""
         return dct.iteritems()
@@ -25,6 +30,11 @@ if SYS_VERSION == 2:
         """Python 2 ascii-ignore encode"""
         return word.encode('ascii', 'ignore')
 else:
+    from html.parser import HTMLParser
+    def unescape(x):
+        """Convert character references (e.g. &gt;, &#62;,..) to unicode"""
+        return HTMLParser().unescape(x)
+
     def iteritems(dct):
         """Python 3 dictionary iteritems()"""
         return iter(dct.items())
