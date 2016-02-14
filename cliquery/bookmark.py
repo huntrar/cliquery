@@ -7,7 +7,7 @@ import sys
 from cliquery import utils
 from .config import CONFIG, CONFIG_FPATH, read_config
 from .open import open_url
-from . import range
+from . import crange
 
 
 BOOKMARK_HELP = ('Usage: '
@@ -245,7 +245,7 @@ def move_bookmark(idx1, idx2):
                 start_range = idx2-1
                 end_range = idx1-1
                 range_inc = -1
-            for i in range(start_range, end_range, range_inc):
+            for i in crange(start_range, end_range, range_inc):
                 temp = bkmarks[i]
                 bkmarks[i] = prev
                 prev = temp
