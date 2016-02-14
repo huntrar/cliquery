@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """Contains cliquery utility functions"""
 
-import os
 import random
 import sys
 
 import lxml.html as lh
 import requests
 
-from .compat import SYS_VERSION, iteritems
+from .compat import iteritems
+from . import SYS_VERSION
 
 
 if SYS_VERSION == 2:

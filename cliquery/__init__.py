@@ -6,4 +6,16 @@
    flags to enter. Opening a link will invoke a browser supplied by the user
    or detected automatically.
 """
-__version__ = '1.6.4'
+
+import sys
+
+
+__version__ = '1.6.5'
+
+SYS_VERSION = sys.version_info[0]
+if SYS_VERSION == 2:
+    input = raw_input
+    range = xrange
+
+CONTINUE = '[Press Enter to continue..] '
+SEE_MORE = 'See more? {0}'.format(CONTINUE)

@@ -1,14 +1,14 @@
 """Functions for Python 2 and 3 compatibility"""
 
-import sys
+from . import SYS_VERSION
 
 
-SYS_VERSION = sys.version_info[0]
 if SYS_VERSION == 2:
     from HTMLParser import HTMLParser
-    def unescape(x):
+
+    def unescape(ref):
         """Convert character references (e.g. &gt;, &#62;,..) to unicode"""
-        return HTMLParser().unescape(x)
+        return HTMLParser().unescape(ref)
 
     def iteritems(dct):
         """Python 2 dictionary iteritems()"""
@@ -31,9 +31,10 @@ if SYS_VERSION == 2:
         return word.encode('ascii', 'ignore')
 else:
     from html.parser import HTMLParser
-    def unescape(x):
+
+    def unescape(ref):
         """Convert character references (e.g. &gt;, &#62;,..) to unicode"""
-        return HTMLParser().unescape(x)
+        return HTMLParser().unescape(ref)
 
     def iteritems(dct):
         """Python 3 dictionary iteritems()"""
