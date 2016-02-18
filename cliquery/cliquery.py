@@ -14,7 +14,7 @@ import os
 import sys
 
 from cliquery import utils
-from .bookmark import bookmarks
+from .bookmark import bookmarks, import_bookmarks
 from .compat import unescape, iteritems, itervalues, iterkeys, uni, asc
 from .config import CONFIG, CONFIG_FPATH, set_config
 from .open import open_url
@@ -51,6 +51,8 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-f', '--first', help='open first link',
                         action='store_true')
+    parser.add_argument('-i', '--import', help='import bookmarks from file',
+                        type=str, nargs='?')
     parser.add_argument('-o', '--open', help='directly open links',
                         action='store_true')
     parser.add_argument('-p', '--print', help='print links to stdout',
@@ -419,6 +421,18 @@ def search(args):
     # Set WolframAlpha API key, browser, and bookmarks in CONFIG
     if not CONFIG:
         set_config()
+
+    # Check for bookmark import
+    if args['import']:
+        print('Importing {0}. This will clear all current bookmarks.'
+              .format(args['import']))
+        try:
+            if utils.confirm_input(cinput('Import anyways? (yes/no): ')):
+                if import_bookmarks(args['import']):
+                    print('Import was successful.')
+        except (KeyboardInterrupt, EOFError):
+            pass
+        return
 
     # Cannot search WolframAlpha without an API key in .cliqrc
     if args['wolfram'] and not CONFIG['api_key']:

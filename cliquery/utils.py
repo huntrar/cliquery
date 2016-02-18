@@ -192,6 +192,24 @@ def check_input(user_input, num=False, empty=False):
     return True
 
 
+def confirm_input(user_input):
+    """Check user input for yes, no, or an exit signal"""
+    if isinstance(user_input, list):
+        user_input = ''.join(user_input)
+
+    try:
+        u_inp = user_input.lower().strip()
+    except AttributeError:
+        u_inp = user_input
+
+    # Check for exit signal
+    if u_inp in ('q', 'quit', 'exit'):
+        sys.exit()
+    if u_inp in ('y', 'yes'):
+        return True
+    return False
+
+
 def is_num(num):
     """Return whether num can be an int"""
     try:
@@ -217,22 +235,30 @@ def in_range(length, start=None, end=None):
     return start >= 0 and end < length
 
 
+def add_scheme(url):
+    """Add scheme to URL"""
+    return 'http://{0}'.format(url)
+
+
+def remove_scheme(url):
+    """Remove scheme from URL"""
+    return url.replace('http://', '').replace('https://', '')
+
+
+def check_scheme(url):
+    """Check URL for a scheme"""
+    if url and (url.startswith('http://') or url.startswith('https://')):
+        return True
+    return False
+
+
 def append_scheme(urls):
     """Append scheme to URL's if not present"""
     if isinstance(urls, list):
-        scheme_urls = []
-
-        for url in urls:
-            if not (url.startswith('http://') or url.startswith('https://')):
-                scheme_urls.append('http://{0}'.format(url))
-            else:
-                scheme_urls.append(url)
-        return scheme_urls
-    else:
-        if urls.startswith('http://') or urls.startswith('https://'):
-            return urls
-        else:
-            return 'http://{0}'.format(urls)
+        return [x if check_scheme(x) else add_scheme(x) for x in urls]
+    if check_scheme(urls):
+        return urls
+    return add_scheme(urls)
 
 
 def reset_flags(args):

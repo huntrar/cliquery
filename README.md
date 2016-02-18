@@ -29,27 +29,32 @@ Do the following to copy .cliqrc to .local.cliqrc:
 
 If you encounter issues installing lxml, see [here](http://lxml.de/installation.html).
 
+Users may also import Firefox or Chrome bookmarks into .cliqrc by exporting the bookmarks to HTML and importing to cliquery with the -i flag. This will erase existing bookmarks, so beware!
+
 ## Usage
-    usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-o] [-p] [-s] [-v] [-w]
+    usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-i [IMPORT]] [-o] [-p] [-s]
+                       [-v] [-w]
                        [QUERY [QUERY ...]]
-    
+
     a command-line browser interface
-    
+
     positional arguments:
-      QUERY              keywords to search
-    
+      QUERY                 keywords to search
+
     optional arguments:
-      -h, --help         show this help message and exit
-      -b, --bookmark     view and modify bookmarks
-      -c, --config       print config file location
-      -C, --clear-cache  clear the cache
-      -d, --describe     summarize links
-      -f, --first        open first link
-      -o, --open         directly open links
-      -p, --print        print links to stdout
-      -s, --search       search for links
-      -v, --version      display current version
-      -w, --wolfram      search WolframAlpha
+      -h, --help            show this help message and exit
+      -b, --bookmark        view and modify bookmarks
+      -c, --config          print config file location
+      -C, --clear-cache     clear the cache
+      -d, --describe        summarize links
+      -f, --first           open first link
+      -i [IMPORT], --import [IMPORT]
+                            import bookmarks from file
+      -o, --open            directly open links
+      -p, --print           print links to stdout
+      -s, --search          search for links
+      -v, --version         display current version
+      -w, --wolfram         search WolframAlpha
 
 ## Author
 * Hunter Hammond (huntrar@gmail.com)

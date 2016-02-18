@@ -1,10 +1,14 @@
 """Cliquery bookmark functions"""
 
 from __future__ import absolute_import, print_function
+from collections import OrderedDict
 import re
 import sys
 
+import lxml.html as lh
+
 from cliquery import utils
+from .compat import iteritems, itervalues
 from .config import CONFIG, CONFIG_FPATH, read_config
 from .open import open_url
 from . import crange
@@ -110,22 +114,23 @@ def add_bookmark(urls):
     return True
 
 
-def remove_bookmark(bk_idx):
+def remove_bookmark(bk_idx=None):
     """Remove an existing bookmark from the list of saved bookmarks"""
     bkmarks = CONFIG['bookmarks']
     with open(CONFIG_FPATH, 'w') as cfg:
         cfg.write('api_key: {0}'.format(CONFIG['api_key']))
         cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
         cfg.write('\nbookmarks: ')
-        if isinstance(bk_idx, list):
-            bk_idx = [int(x)-1 for x in bk_idx]
-            for i, bkmark in enumerate(bkmarks):
-                if i not in bk_idx:
-                    cfg.write('\n{0}'.format(bkmark))
-        else:
-            for i, bkmark in enumerate(bkmarks):
-                if i != int(bk_idx)-1:
-                    cfg.write('\n{0}'.format(bkmark))
+        if bk_idx is not None:
+            if isinstance(bk_idx, list):
+                bk_idx = [int(x)-1 for x in bk_idx]
+                for i, bkmark in enumerate(bkmarks):
+                    if i not in bk_idx:
+                        cfg.write('\n{0}'.format(bkmark))
+            else:
+                for i, bkmark in enumerate(bkmarks):
+                    if i != int(bk_idx)-1:
+                        cfg.write('\n{0}'.format(bkmark))
     reload_bookmarks()
     return True
 
@@ -407,6 +412,54 @@ def bookmark_mv_cmd(query):
         return False
     # Account for zero-indexed list
     return move_bookmark(int(bk1_idx)-1, int(bk2_idx)-1)
+
+
+def import_bookmarks(filename):
+    """Import bookmarks exported from browser as HTML"""
+    def read_bookmarks(toolbar):
+        """Read bookmarks from HTML in import_bookmarks"""
+        with open(filename, 'r') as bkmark_file:
+            text = bkmark_file.read().split(toolbar)[-1]
+            html = lh.fromstring(text)
+
+        imported_bookmarks = [x.xpath('//a') for x in html.xpath('//dt')]
+        new_bookmarks = OrderedDict()
+        if imported_bookmarks:
+            for bkmark in imported_bookmarks[0]:
+                url = bkmark.xpath('@href')[0]
+                if utils.check_scheme(url):
+                    new_bookmarks[url] = bkmark.xpath('text()')
+        return new_bookmarks
+
+    ff_tbar = 'Bookmarks Toolbar'
+    gc_tbar = 'Bookmarks bar'
+    toolbars = {'firefox': ff_tbar,
+                'chrome': gc_tbar,
+                'iceweasel': ff_tbar,
+                'chromium': gc_tbar}
+
+    # Try to find toolbar which matches to browser specified in configuration
+    toolbar_found = False
+    for browser, toolbar in iteritems(toolbars):
+        if CONFIG['browser_name'] in browser:
+            new_bookmarks = read_bookmarks(toolbar)
+            if new_bookmarks:
+                toolbar_found = True
+                break
+    if not toolbar_found:
+        new_bookmarks = read_bookmarks(ff_tbar) or read_bookmarks(gc_tbar)
+
+    if new_bookmarks:
+        # Remove existing bookmarks
+        remove_bookmark()
+
+        # Add and tag new bookmarks
+        add_bookmark(list(new_bookmarks.keys()))
+        for i, tag in enumerate(itervalues(new_bookmarks)):
+            if tag:
+                tag_bookmark(i, tag)
+        return True
+    return False
 
 
 def bookmarks(args, query):

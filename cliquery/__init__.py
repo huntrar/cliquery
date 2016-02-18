@@ -10,7 +10,7 @@
 import sys
 
 
-__version__ = '1.6.6'
+__version__ = '1.6.7'
 
 SYS_VERSION = sys.version_info[0]
 # cinput and crange are Python 2.x and 3.x compatible builtins
