@@ -30,6 +30,11 @@ News
 
 """ % read('README', 'CHANGES')
 
+extras_require = {
+    # No builtin OrderedDict before 2.7
+    ':python_version=="2.6"': ['ordereddict'],
+}
+
 setup(
     name='cliquery',
     version=cliquery.__version__,
@@ -42,12 +47,16 @@ setup(
         "Intended Audience :: End Users/Desktop",
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
     ],
     keywords='cliquery command line console help answer google search feeling lucky wolfram alpha knowledge engine internet browser interface bookmark pyteaser preview',
     author='Hunter Hammond',
@@ -67,5 +76,6 @@ setup(
         'lxml',
         'requests',
         'requests-cache'
-    ]
+    ],
+    extras_require=extras_require,
 )
