@@ -419,8 +419,7 @@ def import_bookmarks(filename):
     def read_bookmarks(toolbar):
         """Read bookmarks from HTML in import_bookmarks"""
         with open(filename, 'r') as bkmark_file:
-            text = bkmark_file.read().split(toolbar)[-1]
-            html = lh.fromstring(text)
+            html = lh.fromstring(bkmark_file.read().split(toolbar)[-1])
 
         imported_bookmarks = [x.xpath('//a') for x in html.xpath('//dt')]
         new_bookmarks = OrderedDict()
@@ -450,9 +449,6 @@ def import_bookmarks(filename):
         new_bookmarks = read_bookmarks(ff_tbar) or read_bookmarks(gc_tbar)
 
     if new_bookmarks:
-        # Remove existing bookmarks
-        remove_bookmark()
-
         # Add and tag new bookmarks
         add_bookmark(list(new_bookmarks.keys()))
         for i, tag in enumerate(itervalues(new_bookmarks)):

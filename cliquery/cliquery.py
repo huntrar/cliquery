@@ -424,10 +424,10 @@ def search(args):
 
     # Check for bookmark import
     if args['import']:
-        print('Importing {0}. This will clear all current bookmarks.'
+        print('Importing {0}. This will append to existing bookmarks.'
               .format(args['import']))
         try:
-            if utils.confirm_input(cinput('Import anyways? (yes/no): ')):
+            if utils.confirm_input(cinput('Confirm import (yes/no): ')):
                 if import_bookmarks(args['import']):
                     print('Import was successful.')
         except (KeyboardInterrupt, EOFError):

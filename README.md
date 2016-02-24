@@ -29,7 +29,7 @@ Do the following to copy .cliqrc to .local.cliqrc:
 
 If you encounter issues installing lxml, see [here](http://lxml.de/installation.html).
 
-Users may also import Firefox or Chrome bookmarks into .cliqrc by exporting the bookmarks to HTML and importing to cliquery with the -i flag. This will erase existing bookmarks, so beware!
+Users may also import Firefox or Chrome bookmarks into .cliqrc by exporting the bookmarks to HTML and importing to cliquery with the -i flag. The imported bookmarks will be added to your existing bookmarks, which may result in duplicates.
 
 ## Usage
     usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-i [IMPORT]] [-o] [-p] [-s]
