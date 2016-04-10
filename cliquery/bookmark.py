@@ -317,23 +317,30 @@ def bookmark_open_cmd(args, query):
 
 def bookmark_add_cmd(query):
     """add: add [url..]"""
-    split_query = query[3:].strip().split()
-    if not split_query:
+    trimmed_query = query[3:].strip()
+    if not trimmed_query:
         sys.stderr.write(BOOKMARK_HELP)
         return False
 
+    if '(' in trimmed_query and ')' in trimmed_query:
+        # Split by tag and space
+        split_query = re.findall(r'\([^)]+\)|\S+', trimmed_query)
+    else:
+        # Split by space
+        split_query = trimmed_query.split()
+
     new_bkmarks = []
     for arg in split_query:
-        arg = utils.append_scheme(arg)
-        if '.' not in arg:
-            if '(' in arg and ')' in arg:
-                split_arg = arg.split('(')
-                tag = split_arg[1].rstrip(')')
-                bkmark = split_arg[0].strip()
-                arg = '{0}.com ({1})'.format(bkmark, tag)
-            else:
+        if '(' in arg and ')' in arg:
+            # This is a tag, try to add it to the previous bookmark
+            tag = arg.split('(')[1].rstrip(')')
+            if len(new_bkmarks) > 0:
+                new_bkmarks[-1] = '{0} ({1})'.format(new_bkmarks[-1], tag)
+        else:
+            arg = utils.append_scheme(arg)
+            if '.' not in arg:
                 arg = '{0}.com'.format(arg)
-        new_bkmarks.append(arg)
+            new_bkmarks.append(arg)
     return add_bookmark(new_bkmarks)
 
 

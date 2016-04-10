@@ -1,3 +1,8 @@
+1.6.9
+------
+
+ - fixed tagging multiple bookmarks during add
+
 1.6.8
 ------
 
