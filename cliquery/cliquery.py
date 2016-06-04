@@ -335,7 +335,9 @@ def google_search(args, resp):
 
 def open_first(args, resp):
     """Open the first Google link available, i.e. 'Feeling Lucky'"""
-    return open_url(args, resp['results'][0]['url'])
+    if resp:
+        return open_url(args, resp['results'][0]['url'])
+    print('Results not found.')
 
 
 def reformat_wolfram_entries(titles, entries):

@@ -1,3 +1,13 @@
+1.7.0
+------
+
+ - future update: google web search api no longer available, switching to custom search
+
+1.6.10
+------
+
+ - check for no results from google
+
 1.6.9
 ------
 
