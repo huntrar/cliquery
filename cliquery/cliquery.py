@@ -9,7 +9,6 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 import glob
 import itertools
-import json
 import os
 import sys
 
@@ -84,13 +83,44 @@ def clear_cache():
         os.remove(cache)
 
 
-def get_google_resp(query):
-    """Get JSON response from Google API as a dict object (top 8 results)"""
+def get_bing_resp(query):
+    """Get response from Bing search (top 10 results)"""
     if not query:
         return None
-    base_url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0'
-    raw_resp = utils.get_raw_resp('{0}&q={1}&rsz=8'.format(base_url, query))
-    return json.loads(raw_resp.decode('utf-8'))['responseData']
+
+    return utils.get_resp('http://www.bing.com/search?q={0}'.format(query))
+
+
+def get_google_resp(query):
+    """Get response from Google custom search API (top 10 results)
+
+       Return response and True if Google was used (other option is Bing)
+    """
+    use_google = True
+    if not query:
+        return None, use_google
+
+    try:
+        from googleapiclient.discovery import build
+    except ImportError:
+        use_google = False
+
+    if use_google:
+        api_key = CONFIG['google_api_key']
+        engine_key = CONFIG['google_engine_key']
+
+        resp = ''
+        if api_key and engine_key:
+            service = build("customsearch", "v1", developerKey=api_key)
+            resp = service.cse().list(q=query, cx=engine_key).execute()
+
+        if resp and 'items' in resp:
+            return resp['items'], use_google
+        else:
+            use_google = False
+
+    # If no results from Google (or no API keys), use Bing
+    return get_bing_resp(query), use_google
 
 
 def get_wolfram_resp(query):
@@ -98,7 +128,7 @@ def get_wolfram_resp(query):
     if not query:
         return None
     base_url = 'http://api.wolframalpha.com/v2/query?input='
-    api_key = CONFIG['api_key']
+    api_key = CONFIG['wolfram_api_key']
     return utils.get_resp('{0}{1}&appid={2}'.format(base_url, query, api_key))
 
 
@@ -292,18 +322,18 @@ def exec_prompt_cmd(args, urls, prompt_cmd, prompt_args):
         search(args)
 
 
-def display_link_prompt(args, urls, url_descs):
+def display_link_prompt(args, urls, titles):
     """Print URL's and their descriptions alongside a prompt
 
        Keyword arguments:
        args -- program arguments (dict)
        urls -- search URL's found (list)
-       url_descs -- descriptions of search URL's found (list)
+       titles -- descriptions of search URL's found (list)
     """
     while 1:
         print('\n{0}'.format(BORDER))
         for i in crange(len(urls)):
-            print('{0}. {1}'.format(i+1, uni(unescape(url_descs[i]))))
+            print('{0}. {1}'.format(i+1, uni(unescape(titles[i]))))
         print(BORDER)
 
         # Handle link prompt input
@@ -318,6 +348,46 @@ def display_link_prompt(args, urls, url_descs):
             return False
 
 
+def bing_search(args, resp):
+    """Perform a Bing search and display link choice prompt"""
+    if resp is None:
+        return open_url(args, 'https://www.google.com')
+    elif args['open']:
+        return open_url(args, args['query'])
+
+    try:
+        unprocessed_urls = resp.xpath('//h2/a/@href')
+    except AttributeError:
+        raise AttributeError('Failed to retrieve data from lxml object!')
+    if not unprocessed_urls:
+        sys.stderr.write('Failed to retrieve links from Bing.\n')
+        return None
+
+    urls = []
+    titles = []
+    base_url = 'www.bing.com'
+    for url in unprocessed_urls:
+        if url.startswith('/') and base_url not in url:
+            # Add missing base url
+            urls.append('http://{0}{1}'.format(base_url, url))
+            if "'" in url:
+                ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
+            else:
+                ld_xpath = "//h2/a[@href='{0}']//text()".format(url)
+            titles.append(''.join(resp.xpath(ld_xpath)))
+        elif url.startswith('http://') or url.startswith('https://'):
+            urls.append(url)
+            if "'" in url:
+                ld_xpath = '//h2/a[@href="{0}"]//text()'.format(url)
+            else:
+                ld_xpath = "//h2/a[@href='{0}']//text()".format(url)
+            titles.append(''.join(resp.xpath(ld_xpath)))
+
+    if urls and titles:
+        return display_link_prompt(args, urls, titles)
+    return False
+
+
 def google_search(args, resp):
     """Perform a Google search and display link choice prompt"""
     if resp is None:
@@ -325,18 +395,38 @@ def google_search(args, resp):
     elif args['open']:
         return open_url(args, args['query'])
 
-    results = resp['results']
-    urls = [x['url'] for x in results]
-    url_descs = [x['titleNoFormatting'] for x in results]
-    if urls and url_descs:
-        return display_link_prompt(args, urls, url_descs)
+    raw_urls = [x['formattedUrl'] for x in resp]
+    urls = [utils.add_scheme(x) if not utils.check_scheme(x) else x
+            for x in raw_urls]
+    titles = [x['title'] for x in resp]
+    if urls and titles:
+        return display_link_prompt(args, urls, titles)
     return False
 
 
-def open_first(args, resp):
+def bing_open_first(args, resp):
+    """Open the first Bing link available, i.e. 'Feeling Lucky'"""
+    if resp is not None:
+        bing_urls = resp.xpath('//h2/a/@href')
+        if bing_urls:
+            url = bing_urls[0]
+            if url.startswith('http://') or url.startswith('https://'):
+                return open_url(args, url)
+            else:
+                return open_url(args, 'http://{0}'.format(url))
+    print('Results not found.')
+
+
+def google_open_first(args, resp):
     """Open the first Google link available, i.e. 'Feeling Lucky'"""
     if resp:
-        return open_url(args, resp['results'][0]['url'])
+        raw_url = resp[0]['formattedUrl']
+        if not utils.check_scheme(raw_url):
+            url = utils.add_scheme(raw_url)
+        else:
+            url = raw_url
+
+        return open_url(args, url)
     print('Results not found.')
 
 
@@ -456,13 +546,21 @@ def search(args):
             return bookmarks(args, args['query'])
         if args['first']:
             # Open the first Google link available, i.e. 'Feeling Lucky'
-            return open_first(args, get_google_resp(args['query']))
+            resp, google = get_google_resp(args['query'])
+            if google:
+                return google_open_first(args, resp)
+
+            return bing_open_first(args, resp)
         if args['open']:
             # Print, describe, or open URL's in the browser
             return open_url(args, args['query'])
         if args['search']:
             # Perform a Google search and display link choice prompt
-            return google_search(args, get_google_resp(args['query']))
+            resp, google = get_google_resp(args['query'])
+            if google:
+                return google_search(args, resp)
+
+            return bing_search(args, resp)
         if args['wolfram']:
             # Perform a WolframAlpha search, may require an API key in .cliqrc
             result = wolfram_search(args, get_wolfram_resp(args['query']))
@@ -473,7 +571,12 @@ def search(args):
         # Default behavior is to check WolframAlpha, then Google.
         result = wolfram_search(args, get_wolfram_resp(args['query']))
         if not result:
-            result = google_search(args, get_google_resp(args['query']))
+            resp, google = get_google_resp(args['query'])
+            if google:
+                result = google_search(args, resp)
+            else:
+                result = bing_search(args, resp)
+
         return result
     except (KeyboardInterrupt, EOFError):
         return False

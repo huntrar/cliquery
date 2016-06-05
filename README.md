@@ -18,16 +18,26 @@ or
     cd cliquery
     python setup.py install
 
-It is recommended to [sign up](https://developer.wolframalpha.com/portal/apisignup.html) for a WolframAlpha API key and enter that and your preferred browser(s) in .cliqrc (if you do not set a browser, one will be detected automatically). An alternative method of setting your browser is with the BROWSER environment variable.
+If you encounter issues installing lxml, see [here](http://lxml.de/installation.html).
 
-It is also recommended to create a .local.cliqrc file to use in place of .cliqrc, as .cliqrc is overwritten when updating the program.
+## Recommended setup
+
+Sign up for a [Google Custom Search API key](https://code.google.com/apis/console) to access Google results, otherwise defaults to Bing.
+
+Upon signing into Google, click on API Manager, then Credentials, and create an API key. Enter this under the 'google_api_key' field in .cliqrc.
+
+Next, [create a custom search engine](https://cse.google.com/all). You must choose at least one site to search during creation (I chose stackoverflow.com), but to search the entire web you must click on this new search engine, go to Setup, then Basics, and select 'Search the entire web but emphasize included sites.' Then you may choose to keep or delete the site you originally provided.
+
+After creating a custom search engine, click on the engine, go to Setup, and under Details click Search engine ID. Enter this ID under the 'google_engine_key' field in .cliqrc.
+
+To use cliquery for scientific computations, sign up for a [WolframAlpha API key](https://developer.wolframalpha.com/portal/apisignup.html) and enter that and your preferred browser(s) in .cliqrc (if you do not set a browser, one will be detected automatically). An alternative method of setting your browser is with the BROWSER environment variable.
+
+Create a .local.cliqrc file to use in place of .cliqrc, as .cliqrc is overwritten when updating the program.
 
 Do the following to copy .cliqrc to .local.cliqrc:
 
     cd "$(dirname "$(cliquery -c)")"
     sudo cp .cliqrc .local.cliqrc
-
-If you encounter issues installing lxml, see [here](http://lxml.de/installation.html).
 
 Users may also import Firefox or Chrome bookmarks into .cliqrc by exporting the bookmarks to HTML and importing to cliquery with the -i flag. The imported bookmarks will be added to your existing bookmarks, which may result in duplicates.
 

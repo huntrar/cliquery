@@ -4,6 +4,8 @@ import os
 import sys
 import webbrowser
 
+from .compat import iteritems, iterkeys
+
 
 CONFIG_DIR = os.path.dirname(os.path.realpath(__file__))
 if os.path.isfile('{0}/.local.cliqrc'.format(CONFIG_DIR)):
@@ -16,43 +18,60 @@ CONFIG = {}
 def read_config():
     """Read in .cliqrc or .local.cliqrc file"""
     with open(CONFIG_FPATH, 'r') as cfg:
+        fields = {'google_api_key': '',
+                  'google_engine_key': '',
+                  'wolfram_api_key': '',
+                  'browser': ''}
+
+        def add_field(line):
+            """Read in a configuration field and its value"""
+            split_line = line.split(':')
+            field = split_line[0]
+            if field in fields:
+                fields[field] = ':'.join(split_line[1:]).strip()
+                return True
+            return False
+
+        # Attempt to read configuration fields excluding bookmarks
         lines = []
-        api_key = ''
-        browser = ''
-
-        # First two lines of .cliqrc should contain api_key: and browser:
-        # If not, attempts to read the two in that order anyways
-        for _ in range(2):
+        bookmarks_reached = False
+        for _ in range(len(fields.keys())):
             line = cfg.readline()
-            if line.startswith('api_key:'):
-                api_key = line[8:].strip()
-            if line.startswith('browser:'):
-                browser = line[8:].strip()
-            else:
-                lines.append(line)
-        if not api_key and not browser:
-            try:
-                api_key = lines[0].strip()
-                browser = lines[1].strip()
-            except IndexError:
-                api_key = ''
-                browser = ''
+            if line.startswith('bookmarks:'):
+                bookmarks_reached = True
+                break
 
-        # Read in bookmarks
+            if not add_field(line):
+                lines.append(line)
+
+        # Try to resolve fields that were found but unassigned
+        for i, key in enumerate(iterkeys(fields)):
+            if not fields[key] and i < len(lines):
+                fields[key] = lines[i].strip()
+
+        # Attempt to read bookmarks
         bkmarks = []
         cfg_bkmarks = cfg.read()
-        if cfg_bkmarks.startswith('bookmarks:'):
-            cfg_bkmarks = cfg_bkmarks[10:].split('\n')
-            bkmarks = [b.strip() for b in cfg_bkmarks if b.strip()]
 
-        return api_key, browser, bkmarks
+        if cfg_bkmarks.startswith('bookmarks:'):
+            cfg_bkmarks = ':'.join(cfg_bkmarks.split(':')[1:]).split('\n')
+            bkmarks = [b.strip() for b in cfg_bkmarks if b.strip()]
+        elif bookmarks_reached:
+            cfg_bkmarks = cfg_bkmarks.split('\n')
+            bkmarks = [b.strip() for b in cfg_bkmarks if b.strip()]
+        fields['bookmarks'] = bkmarks
+
+        return fields
 
 
 def set_config():
-    """Set WolframAlpha API key, browser, and bookmarks in CONFIG"""
-    api_key, browser_name, bkmarks = read_config()
-    CONFIG['api_key'] = api_key
-    CONFIG['bookmarks'] = bkmarks
+    """Set optional API keys, browser, and bookmarks in CONFIG"""
+    browser_name = ''
+    for key, val in iteritems(read_config()):
+        if key == 'browser':
+            browser_name = val
+        else:
+            CONFIG[key] = val
 
     # There may be multiple browser options given, pick the first which works
     if ',' in browser_name:

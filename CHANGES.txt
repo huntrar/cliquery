@@ -1,7 +1,7 @@
 1.7.0
 ------
 
- - future update: google web search api no longer available, switching to custom search
+ - google removed old API, now requires google api key and search engine key
 
 1.6.10
 ------
