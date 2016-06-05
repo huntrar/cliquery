@@ -1,3 +1,8 @@
+1.7.1
+------
+
+ - Support for 3.2 removed (Google API can't handle) and support for 3.5 added 
+
 1.7.0
 ------
 
