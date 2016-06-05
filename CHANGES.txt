@@ -1,3 +1,8 @@
+1.7.2
+------
+
+ - Cannot support 3.5 until --no-mirrors removed (thanks lxml!)
+
 1.7.1
 ------
 
