@@ -527,7 +527,7 @@ def search(args):
         return
 
     # Cannot search WolframAlpha without an API key in .cliqrc
-    if args['wolfram'] and not CONFIG['api_key']:
+    if args['wolfram'] and not CONFIG['wolfram_api_key']:
         args['wolfram'] = False
         sys.stderr.write('Missing WolframAlpha API key in .cliqrc file.\n')
 
