@@ -1,3 +1,8 @@
+1.7.4
+------
+
+ - Bugfix: updated new configuration file writing
+
 1.7.3
 ------
 

@@ -82,8 +82,8 @@ def set_config():
     if browser_names:
         for brow_name in browser_names:
             try:
-                CONFIG['browser_name'] = brow_name
-                CONFIG['browser'] = webbrowser.get(brow_name)
+                CONFIG['browser'] = brow_name
+                CONFIG['browser_obj'] = webbrowser.get(brow_name)
                 return
             except webbrowser.Error:
                 pass
@@ -93,15 +93,15 @@ def set_config():
         if sys.platform == 'win32':
             # Windows
             browser_name = 'windows-default'
-            browser = webbrowser.get(browser_name)
+            browser_obj = webbrowser.get(browser_name)
         elif sys.platform == 'darwin':
             # Mac OSX
             browser_name = 'macosx'
-            browser = webbrowser.get(browser_name)
+            browser_obj = webbrowser.get(browser_name)
         else:
             browser_name = 'Automatically detected'
-            browser = webbrowser.get()
-        CONFIG['browser_name'] = browser_name
-        CONFIG['browser'] = browser
+            browser_obj = webbrowser.get()
+        CONFIG['browser'] = browser_name
+        CONFIG['browser_obj'] = browser_obj
     except webbrowser.Error:
         pass

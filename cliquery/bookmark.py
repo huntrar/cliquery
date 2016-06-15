@@ -27,7 +27,7 @@ BOOKMARK_HELP = ('Usage: '
 
 def reload_bookmarks():
     """Read in bookmarks again from .cliqrc"""
-    CONFIG['bookmarks'] = read_config()[2]
+    CONFIG['bookmarks'] = read_config()['bookmarks']
 
 
 def find_bookmark_idx(query):
@@ -114,13 +114,27 @@ def add_bookmark(urls):
     return True
 
 
+def write_config_fields(cfg_file):
+    """Write non-bookmark configuration fields to file"""
+    fields = ('google_api_key', 'google_engine_key',
+              'wolfram_api_key', 'browser')
+    for field in fields:
+        try:
+            value = CONFIG[field].strip()
+        except KeyError:
+            value = ''
+        cfg_file.write('{0}: {1}\n'.format(field, value))
+
+
 def remove_bookmark(bk_idx=None):
     """Remove an existing bookmark from the list of saved bookmarks"""
     bkmarks = CONFIG['bookmarks']
     with open(CONFIG_FPATH, 'w') as cfg:
-        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
-        cfg.write('\nbookmarks: ')
+        # Write non-bookmark fields to config file
+        write_config_fields(cfg)
+
+        # Write bookmark fields
+        cfg.write('bookmarks: \n')
         if bk_idx is not None:
             if isinstance(bk_idx, list):
                 bk_idx = [int(x)-1 for x in bk_idx]
@@ -141,9 +155,11 @@ def tag_bookmark(bk_idx, tags):
     if isinstance(tags, list):
         tags = ' '.join(tags)
     with open(CONFIG_FPATH, 'w') as cfg:
-        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
-        cfg.write('\nbookmarks: ')
+        # Write non-bookmark fields to config file
+        write_config_fields(cfg)
+
+        # Write bookmark fields
+        cfg.write('bookmarks: \n')
 
         for i, bkmark in enumerate(bkmarks):
             if i == int(bk_idx)-1:
@@ -164,9 +180,11 @@ def untag_bookmark(bk_idx, tags_to_rm):
     """Remove a tag from a bookmark"""
     bkmarks = CONFIG['bookmarks']
     with open(CONFIG_FPATH, 'w') as cfg:
-        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
-        cfg.write('\nbookmarks: ')
+        # Write non-bookmark fields to config file
+        write_config_fields(cfg)
+
+        # Write bookmark fields
+        cfg.write('bookmarks: \n')
 
         for i, bkmark in enumerate(bkmarks):
             if i == int(bk_idx)-1 and '(' in bkmark and ')' in bkmark:
@@ -215,9 +233,11 @@ def move_bookmark(idx1, idx2):
         return True
 
     with open(CONFIG_FPATH, 'w') as cfg:
-        cfg.write('api_key: {0}'.format(CONFIG['api_key']))
-        cfg.write('\nbrowser: {0}'.format(CONFIG['browser_name']))
-        cfg.write('\nbookmarks: ')
+        # Write non-bookmark fields to config file
+        write_config_fields(cfg)
+
+        # Write bookmark fields
+        cfg.write('bookmarks: \n')
 
         # Move bookmark to the front or end, or insert at an index
         if idx1 < 0:
@@ -447,7 +467,7 @@ def import_bookmarks(filename):
     # Try to find toolbar which matches to browser specified in configuration
     toolbar_found = False
     for browser, toolbar in iteritems(toolbars):
-        if CONFIG['browser_name'] in browser:
+        if CONFIG['browser'] in browser:
             new_bookmarks = read_bookmarks(toolbar)
             if new_bookmarks:
                 toolbar_found = True

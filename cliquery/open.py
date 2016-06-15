@@ -54,8 +54,8 @@ def describe_url(url):
 
 def open_browser(url):
     """Open a browser using webbrowser"""
-    if CONFIG['browser']:
-        CONFIG['browser'].open(url)
+    if CONFIG['browser_obj']:
+        CONFIG['browser_obj'].open(url)
     else:
         sys.stderr.write('Failed to open browser.\n')
 
