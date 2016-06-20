@@ -57,7 +57,7 @@ setup(
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
     ],
-    keywords='cliquery command line console help answer google search feeling lucky wolfram alpha knowledge engine internet browser interface bookmark pyteaser preview',
+    keywords='cliquery command line console help answer google bing search feeling lucky wolfram alpha knowledge engine scientific computation internet browser interface bookmark pyteaser preview',
     author='Hunter Hammond',
     author_email='huntrar@gmail.com',
     maintainer='Hunter Hammond',
