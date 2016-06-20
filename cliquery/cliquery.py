@@ -17,14 +17,7 @@ from .bookmark import bookmarks, import_bookmarks
 from .compat import unescape, iteritems, itervalues, iterkeys, uni, asc
 from .config import CONFIG, CONFIG_FPATH, set_config
 from .open import open_url
-from . import __version__, SYS_VERSION, CONTINUE, SEE_MORE
-
-
-XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
-                               os.path.join(os.path.expanduser('~'), '.cache'))
-CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'cliquery')
-CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
-    SYS_VERSION if SYS_VERSION == 3 else ''))
+from . import __version__, CONTINUE, SEE_MORE
 
 
 BORDER_LEN = 28  # The length of the link prompt border
@@ -63,24 +56,6 @@ def get_parser():
     parser.add_argument('-w', '--wolfram', help='search WolframAlpha',
                         action='store_true')
     return parser
-
-
-def enable_cache():
-    """Enable requests library cache"""
-    try:
-        import requests_cache
-    except ImportError as err:
-        sys.stderr.write('Failed to enable cache: {0}\n'.format(str(err)))
-        return
-    if not os.path.exists(CACHE_DIR):
-        os.makedirs(CACHE_DIR)
-    requests_cache.install_cache(CACHE_FILE)
-
-
-def clear_cache():
-    """Clear requests library cache"""
-    for cache in glob.glob('{0}*'.format(CACHE_FILE)):
-        os.remove(cache)
 
 
 def get_bing_resp(query):
@@ -506,7 +481,7 @@ def search(args):
         print(CONFIG_FPATH)
         return
     if args['clear_cache']:
-        clear_cache()
+        utils.clear_cache()
         print('Cleared {0}.'.format(CACHE_DIR))
         return
 
@@ -591,7 +566,7 @@ def command_line_runner():
 
     # Enable cache unless user sets environ variable CLIQ_DISABLE_CACHE
     if not os.getenv('CLIQ_DISABLE_CACHE'):
-        enable_cache()
+        utils.enable_cache()
     search(args)
 
 

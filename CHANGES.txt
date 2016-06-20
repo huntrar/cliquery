@@ -1,3 +1,10 @@
+1.7.6
+------
+
+ - Moved requests cache to utils
+ - Tagged function blocks in utils
+ - Removed redundant assignments in __init__
+
 1.7.5
 ------
 

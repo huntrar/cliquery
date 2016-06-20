@@ -2,6 +2,7 @@
 """Contains cliquery utility functions"""
 
 import random
+import os
 import sys
 
 import lxml.html as lh
@@ -33,6 +34,15 @@ USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) '
                'AppleWebKit/536.5 (KHTML, like Gecko) '
                'Chrome/19.0.1084.46 Safari/536.5')
 
+
+XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
+                               os.path.join(os.path.expanduser('~'), '.cache'))
+CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'cliquery')
+CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
+    SYS_VERSION if SYS_VERSION == 3 else ''))
+
+# Web requests and requests caching functions
+#
 
 def get_proxies():
     """Get available proxies to use with requests library"""
@@ -68,6 +78,26 @@ def get_raw_resp(url):
         sys.stderr.write('Failed to retrieve {0} as str.\n'.format(url))
         raise
 
+
+def enable_cache():
+    """Enable requests library cache"""
+    try:
+        import requests_cache
+    except ImportError as err:
+        sys.stderr.write('Failed to enable cache: {0}\n'.format(str(err)))
+        return
+    if not os.path.exists(CACHE_DIR):
+        os.makedirs(CACHE_DIR)
+    requests_cache.install_cache(CACHE_FILE)
+
+
+def clear_cache():
+    """Clear requests library cache"""
+    for cache in glob.glob('{0}*'.format(CACHE_FILE)):
+        os.remove(cache)
+
+# Text processing functions
+#
 
 def remove_whitespace(text):
     """Remove unnecessary whitespace while keeping logical structure
@@ -157,6 +187,8 @@ def get_text(resp):
     """Return text that is not within a script or style tag"""
     return resp.xpath('//*[not(self::script) and not(self::style)]/text()')
 
+# User input and sanitation functions
+#
 
 def clean_query(args, query):
     """Split the query or replace it's special characters if necessary"""
@@ -209,6 +241,8 @@ def confirm_input(user_input):
         return True
     return False
 
+# Miscellaneous functions
+#
 
 def is_num(num):
     """Return whether num can be an int"""
