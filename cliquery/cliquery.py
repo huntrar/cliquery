@@ -481,7 +481,7 @@ def search(args):
         return
     if args['clear_cache']:
         utils.clear_cache()
-        print('Cleared {0}.'.format(CACHE_DIR))
+        print('Cleared {0}.'.format(utils.CACHE_DIR))
         return
 
     # Set WolframAlpha API key, browser, and bookmarks in CONFIG
