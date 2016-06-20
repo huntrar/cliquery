@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Contains cliquery utility functions"""
 
+import glob
 import random
 import os
 import sys
@@ -43,6 +44,7 @@ CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
 
 # Web requests and requests caching functions
 #
+
 
 def get_proxies():
     """Get available proxies to use with requests library"""
@@ -98,6 +100,7 @@ def clear_cache():
 
 # Text processing functions
 #
+
 
 def remove_whitespace(text):
     """Remove unnecessary whitespace while keeping logical structure
@@ -187,8 +190,38 @@ def get_text(resp):
     """Return text that is not within a script or style tag"""
     return resp.xpath('//*[not(self::script) and not(self::style)]/text()')
 
+# URL processing functions
+#
+
+
+def add_scheme(url):
+    """Add scheme to URL"""
+    return 'http://{0}'.format(url)
+
+
+def remove_scheme(url):
+    """Remove scheme from URL"""
+    return url.replace('http://', '').replace('https://', '')
+
+
+def check_scheme(url):
+    """Check URL for a scheme"""
+    if url and (url.startswith('http://') or url.startswith('https://')):
+        return True
+    return False
+
+
+def append_scheme(urls):
+    """Append scheme to URL's if not present"""
+    if isinstance(urls, list):
+        return [x if check_scheme(x) else add_scheme(x) for x in urls]
+    if check_scheme(urls):
+        return urls
+    return add_scheme(urls)
+
 # User input and sanitation functions
 #
+
 
 def clean_query(args, query):
     """Split the query or replace it's special characters if necessary"""
@@ -244,6 +277,7 @@ def confirm_input(user_input):
 # Miscellaneous functions
 #
 
+
 def is_num(num):
     """Return whether num can be an int"""
     try:
@@ -267,32 +301,6 @@ def in_range(length, start=None, end=None):
     if not isinstance(end, int) and is_num(end):
         end = int(end)
     return start >= 0 and end < length
-
-
-def add_scheme(url):
-    """Add scheme to URL"""
-    return 'http://{0}'.format(url)
-
-
-def remove_scheme(url):
-    """Remove scheme from URL"""
-    return url.replace('http://', '').replace('https://', '')
-
-
-def check_scheme(url):
-    """Check URL for a scheme"""
-    if url and (url.startswith('http://') or url.startswith('https://')):
-        return True
-    return False
-
-
-def append_scheme(urls):
-    """Append scheme to URL's if not present"""
-    if isinstance(urls, list):
-        return [x if check_scheme(x) else add_scheme(x) for x in urls]
-    if check_scheme(urls):
-        return urls
-    return add_scheme(urls)
 
 
 def reset_flags(args):

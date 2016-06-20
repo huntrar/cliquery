@@ -7,7 +7,6 @@
 from __future__ import absolute_import, print_function
 from argparse import ArgumentParser
 from collections import OrderedDict
-import glob
 import itertools
 import os
 import sys
