@@ -17,7 +17,7 @@ from .bookmark import bookmarks, import_bookmarks
 from .compat import unescape, iteritems, itervalues, iterkeys, uni, asc
 from .config import CONFIG, CONFIG_FPATH, set_config
 from .open import open_url
-from . import __version__, cinput, crange, SYS_VERSION, CONTINUE, SEE_MORE
+from . import __version__, SYS_VERSION, CONTINUE, SEE_MORE
 
 
 XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
@@ -297,7 +297,7 @@ def exec_prompt_cmd(args, urls, prompt_cmd, prompt_args):
                                          'print': args['print']}) if value][0]
         else:
             # Print help message and check for quit
-            utils.check_input(cinput('{0}\n{1}'.format(PARSER_HELP, CONTINUE)))
+            utils.check_input(input('{0}\n{1}'.format(PARSER_HELP, CONTINUE)))
             return
     elif not FLAGS_MODIFIED:
         # Reset args again because flags were modified
@@ -332,13 +332,13 @@ def display_link_prompt(args, urls, titles):
     """
     while 1:
         print('\n{0}'.format(BORDER))
-        for i in crange(len(urls)):
+        for i in range(len(urls)):
             print('{0}. {1}'.format(i+1, uni(unescape(titles[i]))))
         print(BORDER)
 
         # Handle link prompt input
         try:
-            link_input = [inp.strip() for inp in cinput(': ').split()]
+            link_input = [inp.strip() for inp in input(': ').split()]
             if not link_input:
                 continue
             utils.check_input(link_input)  # Check input in case of quit
@@ -488,7 +488,7 @@ def wolfram_search(args, resp):
             return False
         elif len(output_list) > 2:
             print('\n'.join(output_list[:2]))
-            if utils.check_input(cinput(SEE_MORE), empty=True):
+            if utils.check_input(input(SEE_MORE), empty=True):
                 print('\n'.join(output_list[2:]))
         else:
             print('\n'.join(output_list))
@@ -519,7 +519,7 @@ def search(args):
         print('Importing {0}. This will append to existing bookmarks.'
               .format(args['import']))
         try:
-            if utils.confirm_input(cinput('Confirm import (yes/no): ')):
+            if utils.confirm_input(input('Confirm import (yes/no): ')):
                 if import_bookmarks(args['import']):
                     print('Import was successful.')
         except (KeyboardInterrupt, EOFError):

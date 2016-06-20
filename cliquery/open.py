@@ -8,7 +8,7 @@ from .utils import (get_resp, get_title, get_text, remove_whitespace,
 from .compat import uni
 from .config import CONFIG
 from .pyteaser import summarize
-from . import cinput, CONTINUE
+from . import CONTINUE
 
 
 def get_google_query_url(query):
@@ -45,7 +45,7 @@ def describe_url(url):
         clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
         print('\n'.join(x if isinstance(x, str) else uni(x)
                         for x in clean_desc))
-        check_input(cinput(CONTINUE))
+        check_input(input(CONTINUE))
         return True
     except AttributeError:
         sys.stderr.write('Failed to describe {0}.\n'.format(url))

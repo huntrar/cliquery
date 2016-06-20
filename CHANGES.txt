@@ -1,3 +1,10 @@
+1.7.5
+------
+
+ - Removed crange, cinput definitions and reassigned builtins instead
+ - Updated setup keywords
+ - Removed --use-mirrors for 3.5 support
+
 1.7.4
 ------
 

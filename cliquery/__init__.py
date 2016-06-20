@@ -10,16 +10,16 @@
 import sys
 
 
-__version__ = '1.7.4'
+__version__ = '1.7.5'
 
 SYS_VERSION = sys.version_info[0]
-# cinput and crange are Python 2.x and 3.x compatible builtins
+# Python 2.x and 3.x compatible builtins
 if SYS_VERSION == 2:
-    cinput = raw_input
-    crange = xrange
+    input = raw_input
+    range = xrange
 else:
-    cinput = input
-    crange = range
+    input = input
+    range = range
 
 CONTINUE = '[Press Enter to continue..] '
 SEE_MORE = 'See more? {0}'.format(CONTINUE)
