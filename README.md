@@ -22,19 +22,19 @@ If you encounter issues installing lxml, see [here](http://lxml.de/installation.
 
 ## Recommended setup
 
-Sign up for a [Google Custom Search API key](https://code.google.com/apis/console) to access Google results, otherwise defaults to Bing.
+Sign up for a [Google Custom Search API key](https://code.google.com/apis/console) to access Google results, otherwise search results will come from Bing.
 
 Upon signing into Google, click on API Manager, then Credentials, and create an API key. Enter this under the 'google_api_key' field in .cliqrc.
 
 Next, [create a custom search engine](https://cse.google.com/all). You must choose at least one site to search during creation (I chose stackoverflow.com), but to search the entire web you must click on this new search engine, go to Setup, then Basics, and select 'Search the entire web but emphasize included sites.' Then you may choose to keep or delete the site you originally provided.
 
-After creating a custom search engine, click on the engine, go to Setup, and under Details click Search engine ID. Enter this ID under the 'google_engine_key' field in .cliqrc.
+After creating a custom search engine, click on the engine, go to Setup, and under Details click Search engine ID. Enter this under the 'google_engine_key' field in .cliqrc.
 
-To use cliquery for scientific computations, sign up for a [WolframAlpha API key](https://developer.wolframalpha.com/portal/apisignup.html) and enter that and your preferred browser(s) in .cliqrc (if you do not set a browser, one will be detected automatically). An alternative method of setting your browser is with the BROWSER environment variable.
+To use cliquery for scientific computations, sign up for a [WolframAlpha API key](https://developer.wolframalpha.com/portal/apisignup.html) and enter this under the 'wolfram_api_key' field in .cliqrc.
 
-Create a .local.cliqrc file to use in place of .cliqrc, as .cliqrc is overwritten when updating the program.
+A browser may be explicitly chosen by entering the executable name under the 'browser' field in .cliqrc (if you do not set a browser, one will be detected automatically). An alternative method of setting your browser is with the BROWSER environment variable.
 
-Do the following to copy .cliqrc to .local.cliqrc:
+It is advised to copy the blank .cliqrc into .local.cliqrc, as .cliqrc will be emptied after a program update. To do this, enter the following:
 
     cd "$(dirname "$(cliquery -c)")"
     sudo cp .cliqrc .local.cliqrc
