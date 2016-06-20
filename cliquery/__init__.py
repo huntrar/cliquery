@@ -10,16 +10,14 @@
 import sys
 
 
-__version__ = '1.7.5'
+__version__ = '1.7.6'
 
 SYS_VERSION = sys.version_info[0]
+
 # Python 2.x and 3.x compatible builtins
 if SYS_VERSION == 2:
     input = raw_input
     range = xrange
-else:
-    input = input
-    range = range
 
 CONTINUE = '[Press Enter to continue..] '
 SEE_MORE = 'See more? {0}'.format(CONTINUE)
