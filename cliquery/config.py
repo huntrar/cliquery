@@ -1,10 +1,12 @@
 """Read and initialize cliquery configuration"""
 
+from __future__ import absolute_import
 import os
 import sys
 import webbrowser
 
-from .compat import iteritems, iterkeys
+from cliquery.compat import iteritems, iterkeys
+from cliquery import range
 
 
 CONFIG_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -16,7 +18,7 @@ CONFIG = {}
 
 
 def read_config():
-    """Read in .cliqrc or .local.cliqrc file"""
+    """Read in .cliqrc or .local.cliqrc file."""
     with open(CONFIG_FPATH, 'r') as cfg:
         fields = {'google_api_key': '',
                   'google_engine_key': '',
@@ -24,7 +26,7 @@ def read_config():
                   'browser': ''}
 
         def add_field(line):
-            """Read in a configuration field and its value"""
+            """Read in a configuration field and its value."""
             split_line = line.split(':')
             field = split_line[0]
             if field in fields:
@@ -65,7 +67,7 @@ def read_config():
 
 
 def set_config():
-    """Set optional API keys, browser, and bookmarks in CONFIG"""
+    """Set optional API keys, browser, and bookmarks in CONFIG."""
     browser_name = ''
     for key, val in iteritems(read_config()):
         if key == 'browser':

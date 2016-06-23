@@ -1,18 +1,16 @@
 """Contains cliquery functions to describe and open webpages"""
 
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 import sys
 
-from .utils import (get_resp, get_title, get_text, remove_whitespace,
-                    check_input)
-from .compat import uni
-from .config import CONFIG
-from .pyteaser import summarize
-from . import CONTINUE
+from cliquery.compat import uni
+from cliquery.config import CONFIG
+from cliquery.pyteaser import summarize
+from cliquery import utils, input, CONTINUE
 
 
 def get_google_query_url(query):
-    """Get Google query url"""
+    """Get Google query URL."""
     base_url = 'www.google.com'
     if not query:
         return 'http://{0}'.format(base_url)
@@ -20,7 +18,7 @@ def get_google_query_url(query):
 
 
 def get_wolfram_query_url(query):
-    """Get Wolfram query url"""
+    """Get Wolfram query URL."""
     base_url = 'www.wolframalpha.com'
     if not query:
         return 'http://{0}'.format(base_url)
@@ -28,14 +26,14 @@ def get_wolfram_query_url(query):
 
 
 def describe_url(url):
-    """Print a text preview of a given URL"""
+    """Print a text preview of a given URL."""
     try:
         # Get title and text for summarization
-        resp = get_resp(url)
-        title = get_title(resp)
-        text = get_text(resp)
+        resp = utils.get_resp(url)
+        title = utils.get_title(resp)
+        text = utils.get_text(resp)
         if title and text:
-            desc = remove_whitespace(summarize(title, ' '.join(text)))
+            desc = utils.remove_whitespace(summarize(title, ' '.join(text)))
         else:
             desc = ''
         if not desc:
@@ -45,7 +43,7 @@ def describe_url(url):
         clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
         print('\n'.join(x if isinstance(x, str) else uni(x)
                         for x in clean_desc))
-        check_input(input(CONTINUE))
+        utils.check_input(input(CONTINUE))
         return True
     except AttributeError:
         sys.stderr.write('Failed to describe {0}.\n'.format(url))
@@ -53,7 +51,7 @@ def describe_url(url):
 
 
 def open_browser(url):
-    """Open a browser using webbrowser"""
+    """Open a browser using webbrowser."""
     if CONFIG['browser_obj']:
         CONFIG['browser_obj'].open(url)
     else:
@@ -61,15 +59,15 @@ def open_browser(url):
 
 
 def open_url(args, urls, prompt_args=None):
-    """Print, describe, or open URL's in the browser
+    """Print, describe, or open URLs in the browser.
 
-       Keyword arguments:
-           args -- program arguments (dict)
-           urls -- search URL's chosen (list)
-           prompt_args -- temporary arguments from link prompt (list)
+    Keyword arguments:
+    args -- program arguments (dict)
+    urls -- search URLs chosen (list)
+    prompt_args -- temporary arguments from link prompt (list)
     """
     if urls:
-        # Either opening URL's or searching for link prompt arguments, not both
+        # Either opening URLs or searching for link prompt arguments, not both
         prompt_args = None
         if not isinstance(urls, list):
             urls = [urls]

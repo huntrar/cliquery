@@ -1,6 +1,7 @@
 """Functions for Python 2 and 3 compatibility"""
 
-from . import SYS_VERSION
+from __future__ import absolute_import
+from cliquery import SYS_VERSION
 
 
 if SYS_VERSION == 2:

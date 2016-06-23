@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Credit to https://github.com/xiaoxu193/PyTeaser"""
 
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 from collections import Counter
 import itertools
 from math import fabs
 from re import split as regex_split, sub as regex_sub, UNICODE as REGEX_UNICODE
 
-from .compat import iterkeys, uni
+from cliquery.compat import iterkeys, uni
 
 
 STOPWORDS = set([
@@ -73,7 +73,7 @@ IDEAL = 20.0
 
 
 def summarize(title, text):
-    """Summarize text using the title as a reference"""
+    """Summarize text using the title as a reference."""
     summaries = []
     sentences = split_sentences(text)
     keys = get_keywords(text)
@@ -91,7 +91,7 @@ def summarize(title, text):
 
 
 def get_score(sentences, title_words, keywords):
-    """Score sentences based on different features"""
+    """Score sentences based on different features."""
     sen_size = len(sentences)
     ranks = Counter()
     for i, sen in enumerate(sentences):
@@ -111,7 +111,7 @@ def get_score(sentences, title_words, keywords):
 
 
 def sbs(words, keywords):
-    """Summation based selection"""
+    """Summation based selection."""
     score = 0.0
     if len(words) == 0:
         return 0
@@ -122,7 +122,7 @@ def sbs(words, keywords):
 
 
 def dbs(words, keywords):
-    """Density based selection"""
+    """Density based selection."""
     if len(words) == 0:
         return 0
 
@@ -147,7 +147,7 @@ def dbs(words, keywords):
 
 
 def split_words(text):
-    """Split a string into array of words"""
+    """Split a string into array of words."""
     try:
         # Strip special characters
         text = regex_sub(r'[^\w ]', '', text, flags=REGEX_UNICODE)
@@ -160,7 +160,7 @@ def split_words(text):
 def get_keywords(text):
     """Get the top 10 keywords and their frequency scores
         ignores blacklisted words in STOPWORDS,
-        counts the number of occurrences of each word
+        counts the number of occurrences of each word.
     """
     text = split_words(text)
     num_words = len(text)  # of words before removing blacklist words
@@ -201,12 +201,12 @@ def split_sentences(text):
 
 
 def length_score(sentence):
-    """Score the sentence based on length"""
+    """Score the sentence based on length."""
     return 1 - fabs(IDEAL - len(sentence)) / IDEAL
 
 
 def title_score(title, sentence):
-    """Score the title based on occurrence of words in the sentence"""
+    """Score the title based on occurrence of words in the sentence."""
     title = [x for x in title if x not in STOPWORDS]
     count = 0.0
     for word in sentence:
@@ -221,7 +221,7 @@ def title_score(title, sentence):
 
 def sentence_position(i, size):
     """Different sentence positions indicate different
-        probability of being an important sentence
+        probability of being an important sentence.
     """
     normalized = i*1.0 / size
     if 0 < normalized <= 0.1:

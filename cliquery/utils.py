@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Contains cliquery utility functions"""
+"""cliquery utility functions.
 
+   Functions include:
+   Web requests and requests caching
+   Text processing
+   URL processing
+   User input and sanitation
+   Miscellaneous
+"""
+
+from __future__ import absolute_import
 import glob
 import random
 import os
@@ -9,8 +18,8 @@ import sys
 import lxml.html as lh
 import requests
 
-from .compat import iteritems
-from . import SYS_VERSION
+from cliquery.compat import iteritems
+from cliquery import SYS_VERSION
 
 
 if SYS_VERSION == 2:
@@ -47,7 +56,7 @@ CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
 
 
 def get_proxies():
-    """Get available proxies to use with requests library"""
+    """Get available proxies to use with requests library."""
     proxies = getproxies()
     filtered_proxies = {}
     for key, value in iteritems(proxies):
@@ -60,7 +69,7 @@ def get_proxies():
 
 
 def get_resp(url):
-    """Get webpage response as an lxml.html.HtmlElement object"""
+    """Get webpage response as an lxml.html.HtmlElement object."""
     try:
         headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
@@ -71,7 +80,7 @@ def get_resp(url):
 
 
 def get_raw_resp(url):
-    """Get webpage response as a str object"""
+    """Get webpage response as a str object."""
     try:
         headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
@@ -82,7 +91,7 @@ def get_raw_resp(url):
 
 
 def enable_cache():
-    """Enable requests library cache"""
+    """Enable requests library cache."""
     try:
         import requests_cache
     except ImportError as err:
@@ -94,7 +103,7 @@ def enable_cache():
 
 
 def clear_cache():
-    """Clear requests library cache"""
+    """Clear requests library cache."""
     for cache in glob.glob('{0}*'.format(CACHE_FILE)):
         os.remove(cache)
 
@@ -108,10 +117,8 @@ def remove_whitespace(text):
        Keyword arguments:
        text -- text to remove whitespace from (list)
 
-       The goal is to remove unnecessary whitespace while retaining logical
-       structure such as paragraph separation.
-       We also want to remove unnecessary whitespace between words on a line.
-       Removes whitespace at the start and end of the text.
+        Retain paragraph structure but remove other whitespace,
+        such as between words on a line and at the start and end of the text.
     """
     clean_text = []
     curr_line = ''
@@ -156,7 +163,7 @@ def remove_whitespace(text):
 
 
 def split_title(title, delim):
-    """Return largest title piece"""
+    """Return largest title piece."""
     largest_len = 0
     largest_piece = None
     piece_len = 0
@@ -170,7 +177,7 @@ def split_title(title, delim):
 
 
 def get_title(resp):
-    """Extract title from webpage response"""
+    """Extract title from webpage response."""
     title = resp.xpath('//title/text()')
     if not title:
         return ''
@@ -187,37 +194,32 @@ def get_title(resp):
 
 
 def get_text(resp):
-    """Return text that is not within a script or style tag"""
+    """Return text that is not within a script or style tag."""
     return resp.xpath('//*[not(self::script) and not(self::style)]/text()')
 
 # URL processing functions
 #
 
 
-def add_scheme(url):
-    """Add scheme to URL"""
+def add_protocol(url):
+    """Add protocol to URL."""
     return 'http://{0}'.format(url)
 
 
-def remove_scheme(url):
-    """Remove scheme from URL"""
-    return url.replace('http://', '').replace('https://', '')
-
-
-def check_scheme(url):
-    """Check URL for a scheme"""
+def check_protocol(url):
+    """Check URL for a protocol."""
     if url and (url.startswith('http://') or url.startswith('https://')):
         return True
     return False
 
 
-def append_scheme(urls):
-    """Append scheme to URL's if not present"""
+def add_protocols(urls):
+    """Append protocol to URLs if not present."""
     if isinstance(urls, list):
-        return [x if check_scheme(x) else add_scheme(x) for x in urls]
-    if check_scheme(urls):
+        return [x if check_protocol(x) else add_protocol(x) for x in urls]
+    if check_protocol(urls):
         return urls
-    return add_scheme(urls)
+    return add_protocol(urls)
 
 # User input and sanitation functions
 #
