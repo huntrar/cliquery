@@ -1,3 +1,9 @@
+1.7.7
+------
+ 
+ - Bugfix: Import 2-3 compatible range and input (will be replacing this with six)
+ - Refactorings
+
 1.7.6
 ------
 

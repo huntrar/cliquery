@@ -11,12 +11,11 @@ import itertools
 import os
 import sys
 
-from cliquery import utils
-from .bookmark import bookmarks, import_bookmarks
-from .compat import unescape, iteritems, itervalues, iterkeys, uni, asc
-from .config import CONFIG, CONFIG_FPATH, set_config
-from .open import open_url
-from . import __version__, CONTINUE, SEE_MORE
+from cliquery.bookmark import bookmarks, import_bookmarks
+from cliquery.compat import unescape, iteritems, itervalues, iterkeys, uni, asc
+from cliquery.config import CONFIG, CONFIG_FPATH, set_config
+from cliquery.open import open_url
+from cliquery import utils, __version__, input, range, CONTINUE, SEE_MORE
 
 
 BORDER_LEN = 28  # The length of the link prompt border
@@ -28,7 +27,7 @@ FLAGS_MODIFIED = False  # Set to True once user enters interactive flags
 
 
 def get_parser():
-    """Parse command-line arguments"""
+    """Parse command-line arguments."""
     parser = ArgumentParser(description='a command-line browser interface')
     parser.add_argument('query', metavar='QUERY', type=str, nargs='*',
                         help='keywords to search')
@@ -58,7 +57,7 @@ def get_parser():
 
 
 def get_bing_resp(query):
-    """Get response from Bing search (top 10 results)"""
+    """Get response from Bing search (top 10 results)."""
     if not query:
         return None
 
@@ -66,9 +65,9 @@ def get_bing_resp(query):
 
 
 def get_google_resp(query):
-    """Get response from Google custom search API (top 10 results)
+    """Get response from Google custom search API (top 10 results).
 
-       Return response and True if Google was used (other option is Bing)
+       Return response and True if Google was used (other option is Bing).
     """
     use_google = True
     if not query:
@@ -98,7 +97,7 @@ def get_google_resp(query):
 
 
 def get_wolfram_resp(query):
-    """Get XML response from Wolfram API as an lxml.html.HtmlElement object"""
+    """Get XML response from Wolfram API as an lxml.html.HtmlElement object."""
     if not query:
         return None
     base_url = 'http://api.wolframalpha.com/v2/query?input='
@@ -107,12 +106,12 @@ def get_wolfram_resp(query):
 
 
 def open_link_range(args, urls, prompt_args):
-    """Open a link number range
+    """Open a link number range.
 
-       Keyword arguments:
-       args -- program arguments (dict)
-       urls -- search URL's found (list)
-       prompt_args -- temporary arguments from link prompt (list)
+    Keyword arguments:
+    args -- program arguments (dict)
+    urls -- search URLs found (list)
+    prompt_args -- temporary arguments from link prompt (list)
     """
     split_args = ''.join(prompt_args).split('-')
     start = split_args[0].strip()
@@ -152,7 +151,7 @@ def open_links(args, urls, prompt_args):
 
        Keyword arguments:
        args -- program arguments (dict)
-       urls -- search URL's found (list)
+       urls -- search URLs found (list)
        prompt_args -- temporary arguments from link prompt (list)
     """
     if not isinstance(prompt_args, list):
@@ -173,14 +172,14 @@ def open_links(args, urls, prompt_args):
 
 
 def process_prompt_cmds(args, urls, prompt_args):
-    """Special processing for link prompt commands
+    """Special processing for link prompt commands.
 
-       Keyword arguments:
-       args -- program arguments (dict)
-       urls -- search URL's found (list)
-       prompt_args -- command arguments entered in link prompt (list)
+    Keyword arguments:
+    args -- program arguments (dict)
+    urls -- search URLs found (list)
+    prompt_args -- command arguments entered in link prompt (list)
 
-       Return whether to call search as well as possibly modified prompt_args
+    Return whether to call search as well as possibly modified prompt_args.
     """
     for flag in iterkeys(args):
         if args[flag]:
@@ -216,15 +215,15 @@ def process_prompt_cmds(args, urls, prompt_args):
 
 
 def exec_prompt_cmd(args, urls, prompt_cmd, prompt_args):
-    """Execute a command in the link prompt
+    """Execute a command in the link prompt.
 
-       Keyword arguments:
-       args -- program arguments (dict)
-       urls -- search URL's found (list)
-       prompt_cmd -- command entered in link prompt (str)
-       prompt_args -- command arguments entered in link prompt (list)
+    Keyword arguments:
+    args -- program arguments (dict)
+    urls -- search URLs found (list)
+    prompt_cmd -- command entered in link prompt (str)
+    prompt_args -- command arguments entered in link prompt (list)
 
-       If there are no preexisting flags, the prompt command defaults to open.
+    If there are no preexisting flags, the prompt command defaults to open.
     """
     # lookup_flags (dict)
     #   key: abbreviated flag name (first letter of flag)
@@ -297,12 +296,12 @@ def exec_prompt_cmd(args, urls, prompt_cmd, prompt_args):
 
 
 def display_link_prompt(args, urls, titles):
-    """Print URL's and their descriptions alongside a prompt
+    """Print URLs and their descriptions alongside a prompt.
 
-       Keyword arguments:
-       args -- program arguments (dict)
-       urls -- search URL's found (list)
-       titles -- descriptions of search URL's found (list)
+    Keyword arguments:
+    args -- program arguments (dict)
+    urls -- search URLs found (list)
+    titles -- descriptions of search URLs found (list)
     """
     while 1:
         print('\n{0}'.format(BORDER))
@@ -323,7 +322,7 @@ def display_link_prompt(args, urls, titles):
 
 
 def bing_search(args, resp):
-    """Perform a Bing search and display link choice prompt"""
+    """Perform a Bing search and display link choice prompt."""
     if resp is None:
         return open_url(args, 'https://www.google.com')
     elif args['open']:
@@ -363,7 +362,7 @@ def bing_search(args, resp):
 
 
 def google_search(args, resp):
-    """Perform a Google search and display link choice prompt"""
+    """Perform a Google search and display link choice prompt."""
     if resp is None:
         return open_url(args, 'https://www.google.com')
     elif args['open']:
@@ -379,7 +378,7 @@ def google_search(args, resp):
 
 
 def bing_open_first(args, resp):
-    """Open the first Bing link available, i.e. 'Feeling Lucky'"""
+    """Open the first Bing link available, i.e. 'Feeling Lucky'."""
     if resp is not None:
         bing_urls = resp.xpath('//h2/a/@href')
         if bing_urls:
@@ -392,7 +391,7 @@ def bing_open_first(args, resp):
 
 
 def google_open_first(args, resp):
-    """Open the first Google link available, i.e. 'Feeling Lucky'"""
+    """Open the first Google link available, i.e. 'Feeling Lucky'."""
     if resp:
         raw_url = resp[0]['formattedUrl']
         if not utils.check_scheme(raw_url):
@@ -405,7 +404,7 @@ def google_open_first(args, resp):
 
 
 def reformat_wolfram_entries(titles, entries):
-    """Reformat Wolfram entries"""
+    """Reformat Wolfram entries."""
     output_list = []
     for title, entry in itertools.izip(titles, entries):
         try:
@@ -422,7 +421,7 @@ def reformat_wolfram_entries(titles, entries):
 
 
 def wolfram_search(args, resp):
-    """Perform a WolframAlpha search, may require an API key in .cliqrc"""
+    """Perform a WolframAlpha search, may require an API key in .cliqrc."""
     if resp is None:
         return open_url(args, 'http://www.wolframalpha.com')
     elif args['open']:
@@ -472,7 +471,7 @@ def wolfram_search(args, resp):
 
 
 def search(args):
-    """Handle web searching, page previewing, and bookmarks"""
+    """Handle web searching, page previewing, and bookmarks."""
     if args['version']:
         print(__version__)
         return
@@ -526,7 +525,7 @@ def search(args):
 
             return bing_open_first(args, resp)
         if args['open']:
-            # Print, describe, or open URL's in the browser
+            # Print, describe, or open URLs in the browser
             return open_url(args, args['query'])
         if args['search']:
             # Perform a Google search and display link choice prompt
@@ -557,7 +556,7 @@ def search(args):
 
 
 def command_line_runner():
-    """Handle command-line interaction"""
+    """Handle command-line interaction."""
     parser = get_parser()
     global PARSER_HELP
     PARSER_HELP = parser.format_help()

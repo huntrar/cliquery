@@ -10,7 +10,7 @@
 import sys
 
 
-__version__ = '1.7.6'
+__version__ = '1.7.7'
 
 SYS_VERSION = sys.version_info[0]
 
