@@ -74,7 +74,8 @@ setup(
     install_requires=[
         'lxml',
         'requests',
-        'requests-cache'
+        'requests-cache',
+        'six'
     ],
     extras_require=extras_require,
 )
