@@ -193,7 +193,9 @@ def get_text(resp):
 
 def add_protocol(url):
     """Add protocol to URL."""
-    return 'http://{0}'.format(url)
+    if not check_protocol(url):
+        return 'http://{0}'.format(url)
+    return url
 
 
 def check_protocol(url):

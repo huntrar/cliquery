@@ -453,7 +453,7 @@ def import_bookmarks(filename):
         if imported_bookmarks:
             for bkmark in imported_bookmarks[0]:
                 url = bkmark.xpath('@href')[0]
-                if utils.check_scheme(url):
+                if utils.check_protocol(url):
                     new_bookmarks[url] = bkmark.xpath('text()')
         return new_bookmarks
 

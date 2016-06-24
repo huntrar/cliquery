@@ -37,7 +37,7 @@ def describe_url(url):
         if title and text:
             desc = utils.remove_whitespace(summarize(title, ' '.join(text)))
         else:
-            desc = ''
+            desc = []
         if not desc:
             sys.stderr.write('Failed to describe {0}.\n'.format(url))
             return False
