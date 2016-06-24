@@ -11,7 +11,7 @@ import itertools
 import os
 import sys
 
-from six import iteritems, itervalues, iterkeys
+from six import PY2, iteritems, itervalues, iterkeys
 from six.moves import input, xrange as range
 from six.moves.html_parser import HTMLParser
 
@@ -309,7 +309,8 @@ def display_link_prompt(args, urls, titles):
     while 1:
         print('\n{0}'.format(BORDER))
         for i in range(len(urls)):
-            print('{0}. {1}'.format(i+1, HTMLParser().unescape(titles[i]).encode('utf-8')))
+            link = HTMLParser().unescape(titles[i])
+            print('{0}. {1}'.format(i+1, link.encode('utf-8') if PY2 else link))
         print(BORDER)
 
         # Handle link prompt input
@@ -415,9 +416,11 @@ def reformat_wolfram_entries(titles, entries):
                 entry = '\n\t{0}'.format(entry.replace(' |', ':')
                                          .replace('\n', '\n\t'))
             if title == 'Result':
-                output_list.append(entry.encode('utf-8'))
+                new_entry = entry.encode('utf-8') if PY2 else entry
             else:
-                output_list.append((title + ': ' + entry).encode('utf-8'))
+                raw_entry = (title + ': ' + entry)
+                new_entry = raw_entry.encode('utf-8') if PY2 else raw_entry
+            output_list.append(new_entry)
         except (AttributeError, UnicodeEncodeError):
             pass
     return output_list
@@ -447,7 +450,8 @@ def wolfram_search(args, resp):
     entries = []
     if titles:
         for title in titles:
-            title = title.encode('ascii', 'ignore')
+            if PY2:
+                title = title.encode('ascii', 'ignore')
             entry_xpath = ("//pod[@title='{0}']/subpod/plaintext/text()"
                            .format(title))
             entry = resp.xpath(entry_xpath)

@@ -17,7 +17,7 @@ import sys
 
 import lxml.html as lh
 import requests
-from six import PY3, iteritems
+from six import PY2, iteritems
 from six.moves.urllib.parse import quote_plus
 from six.moves.urllib.request import getproxies
 
@@ -39,8 +39,7 @@ USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) '
 XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
                                os.path.join(os.path.expanduser('~'), '.cache'))
 CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'cliquery')
-CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
-    '3' if PY3 else ''))
+CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format('' if PY2 else '3'))
 
 # Web requests and requests caching functions
 #
@@ -64,7 +63,7 @@ def get_resp(url):
     try:
         headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
-        return lh.fromstring(request.text.encode('utf-8'))
+        return lh.fromstring(request.text.encode('utf-8') if PY2 else request.text)
     except Exception:
         sys.stderr.write('Failed to retrieve {0}.\n'.format(url))
         raise
@@ -75,7 +74,7 @@ def get_raw_resp(url):
     try:
         headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
-        return request.text.encode('utf-8')
+        return request.text.encode('utf-8') if PY2 else request.text
     except Exception:
         sys.stderr.write('Failed to retrieve {0} as str.\n'.format(url))
         raise

@@ -1,3 +1,9 @@
+1.7.9
+------
+
+ - Check for version before encoding strings
+ - Changed six module version to 1.9.0
+
 1.7.8
 ------
 

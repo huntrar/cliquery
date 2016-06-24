@@ -3,6 +3,7 @@
 from __future__ import absolute_import, print_function
 import sys
 
+from six import PY2
 from six.moves import input
 
 from .config import CONFIG
@@ -42,7 +43,7 @@ def describe_url(url):
             return False
 
         clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
-        print('\n'.join(x if isinstance(x, str) else x.encode('utf-8')
+        print('\n'.join(x if isinstance(x, str) else x.encode('utf-8') if PY2 else x
                         for x in clean_desc))
         utils.check_input(input(CONTINUE))
         return True
