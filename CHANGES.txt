@@ -1,3 +1,8 @@
+1.7.10
+------
+
+ - Fixed issues with six module requirement
+
 1.7.9
 ------
 
