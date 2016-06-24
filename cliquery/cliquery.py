@@ -11,11 +11,14 @@ import itertools
 import os
 import sys
 
-from cliquery.bookmark import bookmarks, import_bookmarks
-from cliquery.compat import unescape, iteritems, itervalues, iterkeys, uni, asc
-from cliquery.config import CONFIG, CONFIG_FPATH, set_config
-from cliquery.open import open_url
-from cliquery import utils, __version__, input, range, CONTINUE, SEE_MORE
+from six import iteritems, itervalues, iterkeys
+from six.moves import input, xrange as range
+from six.moves.html_parser import HTMLParser
+
+from .bookmark import bookmarks, import_bookmarks
+from .config import CONFIG, CONFIG_FPATH, set_config
+from .open import open_url
+from . import utils, __version__, CONTINUE, SEE_MORE
 
 
 BORDER_LEN = 28  # The length of the link prompt border
@@ -306,7 +309,7 @@ def display_link_prompt(args, urls, titles):
     while 1:
         print('\n{0}'.format(BORDER))
         for i in range(len(urls)):
-            print('{0}. {1}'.format(i+1, uni(unescape(titles[i]))))
+            print('{0}. {1}'.format(i+1, HTMLParser().unescape(titles[i]).encode('utf-8')))
         print(BORDER)
 
         # Handle link prompt input
@@ -412,9 +415,9 @@ def reformat_wolfram_entries(titles, entries):
                 entry = '\n\t{0}'.format(entry.replace(' |', ':')
                                          .replace('\n', '\n\t'))
             if title == 'Result':
-                output_list.append(uni(entry))
+                output_list.append(entry.encode('utf-8'))
             else:
-                output_list.append(uni(title + ': ' + entry))
+                output_list.append((title + ': ' + entry).encode('utf-8'))
         except (AttributeError, UnicodeEncodeError):
             pass
     return output_list
@@ -444,7 +447,7 @@ def wolfram_search(args, resp):
     entries = []
     if titles:
         for title in titles:
-            title = asc(title)  # Encode to ascii-ignore
+            title = title.encode('ascii', 'ignore')
             entry_xpath = ("//pod[@title='{0}']/subpod/plaintext/text()"
                            .format(title))
             entry = resp.xpath(entry_xpath)

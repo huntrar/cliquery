@@ -7,7 +7,7 @@ import itertools
 from math import fabs
 from re import split as regex_split, sub as regex_sub, UNICODE as REGEX_UNICODE
 
-from cliquery.compat import iterkeys, uni
+from six import iterkeys
 
 
 STOPWORDS = set([
@@ -87,7 +87,7 @@ def summarize(title, text):
     for rank in ranks:
         summaries.append(rank[0])
 
-    return [uni(x) for x in summaries]
+    return [x.encode('utf-8') for x in summaries]
 
 
 def get_score(sentences, title_words, keywords):

@@ -7,17 +7,7 @@
    or detected automatically.
 """
 
-import sys
-
-
-__version__ = '1.7.7'
-
-SYS_VERSION = sys.version_info[0]
-
-# Python 2.x and 3.x compatible builtins
-if SYS_VERSION == 2:
-    input = raw_input
-    range = xrange
+__version__ = '1.7.8'
 
 CONTINUE = '[Press Enter to continue..] '
 SEE_MORE = 'See more? {0}'.format(CONTINUE)

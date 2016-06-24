@@ -3,10 +3,11 @@
 from __future__ import absolute_import, print_function
 import sys
 
-from cliquery.compat import uni
-from cliquery.config import CONFIG
-from cliquery.pyteaser import summarize
-from cliquery import utils, input, CONTINUE
+from six.moves import input
+
+from .config import CONFIG
+from .pyteaser import summarize
+from . import utils, CONTINUE
 
 
 def get_google_query_url(query):
@@ -41,7 +42,7 @@ def describe_url(url):
             return False
 
         clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
-        print('\n'.join(x if isinstance(x, str) else uni(x)
+        print('\n'.join(x if isinstance(x, str) else x.encode('utf-8')
                         for x in clean_desc))
         utils.check_input(input(CONTINUE))
         return True

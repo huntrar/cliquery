@@ -6,11 +6,12 @@ import re
 import sys
 
 import lxml.html as lh
+from six import iteritems, itervalues
+from six.moves import xrange as range
 
-from cliquery.compat import iteritems, itervalues
-from cliquery.config import CONFIG, CONFIG_FPATH, read_config
-from cliquery.open import open_url
-from cliquery import utils, range
+from .config import CONFIG, CONFIG_FPATH, read_config
+from .open import open_url
+from . import utils
 
 
 BOOKMARK_HELP = ('Usage: '

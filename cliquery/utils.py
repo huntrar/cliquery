@@ -17,18 +17,9 @@ import sys
 
 import lxml.html as lh
 import requests
-
-from cliquery.compat import iteritems
-from cliquery import SYS_VERSION
-
-
-if SYS_VERSION == 2:
-    from urllib import quote_plus as url_quote
-    from urllib import getproxies
-
-else:
-    from urllib.parse import quote_plus as url_quote
-    from urllib.request import getproxies
+from six import PY3, iteritems
+from six.moves.urllib.parse import quote_plus
+from six.moves.urllib.request import getproxies
 
 
 USER_AGENTS = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) '
@@ -49,7 +40,7 @@ XDG_CACHE_DIR = os.environ.get('XDG_CACHE_HOME',
                                os.path.join(os.path.expanduser('~'), '.cache'))
 CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'cliquery')
 CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
-    SYS_VERSION if SYS_VERSION == 3 else ''))
+    '3' if PY3 else ''))
 
 # Web requests and requests caching functions
 #
@@ -235,7 +226,7 @@ def clean_query(args, query):
         return query.split()
     else:
         # Replace special characters with hex encoded escapes
-        return url_quote(query)
+        return quote_plus(query)
 
 
 def check_input(user_input, num=False, empty=False):

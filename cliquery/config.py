@@ -1,12 +1,11 @@
 """Read and initialize cliquery configuration"""
 
-from __future__ import absolute_import
 import os
 import sys
 import webbrowser
 
-from cliquery.compat import iteritems, iterkeys
-from cliquery import range
+from six import iteritems, iterkeys
+from six.moves import xrange as range
 
 
 CONFIG_DIR = os.path.dirname(os.path.realpath(__file__))
