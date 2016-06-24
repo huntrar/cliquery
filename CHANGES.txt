@@ -1,3 +1,9 @@
+1.7.12
+------
+
+ - Converted markdown README to rst
+ - Added setup topic Utilities
+
 1.7.11
 ------
 

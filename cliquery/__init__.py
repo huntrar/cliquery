@@ -7,7 +7,7 @@
    or detected automatically.
 """
 
-__version__ = '1.7.11'
+__version__ = '1.7.12'
 
 CONTINUE = '[Press Enter to continue..] '
 SEE_MORE = 'See more? {0}'.format(CONTINUE)

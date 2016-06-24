@@ -8,7 +8,7 @@ import cliquery
 
 def read(*names):
     values = dict()
-    extensions = ['.txt', '.md']
+    extensions = ['.txt', '.rst']
     for name in names:
         value = ''
         for extension in extensions:
@@ -56,6 +56,7 @@ setup(
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
+        "Topic :: Utilities",
     ],
     keywords='cliquery command line console help answer google bing search feeling lucky wolfram alpha knowledge engine scientific computation internet browser interface bookmark pyteaser preview',
     author='Hunter Hammond',
