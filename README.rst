@@ -84,8 +84,8 @@ Usage
 
 ::
 
-    usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-f] [-i [IMPORT]] [-o] [-p] [-s]
-                       [-v] [-w]
+    usage: cliquery.py [-h] [-b] [-c] [-C] [-d] [-e] [-f] [-i [IMPORT]] [-o] [-p]
+                       [-s] [-v] [-w]
                        [QUERY [QUERY ...]]
 
     a command-line browser interface
@@ -99,6 +99,7 @@ Usage
       -c, --config          print config file location
       -C, --clear-cache     clear the cache
       -d, --describe        summarize links
+      -e, --edit            edit config file
       -f, --first           open first link
       -i [IMPORT], --import [IMPORT]
                             import bookmarks from file

@@ -16,7 +16,7 @@ from six.moves import input, xrange as range
 from six.moves.html_parser import HTMLParser
 
 from .bookmark import bookmarks, import_bookmarks
-from .config import CONFIG, CONFIG_FPATH, set_config
+from .config import CONFIG, CONFIG_FPATH, set_config, edit_config
 from .open import open_url
 from . import utils, __version__, CONTINUE, SEE_MORE
 
@@ -41,6 +41,8 @@ def get_parser():
     parser.add_argument('-C', '--clear-cache', help='clear the cache',
                         action='store_true')
     parser.add_argument('-d', '--describe', help='summarize links',
+                        action='store_true')
+    parser.add_argument('-e', '--edit', help='edit config file',
                         action='store_true')
     parser.add_argument('-f', '--first', help='open first link',
                         action='store_true')
@@ -473,15 +475,18 @@ def wolfram_search(args, resp):
 
 def search(args):
     """Handle web searching, page previewing, and bookmarks."""
-    if args['version']:
-        print(__version__)
+    if args['clear_cache']:
+        utils.clear_cache()
+        print('Cleared {0}.'.format(utils.CACHE_DIR))
         return
     if args['config']:
         print(CONFIG_FPATH)
         return
-    if args['clear_cache']:
-        utils.clear_cache()
-        print('Cleared {0}.'.format(utils.CACHE_DIR))
+    if args['edit']:
+        edit_config()
+        return
+    if args['version']:
+        print(__version__)
         return
 
     # Set WolframAlpha API key, browser, and bookmarks in CONFIG

@@ -1,6 +1,7 @@
 """Read and initialize cliquery configuration"""
 
 import os
+import subprocess
 import sys
 import webbrowser
 
@@ -16,22 +17,28 @@ else:
 CONFIG = {}
 
 
+def edit_config():
+    """Invoke text editor on configuration file."""
+    EDITOR = os.environ.get('EDITOR', 'vim')
+    subprocess.call([EDITOR, CONFIG_FPATH])
+    
+
 def read_config():
-    """Read in .cliqrc or .local.cliqrc file."""
+    """Read in fields from .cliqrc or .local.cliqrc as a dict."""
+    def add_field(line):
+        """Read in a configuration field and its value."""
+        split_line = line.split(':')
+        field = split_line[0]
+        if field in fields:
+            fields[field] = ':'.join(split_line[1:]).strip()
+            return True
+        return False
+
     with open(CONFIG_FPATH, 'r') as cfg:
         fields = {'google_api_key': '',
                   'google_engine_key': '',
                   'wolfram_api_key': '',
                   'browser': ''}
-
-        def add_field(line):
-            """Read in a configuration field and its value."""
-            split_line = line.split(':')
-            field = split_line[0]
-            if field in fields:
-                fields[field] = ':'.join(split_line[1:]).strip()
-                return True
-            return False
 
         # Attempt to read configuration fields excluding bookmarks
         lines = []
