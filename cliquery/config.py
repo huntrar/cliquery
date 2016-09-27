@@ -81,8 +81,11 @@ def set_config():
         try:
             CONFIG['browser_obj'] = webbrowser.get(CONFIG['browser'])
             return
-        except (IndexError, webbrowser.Error) as err:
+        except webbrowser.Error as err:
             sys.stderr.write('{} at {}\n'.format(str(err), CONFIG['browser']))
+            CONFIG['browser_obj'] = None
+            pass
+        except IndexError:
             CONFIG['browser_obj'] = None
             pass
 
