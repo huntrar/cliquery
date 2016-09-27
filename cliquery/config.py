@@ -74,27 +74,17 @@ def read_config():
 
 def set_config():
     """Set optional API keys, browser, and bookmarks in CONFIG."""
-    browser_name = ''
     for key, val in iteritems(read_config()):
-        if key == 'browser':
-            browser_name = val
-        else:
-            CONFIG[key] = val
+        CONFIG[key] = val
 
-    # There may be multiple browser options given, pick the first which works
-    if ',' in browser_name:
-        browser_names = browser_name.split(',')
-    else:
-        browser_names = browser_name.split()
-
-    if browser_names:
-        for brow_name in browser_names:
-            try:
-                CONFIG['browser'] = brow_name
-                CONFIG['browser_obj'] = webbrowser.get(brow_name)
-                return
-            except webbrowser.Error:
-                pass
+    if 'browser' in CONFIG:
+        try:
+            CONFIG['browser_obj'] = webbrowser.get(CONFIG['browser'])
+            return
+        except webbrowser.Error as err:
+            sys.stderr.write('{} at {}\n'.format(str(err), CONFIG['browser']))
+            CONFIG['browser_obj'] = None
+            pass
 
     # If no valid browser found then use webbrowser to automatically detect one
     try:
