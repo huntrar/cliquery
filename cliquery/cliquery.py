@@ -375,7 +375,7 @@ def google_search(args, resp):
         return open_url(args, args['query'])
 
     raw_urls = [x['formattedUrl'] for x in resp]
-    urls = [utils.add_protocol(x) for x in raw_urls]
+    urls = [utils.add_scheme(x) for x in raw_urls]
     titles = [x['title'] for x in resp]
     if urls and titles:
         return display_link_prompt(args, urls, titles)
@@ -398,7 +398,7 @@ def bing_open_first(args, resp):
 def google_open_first(args, resp):
     """Open the first Google link available, i.e. 'Feeling Lucky'."""
     if resp:
-        url = utils.add_protocol(resp[0]['formattedUrl'])
+        url = utils.add_scheme(resp[0]['formattedUrl'])
         return open_url(args, url)
     print('Results not found.')
 

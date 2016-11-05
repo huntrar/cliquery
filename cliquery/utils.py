@@ -191,27 +191,27 @@ def get_text(resp):
 #
 
 
-def add_protocol(url):
-    """Add protocol to URL."""
-    if not check_protocol(url):
+def add_scheme(url):
+    """Add scheme to URL."""
+    if not check_scheme(url):
         return 'http://{0}'.format(url)
     return url
 
 
-def check_protocol(url):
-    """Check URL for a protocol."""
+def check_scheme(url):
+    """Check URL for a scheme."""
     if url and (url.startswith('http://') or url.startswith('https://')):
         return True
     return False
 
 
-def add_protocols(urls):
-    """Append protocol to URLs if not present."""
+def add_schemes(urls):
+    """Append scheme to URLs if not present."""
     if isinstance(urls, list):
-        return [x if check_protocol(x) else add_protocol(x) for x in urls]
-    if check_protocol(urls):
+        return [x if check_scheme(x) else add_scheme(x) for x in urls]
+    if check_scheme(urls):
         return urls
-    return add_protocol(urls)
+    return add_scheme(urls)
 
 # User input and sanitation functions
 #

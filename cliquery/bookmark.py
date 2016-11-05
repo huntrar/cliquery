@@ -357,7 +357,7 @@ def bookmark_add_cmd(query):
             if len(new_bkmarks) > 0:
                 new_bkmarks[-1] = '{0} ({1})'.format(new_bkmarks[-1], tag)
         else:
-            arg = utils.add_protocols(arg)
+            arg = utils.add_schemes(arg)
             if '.' not in arg:
                 arg = '{0}.com'.format(arg)
             new_bkmarks.append(arg)
@@ -453,7 +453,7 @@ def import_bookmarks(filename):
         if imported_bookmarks:
             for bkmark in imported_bookmarks[0]:
                 url = bkmark.xpath('@href')[0]
-                if utils.check_protocol(url):
+                if utils.check_scheme(url):
                     new_bookmarks[url] = bkmark.xpath('text()')
         return new_bookmarks
 
