@@ -63,7 +63,7 @@ def get_resp(url):
     try:
         headers = {'User-Agent': random.choice(USER_AGENTS)}
         request = requests.get(url, headers=headers, proxies=get_proxies())
-        return lh.fromstring(request.text.encode('utf-8') if PY2 else request.text)
+        return lh.fromstring(request.content)
     except Exception:
         sys.stderr.write('Failed to retrieve {0}.\n'.format(url))
         raise

@@ -1,3 +1,9 @@
+1.8.8
+------
+
+ - Bugfix: lxml decoding error with requests in Python 3
+ - Bugfix: another itertools.izip replacement with six.move.zip
+
 1.8.7
 ------
 

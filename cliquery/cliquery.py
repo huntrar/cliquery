@@ -7,12 +7,11 @@
 from __future__ import absolute_import, print_function
 from argparse import ArgumentParser
 from collections import OrderedDict
-import itertools
 import os
 import sys
 
 from six import PY2, iteritems, itervalues, iterkeys
-from six.moves import input, xrange as range
+from six.moves import input, xrange as range, zip
 from six.moves.html_parser import HTMLParser
 
 from .bookmark import bookmarks, import_bookmarks
@@ -406,7 +405,7 @@ def google_open_first(args, resp):
 def reformat_wolfram_entries(titles, entries):
     """Reformat Wolfram entries."""
     output_list = []
-    for title, entry in itertools.izip(titles, entries):
+    for title, entry in zip(titles, entries):
         try:
             if ' |' in entry:
                 entry = '\n\t{0}'.format(entry.replace(' |', ':')
