@@ -77,7 +77,7 @@ def set_config():
     for key, val in iteritems(read_config()):
         CONFIG[key] = val
 
-    if 'browser' in CONFIG:
+    if 'browser' in CONFIG and CONFIG['browser'] != 'Automatically detected':
         try:
             CONFIG['browser_obj'] = webbrowser.get(CONFIG['browser'])
             return
