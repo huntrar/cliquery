@@ -1,3 +1,8 @@
+1.9.0
+------
+
+ - Bugfix: UnicodeEncodeError for py3 descriptions
+
 1.8.10
 ------
 

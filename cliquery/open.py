@@ -43,8 +43,10 @@ def describe_url(url):
             return False
 
         clean_desc = [x.replace('\n', '').replace('\t', '') for x in desc]
-        print('\n'.join(x if isinstance(x, str) else x.encode('utf-8') if PY2 else x
-                        for x in clean_desc))
+        if PY2:
+            print('\n'.join(x.encode('utf-8') for x in clean_desc))
+        else:
+            print(b'\n'.join(x.encode('utf-8') for x in clean_desc))
         utils.check_input(input(CONTINUE))
         return True
     except AttributeError:
