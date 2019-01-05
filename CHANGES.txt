@@ -1,3 +1,10 @@
+1.9.1
+------
+
+ - Updated requirements, license copyright
+ - Removed support for python 3.3 (lxml deprecated these) 
+ - Added support for python 3.6 and 3.7, added 3.6 to Travis CI build
+
 1.9.0
 ------
 
