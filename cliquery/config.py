@@ -91,17 +91,17 @@ def set_config():
 
     # If no valid browser found then use webbrowser to automatically detect one
     try:
-        if sys.platform == 'win32':
-            # Windows
-            browser_name = 'windows-default'
-            browser_obj = webbrowser.get(browser_name)
-        elif sys.platform == 'darwin':
-            # Mac OSX
-            browser_name = 'macosx'
-            browser_obj = webbrowser.get(browser_name)
-        else:
+        supported_platforms = {'win32': 'windows-default', 'cygwin': 'cygstart', 'darwin': 'macosx'}
+        if sys.platform not in supported_platforms:
             browser_name = 'Automatically detected'
             browser_obj = webbrowser.get()
+        else:
+            browser_name = supported_platforms[sys.platform]
+            if browser_name == 'cygstart':
+                # Cygwin requires us to register browser type (or export BROWSER='cygstart')
+                webbrowser.register(browser_name, None, webbrowser.GenericBrowser(browser_name))
+            browser_obj = webbrowser.get(browser_name)
+
         CONFIG['browser'] = browser_name
         CONFIG['browser_obj'] = browser_obj
     except webbrowser.Error:
