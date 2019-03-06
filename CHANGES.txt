@@ -1,3 +1,9 @@
+1.9.2
+------
+
+ - Registered cygstart as default browser object for cygwin users
+ - Updated README to emphasize installation as non-root user
+
 1.9.1
 ------
 

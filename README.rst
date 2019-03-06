@@ -16,13 +16,13 @@ Installation
 
 ::
 
-    pip install cliquery
+    pip install cliquery --user
 
 or
 
 ::
 
-    pip install git+https://github.com/huntrar/cliquery.git#egg=cliquery
+    pip install git+https://github.com/huntrar/cliquery.git#egg=cliquery --user
 
 or
 
@@ -30,18 +30,35 @@ or
 
     git clone https://github.com/huntrar/cliquery
     cd cliquery
-    python setup.py install
+    python setup.py install --user
 
 If you encounter issues installing lxml, see
 `here <http://lxml.de/installation.html>`__.
 
-Recommended setup
------------------
+It is advised to copy the blank .cliqrc into .local.cliqrc, as .cliqrc
+will be emptied after a program update. To do this, enter the following:
 
-Sign up for a `Google Custom Search API
-key <https://code.google.com/apis/console>`__ to access Google results,
-otherwise search results will come from Bing.
+::
 
+    cd "$(dirname "$(cliquery -c)")" && cp .cliqrc .local.cliqrc
+
+
+
+Recommended (optional) setup
+----------------------------
+
+Configuration setup is completely optional but will improve your experience.
+This includes integrating Google Custom Search, WolframAlpha, and/or selection of browser choice.
+
+
+The browser invoked is selected implicitly by the webbrowser module.
+To explicitly choose your browser, set the name in .local.cliqrc
+under 'browser' or set the BROWSER environment variable on your system.
+
+For best results, sign up for a `Google Custom Search API key <https://code.google.com/apis/console>`__
+This defaults search to Google, otherwise results will come from Bing.
+
+The instructions are as follows:
 Upon signing into Google, click on API Manager, then Credentials, and
 create an API key. Enter this under the 'google\_api\_key' field in
 .cliqrc.
@@ -55,24 +72,10 @@ delete the site you originally provided.
 
 After creating a custom search engine, click on the engine, go to Setup,
 and under Details click Search engine ID. Enter this under the
-'google\_engine\_key' field in .cliqrc.
+'google\_engine\_key' field.
 
-To use cliquery for scientific computations, sign up for a `WolframAlpha
-API key <https://developer.wolframalpha.com/portal/apisignup.html>`__
-and enter this under the 'wolfram\_api\_key' field in .cliqrc.
-
-A browser may be explicitly chosen by entering the executable name under
-the 'browser' field in .cliqrc (if you do not set a browser, one will be
-detected automatically). An alternative method of setting your browser
-is with the BROWSER environment variable.
-
-It is advised to copy the blank .cliqrc into .local.cliqrc, as .cliqrc
-will be emptied after a program update. To do this, enter the following:
-
-::
-
-    cd "$(dirname "$(cliquery -c)")"
-    sudo cp .cliqrc .local.cliqrc
+For WolframAlpha usage, sign up for a `WolframAlpha API key <https://developer.wolframalpha.com/portal/apisignup.html>`__
+Enter your key under the 'wolfram\_api\_key' field.
 
 Users may also import Firefox or Chrome bookmarks into .cliqrc by
 exporting the bookmarks to HTML and importing to cliquery with the -i
@@ -125,15 +128,16 @@ Notes
 
        IOError: [Errno 13] Permission denied: '/usr/local/lib/python2.7/dist-packages/cliquery/.cliqrc'
 
-   Then you have two options:
+   This means you did not follow the install advice and chose to install as root. You have three options:
 
    ::
 
-       1. (recommended) Change file ownership from root to user by entering the following:
+       1. (recommended) Uninstall and reinstall as a non-root user by following the instructions above.
+       2. Change the configuration file ownership from root to user by entering the following:
 
                sudo chown $USER "$(cliquery -c)" 
 
-       2. Execute cliquery as root, using su or sudo.
+       2. (not recommended) Execute cliquery as root, using su or sudo.
 
 -  A search may return immediate results, such as calculations or facts
    made possible by WolframAlpha, or instead a page of Google search
