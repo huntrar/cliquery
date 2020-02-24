@@ -1,5 +1,5 @@
-cliquery |PyPI Version| |Build Status| |PyPI Monthly downloads|
-===============================================================
+cliquery |PyPI Version| |Build Status| |Total Downloads|
+========================================================
 
 a command-line browser interface
 --------------------------------
@@ -187,5 +187,5 @@ Notes
    :target: https://pypi.python.org/pypi/cliquery
 .. |Build Status| image:: https://travis-ci.org/huntrar/cliquery.svg?branch=master
    :target: https://travis-ci.org/huntrar/cliquery
-.. |PyPI Monthly downloads| image:: https://img.shields.io/pypi/dm/cliquery.svg?style=flat
-   :target: https://pypi.python.org/pypi/cliquery
+.. |Total Downloads| image:: https://pepy.tech/badge/cliquery
+   :target: https://pepy.tech/project/cliquery
