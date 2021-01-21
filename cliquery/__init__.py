@@ -7,7 +7,7 @@
    or detected automatically.
 """
 
-__version__ = '1.9.3'
+__version__ = '1.9.4'
 
 # User interaction messages
 CONTINUE = '[Press Enter to continue..] '

@@ -12,7 +12,11 @@ import sys
 
 from six import PY2, iteritems, itervalues, iterkeys
 from six.moves import input, xrange as range, zip
-from six.moves.html_parser import HTMLParser
+if not PY2:
+    import html
+else:
+    from six.moves import html_parser
+    html = html_parser.HTMLParser()
 
 from .bookmark import bookmarks, import_bookmarks
 from .config import CONFIG, CONFIG_FPATH, set_config, edit_config
@@ -310,7 +314,7 @@ def display_link_prompt(args, urls, titles):
     while 1:
         print('\n{0}'.format(BORDER))
         for i in range(len(urls)):
-            link = HTMLParser().unescape(titles[i])
+            link = html.unescape(titles[i])
             print('{0}. {1}'.format(i+1, link.encode('utf-8') if PY2 else link))
         print(BORDER)
 

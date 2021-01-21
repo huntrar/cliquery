@@ -1,3 +1,8 @@
+1.9.4
+------
+
+ - Update for deprecated HTMLParser.unescape for python >=3.9
+
 1.9.3
 ------
 
