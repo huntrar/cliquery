@@ -1,5 +1,5 @@
-cliquery |PyPI Version| |Build Status| |Total Downloads|
-========================================================
+cliquery |PyPI Version| |Total Downloads|
+=========================================
 
 a command-line browser interface
 --------------------------------
@@ -120,7 +120,6 @@ Author
 Notes
 -----
 
--  Supports both Python 2.x and Python 3.x.
 -  NOTE: If you receive the following message (or similar) when trying
    to modify bookmarks:
 
@@ -185,7 +184,5 @@ Notes
 
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/cliquery.svg
    :target: https://pypi.python.org/pypi/cliquery
-.. |Build Status| image:: https://travis-ci.org/huntrar/cliquery.svg?branch=master
-   :target: https://travis-ci.org/huntrar/cliquery
 .. |Total Downloads| image:: https://pepy.tech/badge/cliquery
    :target: https://pepy.tech/project/cliquery
