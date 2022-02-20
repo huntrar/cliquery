@@ -1,3 +1,8 @@
+1.10.1
+------
+
+ - Bump lxml from 4.6.3 to 4.6.5 to fix security vulnerability
+
 1.10.0
 ------
 
